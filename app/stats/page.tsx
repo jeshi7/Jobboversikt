@@ -45,7 +45,7 @@ export default function StatsPage() {
           <Heading level="2" size="large" className="mt-1">
             {sentRatio}%
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             av registrerte selskaper har fått søknad.
           </BodyShort>
         </Panel>
@@ -56,7 +56,7 @@ export default function StatsPage() {
           <Heading level="2" size="large" className="mt-1">
             {interviewRatio}%
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             har ledet til en dypere samtale.
           </BodyShort>
         </Panel>
@@ -67,7 +67,7 @@ export default function StatsPage() {
           <Heading level="2" size="large" className="mt-1">
             {summary.planned}
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             potensielle neste steg i mappen din.
           </BodyShort>
         </Panel>
@@ -79,7 +79,7 @@ export default function StatsPage() {
             <Heading level="2" size="small">
               Fordeling per status
             </Heading>
-            <BodyShort size="xsmall" className="mt-1 text-slate-500">
+            <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
               En enkel stolpediagram, laget med ren layout.
             </BodyShort>
           </div>

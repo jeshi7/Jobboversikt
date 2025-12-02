@@ -93,7 +93,7 @@ export function ContactReminders({ reminders }: Props) {
               <BodyShort size="small" className="font-medium text-slate-900">
                 {reminder.company}
               </BodyShort>
-              <BodyShort size="xsmall" className="text-slate-500">
+              <BodyShort size="small" className="text-slate-500 text-[11px]">
                 {reminder.label}
               </BodyShort>
               <button
@@ -125,7 +125,7 @@ export function ContactReminders({ reminders }: Props) {
                 <Heading level="2" size="small">
                   Notat for {open.type === "kontakt1" ? "Kontakt 1" : "Kontakt 2"}
                 </Heading>
-                <BodyShort size="xsmall" className="mt-1 text-slate-600">
+                <BodyShort size="small" className="mt-1 text-slate-600 text-[11px]">
                   {open.company}
                 </BodyShort>
               </div>
@@ -139,11 +139,11 @@ export function ContactReminders({ reminders }: Props) {
             </div>
             <div className="mt-4 space-y-3">
               <div className="space-y-1">
-                <BodyShort size="xsmall" className="text-slate-600">
+                <BodyShort size="small" className="text-slate-600 text-[11px]">
                   Skriv kort hvordan kontakten gikk, hva dere snakket om, og om du skal
                   følge opp igjen.
                 </BodyShort>
-                <BodyShort size="xsmall" className="text-slate-500">
+                <BodyShort size="small" className="text-slate-500 text-[11px]">
                   {getAdvice(open)}
                 </BodyShort>
               </div>

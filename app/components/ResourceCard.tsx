@@ -53,7 +53,7 @@ export function ResourceCard({ app }: Props) {
           </a>
         ))}
         {app.resources.length === 0 && (
-          <BodyShort size="xsmall" className="text-slate-500">
+          <BodyShort size="small" className="text-slate-500 text-[11px]">
             Ingen dokumenter registrert ennå.
           </BodyShort>
         )}

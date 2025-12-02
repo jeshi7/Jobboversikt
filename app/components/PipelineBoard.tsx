@@ -67,7 +67,7 @@ export function PipelineBoard({ planned, sent, interview }: PipelineBoardProps) 
                 <Heading level="2" size="small">
                   {open.app.jobTitle || open.app.company}
                 </Heading>
-                <BodyShort size="xsmall" className="mt-1 text-slate-600">
+                <BodyShort size="small" className="mt-1 text-slate-600 text-[11px]">
                   {open.app.company}
                   {open.app.location ? ` · ${open.app.location}` : null}
                 </BodyShort>

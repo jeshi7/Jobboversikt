@@ -54,7 +54,7 @@ export default function DashboardPage() {
           <Heading level="2" size="large" className="mt-1">
             {summary.total}
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             registrerte selskaper i systemet
           </BodyShort>
         </Panel>
@@ -65,7 +65,7 @@ export default function DashboardPage() {
           <Heading level="2" size="large" className="mt-1">
             {summary.sent}
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             med tilpasset CV og søknadsbrev
           </BodyShort>
         </Panel>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
           <Heading level="2" size="large" className="mt-1">
             {summary.interview}
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             selskaper du har kommet videre hos
           </BodyShort>
         </Panel>
@@ -87,7 +87,7 @@ export default function DashboardPage() {
           <Heading level="2" size="large" className="mt-1">
             {summary.planned}
           </Heading>
-          <BodyShort size="xsmall" className="mt-1 text-slate-500">
+          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
             ideer du vurderer å sende
           </BodyShort>
         </Panel>
@@ -100,7 +100,7 @@ export default function DashboardPage() {
               <Heading level="2" size="small">
                 Flyt gjennom søknadsprosessen
               </Heading>
-              <BodyShort size="xsmall" className="mt-1 text-slate-500">
+              <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
                 En enkel pipeline fra idé til intervju.
               </BodyShort>
             </div>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
             <Heading level="2" size="small">
               Hva du kan gjøre nå
             </Heading>
-            <BodyShort size="xsmall" className="mt-1 text-slate-500">
+            <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
               Et forslag til hvilke selskaper som kan være fint å jobbe videre
               med nå.
             </BodyShort>
