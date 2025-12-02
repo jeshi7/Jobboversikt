@@ -6,8 +6,124 @@ const SOURCE_DIR = path.join(__dirname, '..', 'Jobb_Søknad_Pakke');
 const PUBLIC_DATA_DIR = path.join(__dirname, 'public', 'data');
 const MANIFEST_PATH = path.join(__dirname, 'app', 'data-manifest.json');
 
+const SANITIZE_REGEX = /[^a-z0-9æøåäö]/gi;
+
+const stripFormatting = (value = '') =>
+  value
+    .replace(/\*\*/g, '')
+    .replace(/`/g, '')
+    .replace(/_/g, ' ')
+    .replace(/[✉️📝✅❌]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const normalizeKey = (value = '') =>
+  stripFormatting(value)
+    .toLowerCase()
+    .replace(SANITIZE_REGEX, '');
+
+async function parseOverview() {
+  const overviewPath = path.join(SOURCE_DIR, '00_Oversikt', 'Søknadsoversikt.md');
+  if (!(await fs.pathExists(overviewPath))) {
+    return {};
+  }
+
+  const content = await fs.readFile(overviewPath, 'utf-8');
+  const lines = content.split('\n');
+  const startIndex = lines.findIndex((line) => line.includes('| Bedrift |'));
+  if (startIndex === -1) {
+    return {};
+  }
+
+  const overview = {};
+
+  for (let i = startIndex + 2; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    if (!line.startsWith('|')) break;
+    if (line.startsWith('| - |')) break;
+
+    const rawCells = line.split('|').map((cell) => cell.trim());
+    if (rawCells.length < 16) continue;
+
+    const cells = rawCells.slice(1, -1).map(stripFormatting);
+    if (!cells[0] || cells[0] === '-') continue;
+
+    const [
+      company,
+      position,
+      form,
+      percentage,
+      location,
+      deadline,
+      status,
+      contactPerson,
+      notes,
+      contact1,
+      contact2,
+      interview1,
+      interview2,
+      offer,
+    ] = cells;
+
+    const key = normalizeKey(company);
+    overview[key] = {
+      company: stripFormatting(company),
+      position,
+      form,
+      percentage,
+      location,
+      deadline,
+      status,
+      contactPerson,
+      notes,
+      contact1,
+      contact2,
+      interview1,
+      interview2,
+      offer,
+    };
+  }
+
+  return overview;
+}
+
+function findOverviewEntry(companyName, overviewMap) {
+  const normalized = normalizeKey(companyName);
+  if (overviewMap[normalized]) return overviewMap[normalized];
+
+  const fallbackKey = Object.keys(overviewMap).find(
+    (key) => key.includes(normalized) || normalized.includes(key)
+  );
+
+  return fallbackKey ? overviewMap[fallbackKey] : null;
+}
+
+function applyOverviewFields(application, overviewMap) {
+  const match = findOverviewEntry(application.company, overviewMap);
+  if (!match) {
+    return application;
+  }
+
+  return {
+    ...application,
+    notes: match.notes || '',
+    contact1: match.contact1 || '',
+    contact2: match.contact2 || '',
+    interview1: match.interview1 || '',
+    interview2: match.interview2 || '',
+    offer: match.offer || '',
+    contactPerson: match.contactPerson || '',
+    overviewStatus: match.status || '',
+    deadline: application.deadline || match.deadline || '',
+    location: application.location || match.location || ''
+  };
+}
+
 async function copyAndIndexData() {
   try {
+    const overviewMap = await parseOverview();
+
     // 1. Copy Files
     await fs.ensureDir(PUBLIC_DATA_DIR);
     const applicationsSource = path.join(SOURCE_DIR, '02_Søknader');
@@ -81,15 +197,26 @@ async function copyAndIndexData() {
            }
         }
         
-        applications.push({
+        let application = {
           company,
           position,
           status,
           deadline,
           location,
           files: fileInfos,
-          jobListingContent
-        });
+          jobListingContent,
+          notes: '',
+          contact1: '',
+          contact2: '',
+          interview1: '',
+          interview2: '',
+          offer: '',
+          contactPerson: '',
+          overviewStatus: ''
+        };
+
+        application = applyOverviewFields(application, overviewMap);
+        applications.push(application);
       }
     }
     
@@ -117,15 +244,26 @@ async function copyAndIndexData() {
           if (headingMatch) position = headingMatch[1];
           
           if (!applications.find(a => a.company === company)) {
-            applications.push({
+            let application = {
               company,
               position,
               status: 'planned',
               deadline,
               location,
               files: [{ name: file, path: '#', type: 'md', content }],
-              jobListingContent: content
-            });
+              jobListingContent: content,
+              notes: '',
+              contact1: '',
+              contact2: '',
+              interview1: '',
+              interview2: '',
+              offer: '',
+              contactPerson: '',
+              overviewStatus: ''
+            };
+
+            application = applyOverviewFields(application, overviewMap);
+            applications.push(application);
           }
         } catch (e) { console.error(e); }
       }

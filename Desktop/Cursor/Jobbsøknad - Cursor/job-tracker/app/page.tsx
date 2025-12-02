@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, Moon, Sun, BarChart3, FileText } from 'lucide-react';
 
+interface ApplicationFile {
+  name: string;
+  path: string;
+  type: 'pdf' | 'md' | 'other';
+  content?: string;
+}
+
 interface Application {
   company: string;
   position: string;
@@ -12,6 +19,15 @@ interface Application {
   deadline?: string;
   location?: string;
   folderPath?: string;
+  notes?: string;
+  contact1?: string;
+  contact2?: string;
+  interview1?: string;
+  interview2?: string;
+  offer?: string;
+  contactPerson?: string;
+  files?: ApplicationFile[];
+  jobListingContent?: string;
 }
 
 export default function Home() {

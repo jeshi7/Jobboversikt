@@ -23,3 +23,9 @@ Når det skjer endringer i mappestrukturen under `02_Søknader/Alle selskaper/` 
 
 **Hvorfor?**
 For å sikre at oversikten alltid er 1:1 med filsystemet. Hvis brukeren sletter en mappe, betyr det at prosessen er avbrutt eller feil, og den skal vekk fra listen.
+
+---
+
+### 🧾 Oppfølging = UI-data
+
+Feltene `Notater`, `Kontakt 1`, `Kontakt 2`, `Intervju 1`, `Intervju 2` og `Tilbud` brukes nå direkte i Jobboversikt-appen (popupen i høyrekolonnen). Hold dem oppdatert når du endrer status i tabellen – det er disse verdiene hjelperne og rådgivere ser når de åpner en søknad.
