@@ -1,8 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
 import Link from 'next/link';
 import { ArrowLeft, FileText, Calendar, MapPin, Download } from 'lucide-react';
+import path from 'path';
+import fs from 'fs';
 
 interface FileInfo {
   name: string;
@@ -11,29 +10,39 @@ interface FileInfo {
   content?: string;
 }
 
-export default function ApplicationDetail({ params }: { params: { company: string } }) {
-  const companyName = decodeURIComponent(params.company);
-  
-  // Determine source directory (priority: public/data for prod, local for dev fallback)
-  const dataDir = path.join(process.cwd(), 'public', 'data', '02_Søknader', 'Alle selskaper');
-  const localSource = path.join(process.cwd(), '..', 'Jobb_Søknad_Pakke', '02_Søknader', 'Alle selskaper');
-  
-  let companyDir = '';
-  let isPublicData = false;
+interface Application {
+  company: string;
+  position: string;
+  location?: string;
+  deadline?: string;
+  jobListingContent?: string;
+  files: FileInfo[];
+}
 
-  if (fs.existsSync(path.join(dataDir, companyName))) {
-    companyDir = path.join(dataDir, companyName);
-    isPublicData = true;
-  } else if (fs.existsSync(path.join(localSource, companyName))) {
-    companyDir = path.join(localSource, companyName);
+// Function to get data (shared logic)
+function getApplicationData(companyName: string): Application | null {
+  try {
+    const manifestPath = path.join(process.cwd(), 'app', 'data-manifest.json');
+    if (fs.existsSync(manifestPath)) {
+      const data: Application[] = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      const app = data.find(a => a.company === decodeURIComponent(companyName));
+      return app || null;
+    }
+  } catch (e) {
+    console.error(e);
   }
+  return null;
+}
 
-  if (!companyDir) {
+export default function ApplicationDetail({ params }: { params: { company: string } }) {
+  const app = getApplicationData(params.company);
+
+  if (!app) {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 p-8 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">Fant ikke selskap</h1>
-          <p className="text-neutral-600 dark:text-neutral-400 mb-8">Kunne ikke finne mappen for {companyName}</p>
+          <p className="text-neutral-600 dark:text-neutral-400 mb-8">Kunne ikke finne data for {decodeURIComponent(params.company)}</p>
           <Link href="/" className="text-blue-500 hover:underline">
             Tilbake til oversikt
           </Link>
@@ -41,67 +50,6 @@ export default function ApplicationDetail({ params }: { params: { company: strin
       </div>
     );
   }
-
-  const files = fs.readdirSync(companyDir);
-  const fileInfos: FileInfo[] = [];
-  
-  let jobListingContent = '';
-  let metadata = {
-    position: 'Ukjent stilling',
-    deadline: '',
-    location: ''
-  };
-
-  files.forEach(file => {
-    const filePath = path.join(companyDir, file);
-    if (fs.statSync(filePath).isDirectory()) return;
-
-    // Build public URL if using public data, otherwise file URL (which won't work remotely but fine for local fallback)
-    // Actually, if we are in localSource mode (dev without copy), we can't serve files easily via URL unless we setup a route.
-    // But for the purpose of the Vercel deploy, we assume isPublicData will be true.
-    // If locally, we might want to just show names.
-    
-    // Construct URL relative to public
-    const publicUrl = isPublicData 
-      ? `/data/02_Søknader/Alle selskaper/${encodeURIComponent(companyName)}/${encodeURIComponent(file)}`
-      : `file://${filePath}`; // Fallback for pure local dev without copy
-
-    if (file.endsWith('.md')) {
-      const content = fs.readFileSync(filePath, 'utf-8');
-      if (file.includes('Utlysning') || file.includes('Job Listing')) {
-        const { content: markdown, data } = matter(content);
-        jobListingContent = markdown;
-        
-        // Parse metadata manually from text if not in frontmatter
-        const lines = markdown.split('\n');
-        for (const line of lines) {
-          if (line.includes('Frist:')) metadata.deadline = line.split('Frist:')[1]?.trim().replace(/\*/g, '') || '';
-          if (line.includes('Sted:')) metadata.location = line.split('Sted:')[1]?.trim().replace(/\*/g, '') || '';
-        }
-        const headingMatch = markdown.match(/^#\s+(.+)/m);
-        if (headingMatch) metadata.position = headingMatch[1];
-      }
-      
-      fileInfos.push({
-        name: file,
-        path: publicUrl,
-        type: 'md',
-        content
-      });
-    } else if (file.endsWith('.pdf')) {
-      fileInfos.push({
-        name: file,
-        path: publicUrl,
-        type: 'pdf'
-      });
-    } else {
-      fileInfos.push({
-        name: file,
-        path: publicUrl,
-        type: 'other'
-      });
-    }
-  });
 
   return (
     <main className="min-h-screen bg-neutral-50 dark:bg-neutral-900 transition-colors">
@@ -113,23 +61,23 @@ export default function ApplicationDetail({ params }: { params: { company: strin
 
         <header className="mb-12">
           <h1 className="text-4xl font-light text-neutral-900 dark:text-neutral-100 mb-4">
-            {companyName}
+            {app.company}
           </h1>
           <h2 className="text-2xl text-neutral-600 dark:text-neutral-300 mb-6">
-            {metadata.position}
+            {app.position}
           </h2>
           
           <div className="flex gap-6 text-sm text-neutral-500 dark:text-neutral-400">
-            {metadata.location && (
+            {app.location && (
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />
-                {metadata.location}
+                {app.location}
               </div>
             )}
-            {metadata.deadline && (
+            {app.deadline && (
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                {metadata.deadline}
+                {app.deadline}
               </div>
             )}
           </div>
@@ -144,7 +92,7 @@ export default function ApplicationDetail({ params }: { params: { company: strin
                 Utlysning / Notater
               </h3>
               <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap text-sm">
-                {jobListingContent || 'Ingen utlysningstekst funnet.'}
+                {app.jobListingContent || 'Ingen utlysningstekst funnet.'}
               </div>
             </section>
           </div>
@@ -156,7 +104,7 @@ export default function ApplicationDetail({ params }: { params: { company: strin
                 Dokumenter
               </h3>
               <div className="space-y-3">
-                {fileInfos.map((file, i) => (
+                {app.files && app.files.map((file, i) => (
                   <a
                     key={i}
                     href={file.path}
@@ -185,4 +133,3 @@ export default function ApplicationDetail({ params }: { params: { company: strin
     </main>
   );
 }
-
