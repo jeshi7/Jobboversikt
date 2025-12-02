@@ -1,0 +1,20 @@
+---
+description: Automatisk oppdatering av planlagte søknader
+globs: 02_Søknader/Planlagte_Søknader/*.md
+---
+
+### 🟡 Synkronisering av Planlagte Søknader
+
+Når brukeren legger til en ny `.md`-fil (typisk en utlysning) i `02_Søknader/Planlagte_Søknader/`, betyr det at brukeren vurderer å søke. Du skal da **ALLTID** oppdatere `00_Oversikt/Søknadsoversikt.md` for å reflektere dette.
+
+**Dine handlinger skal være:**
+
+1.  **Identifiser Bedriften:** Bruk filnavnet eller innholdet i filen til å finne bedriftsnavn (f.eks. hvis filen heter `Spotify.md`, er bedriften Spotify).
+2.  **Oppdater Tabellen:**
+    *   Gå til seksjonen `## 🟡 Under planlegging (Ikke startet)` i `Søknadsoversikt.md`.
+    *   Legg til en ny rad for den nye bedriften.
+    *   Prøv å trekke ut info om Stilling og Frist fra filinnholdet hvis mulig.
+    *   Lag en relativ lenke til filen i `[URL]`-kolonnen (f.eks. `[Link](../02_Søknader/Planlagte_Søknader/Spotify.md)`).
+
+**Hvorfor?**
+For å la brukeren "samle" interessante stillinger i en mappe, og automatisk få dem inn i oversikten uten manuelt arbeid.

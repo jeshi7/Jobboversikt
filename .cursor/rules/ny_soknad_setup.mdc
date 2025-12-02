@@ -1,0 +1,25 @@
+---
+description: Automatisk oppsett av bedriftsmappe og kopiering av utlysning ved ny planlagt søknad
+globs: 02_Søknader/Planlagte_Søknader/*.md
+---
+
+### 🚀 Oppsett av Ny Søknad
+
+Når en ny `.md`-fil (utlysning) opprettes i `02_Søknader/Planlagte_Søknader/`, skal du utføre følgende "oppstarts-rituale" for å gjøre alt klart til søknadsskriving.
+
+**Dine handlinger skal være:**
+
+1.  **Standardiser Filnavn (hvis mulig):**
+    *   Prøv å sikre at filnavnet kun er bedriftsnavnet (f.eks. `Viking.md` istedenfor `Viking_Digital_Designer.md`). *Hvis brukeren ber om å lagre en stilling, bruk kun bedriftsnavnet som filnavn.*
+
+2.  **Opprett Bedriftsmappe:**
+    *   Bruk filnavnet (uten .md) som bedriftsnavn.
+    *   Sjekk om mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]/` finnes.
+    *   Hvis ikke, opprett den.
+
+3.  **Kopier Utlysning:**
+    *   Kopier `.md`-filen fra `02_Søknader/Planlagte_Søknader/` inn i den nye mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]/`.
+    *   Gi filen navnet `Utlysning.md` inne i den nye mappen (slik at vi har en standard referanse).
+
+**Hvorfor?**
+For å umiddelbart klargjøre arbeidsområdet i `Alle selskaper` slik at brukeren kan begynne å produsere innhold (CV/Søknad) med en gang, uten å manuelt måtte opprette mapper og flytte tekst.

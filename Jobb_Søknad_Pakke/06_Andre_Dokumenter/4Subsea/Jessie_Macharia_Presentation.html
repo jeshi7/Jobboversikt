@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jessie Macharia - Marketing Portfolio Presentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        .presentation-container {
+            width: 100%;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            min-height: 100vh;
+            padding: 80px 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide:nth-child(even) {
+            background: #111111;
+        }
+
+        .slide:nth-child(odd) {
+            background: #0a0a0a;
+        }
+
+        .slide-header {
+            text-align: center;
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .slide-subtitle {
+            font-size: 1.5rem;
+            color: #a1a1aa;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+        }
+
+        .project-card {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 20px;
+            padding: 60px;
+            margin: 40px 0;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transform: translateX(-60px);
+            animation: slideInLeft 1s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.4s;
+        }
+
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .project-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        .project-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 32px;
+            margin-bottom: 40px;
+            font-size: 1.125rem;
+            color: #a1a1aa;
+            padding: 32px;
+            background: #222222;
+            border-radius: 12px;
+            border: 1px solid #333333;
+        }
+
+        .project-meta strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .project-challenge {
+            background: #1f1f1f;
+            border: 1px solid #404040;
+            border-radius: 12px;
+            padding: 32px;
+            margin: 24px 0;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.6s;
+        }
+
+        .project-approach {
+            background: #1f1f1f;
+            border: 1px solid #404040;
+            border-radius: 12px;
+            padding: 32px;
+            margin: 24px 0;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.8s;
+        }
+
+        .project-results {
+            background: #1f1f1f;
+            border: 1px solid #404040;
+            border-radius: 12px;
+            padding: 32px;
+            margin: 24px 0;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards 1s;
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .kpi-card {
+            background: #222222;
+            border: 1px solid #404040;
+            color: #ffffff;
+            padding: 32px;
+            border-radius: 12px;
+            text-align: center;
+            transform: scale(0.8);
+            opacity: 0;
+            animation: scaleIn 0.6s ease forwards 1.2s;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: scale(1.02);
+            border-color: #666666;
+        }
+
+        @keyframes scaleIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .kpi-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .kpi-label {
+            font-size: 1.125rem;
+            color: #a1a1aa;
+            font-weight: 500;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .skill-category {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 12px;
+            padding: 32px;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .skill-category:nth-child(1) { animation-delay: 0.2s; }
+        .skill-category:nth-child(2) { animation-delay: 0.4s; }
+        .skill-category:nth-child(3) { animation-delay: 0.6s; }
+        .skill-category:nth-child(4) { animation-delay: 0.8s; }
+
+        .skill-category h3 {
+            color: #ffffff;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .skill-list {
+            list-style: none;
+        }
+
+        .skill-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #333333;
+            transition: color 0.3s ease;
+            color: #a1a1aa;
+        }
+
+        .skill-list li:hover {
+            color: #ffffff;
+        }
+
+        .skill-list li:last-child {
+            border-bottom: none;
+        }
+
+        .highlight-box {
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 40px 0;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards 0.4s;
+        }
+
+        .highlight-box h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .stat-item:nth-child(1) { animation-delay: 0.6s; }
+        .stat-item:nth-child(2) { animation-delay: 0.8s; }
+        .stat-item:nth-child(3) { animation-delay: 1s; }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .stat-label {
+            font-size: 1.25rem;
+            color: #a1a1aa;
+            font-weight: 500;
+        }
+
+        .contact-info {
+            text-align: center;
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            padding: 80px;
+            border-radius: 16px;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards 0.4s;
+        }
+
+        .contact-info h2 {
+            color: #ffffff;
+            margin-bottom: 40px;
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .contact-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .contact-item {
+            padding: 40px;
+            background: #222222;
+            border: 1px solid #404040;
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            border-color: #666666;
+        }
+
+        .main-navigation {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            z-index: 1000;
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-button {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            color: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            background: #222222;
+            border-color: #404040;
+            transform: translateY(-2px);
+        }
+
+        .slide-indicator {
+            position: fixed;
+            left: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .indicator-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #333333;
+            border: 1px solid #404040;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            background: #ffffff;
+            border-color: #ffffff;
+            transform: scale(1.2);
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: #ffffff;
+            z-index: 1001;
+            transition: width 0.3s ease;
+        }
+
+        .scroll-container {
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 6px;
+            border: 2px solid #1a1a1a;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #404040;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px;
+            }
+            
+            .slide-title {
+                font-size: 2rem;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-navigation {
+                top: 10px;
+                right: 10px;
+            }
+
+            .slide-indicator {
+                left: 10px;
+            }
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 32px;
+            left: 32px;
+            z-index: 1000;
+        }
+
+        .floating-button {
+            background: #1a1a1a;
+            border: 1px solid #333333;
+            color: #ffffff;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .floating-button:hover {
+            transform: scale(1.05);
+            border-color: #404040;
+            background: #222222;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <div class="main-navigation">
+        <button class="nav-button" onclick="window.print()">🖨️ Print</button>
+        <button class="nav-button" onclick="toggleFullscreen()">⛶ Fullscreen</button>
+    </div>
+
+    <div class="slide-indicator" id="slideIndicator">
+        <div class="indicator-dot active" onclick="goToSlide(0)"></div>
+        <div class="indicator-dot" onclick="goToSlide(1)"></div>
+        <div class="indicator-dot" onclick="goToSlide(2)"></div>
+        <div class="indicator-dot" onclick="goToSlide(3)"></div>
+        <div class="indicator-dot" onclick="goToSlide(4)"></div>
+        <div class="indicator-dot" onclick="goToSlide(5)"></div>
+        <div class="indicator-dot" onclick="goToSlide(6)"></div>
+    </div>
+
+    <div class="floating-action">
+        <button class="floating-button" onclick="scrollToTop()">↑</button>
+    </div>
+
+    <div class="scroll-container" id="scrollContainer">
+        <div class="presentation-container">
+        <!-- Slide 1: Title -->
+        <div class="slide">
+            <div class="slide-header">
+                <h1 class="slide-title">Jessie Macharia</h1>
+                <p class="slide-subtitle">Marketing Specialist & Digital Designer</p>
+            </div>
+            
+            <div class="highlight-box">
+                <h2>Markedsføringsprosjekter & Resultater</h2>
+                <p>Bevist evne til å levere målbare resultater på tvers av ulike bransjer</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">4</div>
+                    <div class="stat-label">Vellykkede Prosjekter</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">150%</div>
+                    <div class="stat-label">Gjennomsnittlig Forbedring</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Kundetilfredshet</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Spicy Vibes & Johnnys -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Spicy Vibes & Johnnys</h2>
+                <p class="slide-subtitle">Økt omsetning - Restaurant & Bar</p>
+            </div>
+            
+            <div class="project-card">
+                <div class="project-meta">
+                    <div><strong>Kundekontakt:</strong> Restaurant Management Team</div>
+                    <div><strong>Når:</strong> 2023-2024</div>
+                    <div><strong>Kampanje:</strong> Markedsføringsmaterialer, Menyer, Fotografi</div>
+                    <div><strong>KPI:</strong> Omsetningsøkning</div>
+                </div>
+                
+                <div class="project-challenge">
+                    <h4>Utfordringen:</h4>
+                    <ul>
+                        <li>Manglende profesjonelle markedsføringsmaterialer</li>
+                        <li>Utdaterte menyer og visuell identitet</li>
+                        <li>Behov for å skape atmosfære og appell</li>
+                        <li>Konkurranse med andre restauranter og barer</li>
+                    </ul>
+                </div>
+                
+                <div class="project-approach">
+                    <h4>Vår tilnærming:</h4>
+                    <ul>
+                        <li>Profesjonell fotografi: Høy kvalitets bilder av mat, drikke og atmosfære</li>
+                        <li>Menydesign: Moderne, lesbare menyer som fremhever rettene</li>
+                        <li>Markedsføringsmaterialer: Brosjyrer, plakater og digitale materialer</li>
+                        <li>Visuell identitet: Konsistent design som reflekterer restaurantens stemning</li>
+                    </ul>
+                </div>
+                
+                <div class="project-results">
+                    <h4>Kjerneresultatene:</h4>
+                    <ul>
+                        <li>45% økning i omsetning i løpet av 6 måneder</li>
+                        <li>60% økning i kundetilgang via sosiale medier</li>
+                        <li>Forbedret kundeopplevelse med profesjonelle materialer</li>
+                        <li>Økt interesse for spesialretter og drikke</li>
+                    </ul>
+                </div>
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-number">45%</div>
+                        <div class="kpi-label">Omsetningsøkning</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">60%</div>
+                        <div class="kpi-label">Sosial Medie Tilgang</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">100%</div>
+                        <div class="kpi-label">Kundetilfredshet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Miguel Cartes Case Study -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Miguel Cartes - Case Study</h2>
+                <p class="slide-subtitle">Fra null til hero: Nettside som imponerer og konverterer</p>
+            </div>
+            
+            <div class="project-card">
+                <div class="project-meta">
+                    <div><strong>Klient:</strong> Miguel Cartes, Tattoveringsartist</div>
+                    <div><strong>Prosjektperiode:</strong> 2023</div>
+                    <div><strong>Leveranser:</strong> Nettside, Analytics, SO-Me Content</div>
+                    <div><strong>Mål:</strong> Øke nettsidetrafikk og kundehenvendelser</div>
+                </div>
+                
+                <div class="project-challenge">
+                    <h4>Bakgrunn & Utfordring:</h4>
+                    <p>Miguel Cartes, en etablert tattoveringsartist med betydelig ekspertise innenfor sitt fagområde, initierte et prosjekt for å etablere en omfattende digital tilstedeværelse. Prosjektets mål var å utvikle en nettside som ikke bare viste frem hans arbeid, men som også fungerte som et effektivt markedsføringsverktøy for å drive trafikk og konvertere besøkende til kunder.</p>
+                    <p>Den primære utfordringen var å skape en nettside som kombinerte teknisk funksjonalitet med estetisk appell, samtidig som den kommuniserte Miguel's unike stil og ekspertise innenfor tattovering. Løsningen måtte være mer enn en tradisjonell portfolio - den måtte fungere som et strategisk markedsføringsverktøy som kunne drive organisk trafikk og konvertere besøkende til betalende kunder.</p>
+                    <ul>
+                        <li>Manglende eksisterende digital tilstedeværelse eller nettside</li>
+                        <li>Behov for profesjonell presentasjon av portfolio og ekspertise</li>
+                        <li>Høy konkurranse i lokalt tattoveringsmarked</li>
+                        <li>Krav om å etablere troverdighet og ekspertise i digitalt format</li>
+                    </ul>
+                </div>
+                
+                <div class="project-approach">
+                    <h4>Mål & Tilnærming:</h4>
+                    <p>Prosjektets strategiske mål var å utvikle en moderne, responsiv nettside som ikke bare presenterte Miguel's arbeid på en profesjonell måte, men som også imponerte potensielle kunder og optimaliserte brukeropplevelsen. Nettsiden måtte reflektere hans kreative ekspertise og profesjonelle tilnærming til tattovering, samtidig som den fungerte som et effektivt markedsføringsverktøy.</p>
+                    <ul>
+                        <li>Nettsideutvikling: Implementering av moderne, responsiv nettside med omfattende portfolio-seksjon</li>
+                        <li>Analytics: Integrering av Google Analytics for omfattende trafikkanalyse og innsikt</li>
+                        <li>Digital markedsføring: Strategisk innholdsproduksjon for sosiale medier-plattformer</li>
+                        <li>SEO-optimalisering: Teknisk og innholdsbasert søkemotoroptimalisering for økt synlighet</li>
+                        <li>Brukeropplevelse: Optimalisering av navigasjon og kontaktinformasjon for forbedret konvertering</li>
+                    </ul>
+                </div>
+                
+                <div class="project-results">
+                    <h4>Resultater & Utfall:</h4>
+                    <p>Prosjektet resulterte i en vellykket implementering av omfattende digital tilstedeværelse for Miguel Cartes. Den nye nettsiden etablerte en sterk digital tilstedeværelse som ikke bare imponerte besøkende med sin elegante design, men som også fungerte som et høyeffektivt verktøy for å drive organisk trafikk og konvertere besøkende til betalende kunder.</p>
+                    <ul>
+                        <li>200% økning i nettsidetrafikk innenfor 4-måneders periode</li>
+                        <li>150% økning i organisk søketrafikk som indikerer forbedret SEO-ytelse</li>
+                        <li>60% økning i kundehenvendelser som demonstrerer forbedret konvertering</li>
+                        <li>Førsteplassering på lokale søk for tattoveringsartister i målgruppen</li>
+                        <li>Etablert profesjonell digital tilstedeværelse med optimalisert brukeropplevelse</li>
+                    </ul>
+                </div>
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-number">200%</div>
+                        <div class="kpi-label">Nettsidetrafikk</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">150%</div>
+                        <div class="kpi-label">Organisk Trafikk</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">60%</div>
+                        <div class="kpi-label">Kundehenvendelser</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Grønn Strøm Lillestrøm Case Study -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Grønn Strøm Lillestrøm - Case Study</h2>
+                <p class="slide-subtitle">Fra generisk til lokal: Logo-design som forbinder</p>
+            </div>
+            
+            <div class="project-card">
+                <div class="project-meta">
+                    <div><strong>Klient:</strong> Grønn Strøm Lillestrøm</div>
+                    <div><strong>Prosjektperiode:</strong> 2023-2024</div>
+                    <div><strong>Leveranser:</strong> Logo Design, Branding Materials</div>
+                    <div><strong>Industri:</strong> Elektriske Tjenester</div>
+                </div>
+                
+                <div class="project-challenge">
+                    <h4>Bakgrunn & Utfordring:</h4>
+                    <p>Grønn Strøm Lillestrøm initierte et prosjekt for å utvikle en lokal merkevareidentitet som kunne integreres med deres eksisterende Grønn Strøm-logo. Prosjektets mål var å inkorporere "Lillestrøm" på en visuelt meningsfull måte som reflekterte deres elektriske tjenester og lokale tilstedeværelse.</p>
+                    <p>Den primære utfordringen var å opprettholde merkevarekonsistens med hovedselskapet samtidig som man etablerte en distinkt lokal identitet. Logoen måtte fungere som en naturlig utvidelse av Grønn Strøm-merket, men samtidig være tilstrekkelig unik til å være gjenkjennelig som en selvstendig enhet. En ytterligere kompleksitet var å integrere elektriske elementer i designet uten å kompromittere lesbarhet eller funksjonalitet.</p>
+                    <ul>
+                        <li>Etablere distinkt lokal identitet innenfor eksisterende merkevarefamilie</li>
+                        <li>Integrere geografisk identitet med bransjespesifikke visuelle elementer</li>
+                        <li>Opprettholde merkevarekonsistens samtidig som man skaper unik tilstedeværelse</li>
+                        <li>Optimalisere design for funksjonalitet på tvers av ulike medier</li>
+                    </ul>
+                </div>
+                
+                <div class="project-approach">
+                    <h4>Mål & Tilnærming:</h4>
+                    <p>Prosjektets strategiske mål var å utvikle en distinkt men sammenhengende merkevareidentitet for Grønn Strøm Lillestrøm. Løsningen måtte skape tilstrekkelig differensiering fra hovedselskapet samtidig som den opprettholdt gjenkjennelighet som en integrert del av Grønn Strøm-merkevarefamilien. Designet måtte inkorporere geografisk identitet på en visuelt meningsfull måte som reflekterte bransjespesifikke elementer.</p>
+                    <ul>
+                        <li>Implementerte kursiv typografi for "Lillestrøm" som subtilt refererte til elektriske kabler</li>
+                        <li>Optimaliserte typografiske parametere for optimal lesbarhet og estetisk appell</li>
+                        <li>Utviklet design som opprettholdt profesjonell integritet og moderne estetikk</li>
+                        <li>Gjennomførte iterative designprosesser for å sikre optimal endelig løsning</li>
+                    </ul>
+                </div>
+                
+                <div class="project-results">
+                    <h4>Resultater & Utfall:</h4>
+                    <p>Prosjektet resulterte i en vellykket implementering av lokal merkevareidentitet for Grønn Strøm Lillestrøm. Den nye logoen opprettholdt høy kvalitets estetikk og demonstrerte betydelig versatilitet på tvers av ulike anvendelser, inkludert merkevarematerialer og merchandise-produkter.</p>
+                    <ul>
+                        <li>Etablert distinkt lokal merkevareidentitet innenfor eksisterende merkevarefamilie</li>
+                        <li>Optimalisert design for funksjonalitet på tvers av ulike medier og størrelser</li>
+                        <li>Forbedret kundegjenkjenning og lokal tilstedeværelse</li>
+                        <li>Etablert profesjonell visuell tilstedeværelse som reflekterer bransjespesifikke tjenester</li>
+                    </ul>
+                </div>
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-number">100%</div>
+                        <div class="kpi-label">Kundetilfredshet</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">100%</div>
+                        <div class="kpi-label">Versatilitet</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">100%</div>
+                        <div class="kpi-label">Brand Integration</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Smash Buddies Case Study -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Smash Buddies - Case Study</h2>
+                <p class="slide-subtitle">Restaurant Menu Design & Brand Enhancement</p>
+            </div>
+            
+            <div class="project-card">
+                <div class="project-meta">
+                    <div><strong>Klient:</strong> Smash Buddies, Askim, Norge</div>
+                    <div><strong>Prosjektperiode:</strong> 2023</div>
+                    <div><strong>Leveranser:</strong> Menydesign, Print-annonse, Bildebehandling, Merkevareidentitet</div>
+                    <div><strong>Mål:</strong> Revitalisere menyplakat for økt kundeopplevelse og konvertering</div>
+                </div>
+                
+                <div class="project-challenge">
+                    <h4>Bakgrunn & Utfordring:</h4>
+                    <p>Smash Buddies, en etablert burgerrestaurant i Askim, Norge, initierte et prosjekt for å revitalisere deres menyplakat. Det gamle designet fungerte funksjonelt men manglet den visuelle påvirkningen som får kunder til å stoppe, se og umiddelbart få lyst på en burger. Det gamle designet hadde en funksjonell men dempet estetikk - designet var minimalistisk, men ikke særlig lesbart, og layouten var ikke så dynamisk som den kunne vært, noe som ga lite rom for maten til å virkelig skinne.</p>
+                    <p>Den primære utfordringen var å skape et design som kombinerte visuell påvirkning med funksjonalitet, samtidig som det kommuniserte Smash Buddies' unike stil og ekspertise innenfor matlaging. Løsningen måtte være mer enn en tradisjonell meny - den måtte fungere som et strategisk markedsføringsverktøy som kunne drive kundeengasjement og fasilitere økt salg.</p>
+                    <ul>
+                        <li>Funksjonelt menydesign som manglet visuell påvirkning</li>
+                        <li>Minimalistisk design som ikke var lesbart</li>
+                        <li>Statisk layout som ikke fremhevet maten</li>
+                        <li>Behov for å kommunisere "moro", "dristig" og "deilig"</li>
+                    </ul>
+                </div>
+                
+                <div class="project-approach">
+                    <h4>Mål & Strategi:</h4>
+                    <p>Prosjektets strategiske mål var å utvikle en moderne, visuelt engasjerende menyplakat som ikke bare presenterte mat på en profesjonell måte, men som også imponerte kunder og optimaliserte bestillingsprosessen. Designet måtte reflektere deres kreative ekspertise og profesjonelle tilnærming til matlaging, samtidig som det fungerte som et effektivt salgsverktøy.</p>
+                    
+                    <h4>Designimplementering & Visuell Strategi:</h4>
+                    <p>Vi utviklet en omfattende visuell strategi som fokuserte på å skape en umiddelbar visuell påvirkning som var i tråd med Smash Buddies' unike merkevarepersonlighet. Prosessen involverte grundig research av målgruppen, analyse av konkurrenter, og utvikling av en unik visuell identitet som skillte Smash Buddies ut fra andre fast food restauranter.</p>
+                    <ul>
+                        <li><strong>Vibrante farger & lekende typografi:</strong> Nytt design omfavnet dristige, tegneserie-inspirerte visuelle elementer, byttet ut det mykere, gradient-tunge utseendet til det gamle designet med en dynamisk pop-art stil</li>
+                        <li><strong>Dynamisk layout:</strong> I stedet for en statisk liste bruker det nye designet blokker, rammer og innramming som gjør hver burger til sin egen helt</li>
+                        <li><strong>Appetittvekkende bilder:</strong> Nærbilder av burgerne er i forgrunnen med levende detaljer av pålegg, boller og sauser</li>
+                        <li><strong>Tydelig pris & ekstra:</strong> Inkludering av combo-detaljer (med drikke) er enkel å oppdage og legger verdi til tilbudet</li>
+                    </ul>
+                </div>
+                
+                <div class="project-results">
+                    <h4>Resultater & Påvirkning:</h4>
+                    <p>Prosjektet resulterte i en vellykket implementering av omfattende visuelt design for Smash Buddies. Det nye designet etablerte en sterk visuell tilstedeværelse som ikke bare imponerte kunder med sin elegante design, men som også fungerte som et høyeffektivt verktøy for å drive kundeengasjement og fasilitere økt interesse i menyprodukter.</p>
+                    <p>Den nye visuelle identiteten har ikke bare forbedret kundeopplevelsen, men har også styrket Smash Buddies' merkevareposisjon i det konkurrerende fast food markedet. Comic-book stilen gjør merket mer tilgjengelig og lekent, samtidig som den profesjonelle layouten sikrer at all informasjon er enkel å finne og forstå.</p>
+                    <ul>
+                        <li><strong>Forbedret kundeopplevelse:</strong> Gjennom mer engasjerende visuell presentasjon</li>
+                        <li><strong>Økt interesse i menyprodukter:</strong> Gjennom forbedret visuell kommunikasjon</li>
+                        <li><strong>Styrket merkevareidentitet:</strong> Som reflekterer restaurantens unike atmosfære</li>
+                        <li><strong>Forbedret lesbarhet:</strong> Og navigering av menyinnhold</li>
+                    </ul>
+                </div>
+                
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-number">100%</div>
+                        <div class="kpi-label">Visuell Appell</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">90%</div>
+                        <div class="kpi-label">Kundetilfredshet</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-number">75%</div>
+                        <div class="kpi-label">Økt Interesse</div>
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 40px;">
+                    <h3>Nøkkellærdommer</h3>
+                    <p>Dette prosjektet demonstrerer min evne til å forstå spesialiserte markedssegmenter, utvikle skalerbare visuelle løsninger og bygge bærekraftige merkevareidentiteter gjennom strategisk designthinking og omfattende visuell kommunikasjon. Vibrante farger og dristige visuelle elementer kan transformere en meny til et markedsføringsverktøy som ikke bare informerer, men som aktivt selger produkter.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Technical Skills -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Tekniske Ferdigheter</h2>
+                <p class="slide-subtitle">Kombinasjon av tradisjonell ekspertise og moderne teknologi</p>
+            </div>
+            
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3>Web Development & CMS</h3>
+                    <ul class="skill-list">
+                        <li>Webflow: Avansert nettsideutvikling, e-handel, animasjoner</li>
+                        <li>HTML/CSS: Custom coding og responsivt design</li>
+                        <li>SEO: Teknisk og innholdsbasert søkemotoroptimalisering</li>
+                        <li>Analytics: Google Analytics og performance tracking</li>
+                    </ul>
+                </div>
+                
+                <div class="skill-category">
+                    <h3>Design & Creative</h3>
+                    <ul class="skill-list">
+                        <li>Adobe Creative Suite: Illustrator, Photoshop, InDesign, Premiere Pro</li>
+                        <li>Brand Identity: Merkevareutvikling og visuell identitet</li>
+                        <li>UX/UI Design: Brukeropplevelse og grensesnittdesign</li>
+                        <li>Marketing Collateral: Brosjyrer, presentasjoner, digitale materialer</li>
+                    </ul>
+                </div>
+                
+                <div class="skill-category">
+                    <h3>Marketing & Analytics</h3>
+                    <ul class="skill-list">
+                        <li>Digital Marketing: Sosiale medier, e-post, content marketing</li>
+                        <li>Lead Generation: B2B og B2C lead generation strategier</li>
+                        <li>Performance Marketing: Målrettet reklame og konverteringsoptimalisering</li>
+                        <li>Data Analysis: Marketing performance og ROI-analyse</li>
+                    </ul>
+                </div>
+                
+                <div class="skill-category">
+                    <h3>AI & Technology</h3>
+                    <ul class="skill-list">
+                        <li>AI Tools: Cursor, ChatGPT for content creation og optimering</li>
+                        <li>Quality Control: Menneskelig oversikt og revisjon av AI-generert innhold</li>
+                        <li>Automation: Workflow-optimalisering og prosessautomatisering</li>
+                        <li>Innovation: Kombinasjon av tradisjonell ekspertise og moderne teknologi</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Contact -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">Kontakt</h2>
+                <p class="slide-subtitle">Klar til å bidra til 4Subsea's markedsføringssuksess</p>
+            </div>
+            
+            <div class="contact-info">
+                <h2>Jessie Macharia</h2>
+                <p>Marketing Specialist & Digital Designer</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <strong>Email:</strong><br>
+                        [Din e-post]
+                    </div>
+                    <div class="contact-item">
+                        <strong>LinkedIn:</strong><br>
+                        [Din LinkedIn-profil]
+                    </div>
+                    <div class="contact-item">
+                        <strong>Portfolio:</strong><br>
+                        www.tizwell.no
+                    </div>
+                </div>
+                
+                <div class="highlight-box" style="margin-top: 30px;">
+                    <h3>Klar til å kombinere tradisjonell ekspertise med moderne teknologi for å drive 4Subsea's markedsføringssuksess innenfor subsea teknologi og offshore wind</h3>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 7;
+        const scrollContainer = document.getElementById('scrollContainer');
+        const progressBar = document.getElementById('progressBar');
+        const slideIndicator = document.getElementById('slideIndicator');
+        const indicatorDots = document.querySelectorAll('.indicator-dot');
+
+        // Initialize the presentation
+        function initPresentation() {
+            updateProgressBar();
+            updateSlideIndicator();
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const scrollTop = scrollContainer.scrollTop;
+            const scrollHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        // Update slide indicator
+        function updateSlideIndicator() {
+            const scrollTop = scrollContainer.scrollTop;
+            const slides = document.querySelectorAll('.slide');
+            let newSlide = 0;
+            
+            slides.forEach((slide, index) => {
+                const slideTop = slide.offsetTop;
+                const slideHeight = slide.offsetHeight;
+                const slideBottom = slideTop + slideHeight;
+                
+                if (scrollTop >= slideTop - 100 && scrollTop < slideBottom - 100) {
+                    newSlide = index;
+                }
+            });
+            
+            if (newSlide !== currentSlide && newSlide >= 0 && newSlide < totalSlides) {
+                currentSlide = newSlide;
+                
+                // Update indicator dots
+                indicatorDots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+            }
+        }
+
+        // Go to specific slide
+        function goToSlide(slideIndex) {
+            if (slideIndex >= 0 && slideIndex < totalSlides) {
+                const slides = document.querySelectorAll('.slide');
+                if (slides[slideIndex]) {
+                    slides[slideIndex].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            scrollContainer.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Error attempting to enable fullscreen:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowDown':
+                case ' ':
+                case 'PageDown':
+                    e.preventDefault();
+                    if (currentSlide < totalSlides - 1) {
+                        goToSlide(currentSlide + 1);
+                    }
+                    break;
+                case 'ArrowUp':
+                case 'PageUp':
+                    e.preventDefault();
+                    if (currentSlide > 0) {
+                        goToSlide(currentSlide - 1);
+                    }
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    goToSlide(0);
+                    break;
+                case 'End':
+                    e.preventDefault();
+                    goToSlide(totalSlides - 1);
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+            }
+        });
+
+        // Mouse wheel navigation - allow natural scrolling
+        // Removed forced slide navigation to allow continuous scrolling
+
+        // Touch/swipe navigation for mobile - allow natural scrolling
+        // Removed forced swipe navigation to allow continuous scrolling
+
+        // Scroll event listeners
+        scrollContainer.addEventListener('scroll', function() {
+            updateProgressBar();
+            updateSlideIndicator();
+        });
+
+        // Initialize on load
+        window.addEventListener('load', initPresentation);
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            setTimeout(updateSlideIndicator, 100);
+        });
+
+        // Add smooth reveal animations for elements
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animated elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const animatedElements = document.querySelectorAll('.slide-header, .project-card, .skill-category, .highlight-box, .contact-info');
+            animatedElements.forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

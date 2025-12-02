@@ -1,0 +1,3 @@
+**PROFILE**
+
+I’m a creative who’s happiest when I’m making something useful. Most of my experience comes from the startup and small business world, which has taught me to be pragmatic, move fast, and wear a lot of different hats. I focus mainly on branding and digital design, but I also love the storytelling side of video and photo. For me, good design isn't just about aesthetics; it's about crafting a thoughtful message that actually connects with the viewer and makes them stop scrolling. I’m fluent in English and Norwegian, I believe travel builds character, and I’m generally just a curious person who wants to do good work.

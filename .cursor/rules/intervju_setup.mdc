@@ -1,0 +1,49 @@
+---
+description: Automatisk opprettelse av intervju-notater ved statusendring
+globs: 00_Oversikt/Søknadsoversikt.md
+alwaysApply: false
+---
+
+# Intervju Setup Automation
+
+Når brukeren ber om å endre status til "Intervju" for et selskap i `00_Oversikt/Søknadsoversikt.md`, eller når du selv oppdaterer denne statusen:
+
+**Dine instruksjoner:**
+
+1.  **Identifiser selskapet:** Finn riktig mappe i `02_Søknader/Alle selskaper/[Selskapsnavn]`.
+2.  **Opprett fil:** Lag en ny fil i den mappen som heter `Intervju_Notater.md`.
+3.  **Fyll filen med innhold:**
+    -   Bruk malen nedenfor.
+    -   Hent "Vinkel" fra `01_Ressurser/Drømmeliste_og_Nettverk.md` (hvis den finnes der) eller generer en ny basert på `Utlysning.md`.
+    -   Generer 3-5 kritiske spørsmål de vil stille (basert på svakheter i CV vs Utlysning).
+    -   Generer 3 smarte spørsmål brukeren bør stille dem.
+
+---
+**Mal for Intervju_Notater.md:**
+
+# Intervjuforberedelser: [Selskapsnavn]
+
+## 🎯 Min Strategiske Vinkel
+*[Sett inn "one-liner" vinkelen her]*
+*[Sett inn "mitt bidrag" her]*
+
+## 🕵️‍♂️ Hvem møter jeg?
+*   Navn:
+*   Rolle:
+*   Notater (sjekk LinkedIn):
+
+## 🔥 De kritiske spørsmålene (Djevelens advokat)
+*De kommer til å lure på dette. Ha svarene klare.*
+1.  [Spørsmål basert på manglende erfaring/hull/skifte av bransje]
+    *   *Svar-strategi:* ...
+2.  ...
+
+## 🧠 Mine spørsmål til dem
+*Vis at du har gjort hjemmeleksen.*
+1.  [Spørsmål om kultur/arbeidsmetodikk]
+2.  [Spørsmål om en spesifikk utfordring de har nevnt]
+3.  [Strategisk spørsmål om fremtiden]
+
+## ✅ Praktisk
+- [ ] Les gjennom `01_Ressurser/Intervju_Forberedelser.md`
+- [ ] Sjekk nettsiden deres en siste gang

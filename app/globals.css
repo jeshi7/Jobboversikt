@@ -1,0 +1,46 @@
+@import "@navikt/ds-css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-background text-slate-900 antialiased text-[15px] leading-relaxed;
+  font-family: var(--a-font-family, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", sans-serif);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.card {
+  @apply rounded-2xl bg-surface px-5 py-4 md:py-5 shadow-subtle border border-borderSoft/50;
+}
+
+.pill {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.pill-muted {
+  @apply bg-slate-100 text-slate-600;
+}
+
+.pill-positive {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.pill-warning {
+  @apply bg-amber-50 text-amber-700;
+}
+
+.pill-negative {
+  @apply bg-rose-50 text-rose-700;
+}
+
+

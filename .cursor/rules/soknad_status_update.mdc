@@ -1,0 +1,27 @@
+---
+description: Automatisk oppdatering av status til 'Sendt' når både CV og Søknad er på plass
+globs: 02_Søknader/Alle selskaper/**/*.pdf, 02_Søknader/All Companies/**/*.pdf
+---
+
+### oa Synkronisering av Søknadsstatus (Komplett sett)
+
+Når brukeren legger til eller endrer PDF-filer i en bedriftsmappe, skal du sjekke om søknaden er **helt ferdig** før du oppdaterer status.
+
+**Dine handlinger skal være:**
+
+1.  **Sjekk mappen:**
+    *   Når en PDF legges til i f.eks. `.../Norwegian/`, skann hele mappen for filer.
+
+2.  **Verifiser dokumenter:**
+    *   Ser du en fil som inneholder **"CV"** i navnet? (f.eks. `CV - Navn.pdf`)
+    *   **OG**
+    *   Ser du en fil som inneholder **"Søknad"** ELLER **"Cover Letter"** i navnet?
+
+3.  **Oppdater `00_Oversikt/Søknadsoversikt.md`:**
+    *   **HVIS BEGGE ER PÅ PLASS:**
+        *   Endre status i `Søknadsoversikt.md` til `✉️ Sendt`.
+    *   **HVIS KUN ÉN (ELLER INGEN) ER PÅ PLASS:**
+        *   Sørg for at status er `📝 Under arbeid`.
+
+**Hvorfor?**
+For å skille mellom arbeid som pågår (f.eks. bare CV er ferdig) og en innsendt søknad. Vi markerer kun som "Sendt" når pakken er komplett.

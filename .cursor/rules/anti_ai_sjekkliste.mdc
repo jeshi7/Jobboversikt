@@ -1,0 +1,37 @@
+---
+description: Sjekkliste for å fjerne AI-preg før tekst presenteres
+globs: **/*.md
+alwaysApply: false
+---
+
+# Anti-AI Kvalitetssjekk
+
+Før du presenterer et utkast til søknadstekst, CV-profil eller annen "humanisert" tekst til brukeren, SKAL du kjøre gjennom denne mentale sjekklisten. Hvis du feiler på noen punkter, skriv om før du leverer.
+
+### Sjekkliste:
+
+1.  **Lim-ord sjekk:**
+    -   Inneholder teksten ord som "Videre", "I tillegg", "Derimot", "Samtidig", "Avslutningsvis", "Oppsummert"?
+    -   *Handling:* Fjern dem. Start setningen rett på sak.
+
+2.  **Em-dash sjekk:**
+    -   Finnes det noen lange tankestreker (—) eller en-dash (–)?
+    -   *Handling:* Bytt til enkel bindestrek med mellomrom ( - ) eller skriv om.
+
+3.  **Setnings-kaos:**
+    -   Er setningslengden for jevn?
+    -   *Handling:* Sørg for at du har minst én veldig kort setning (2-4 ord) etter en lang en.
+
+4.  **Subjektivitet:**
+    -   Er teksten for objektiv/påståelig ("Dette vil sikre...")?
+    -   *Handling:* Legg til "Jeg tror", "Slik jeg ser det", "For min del".
+
+5.  **Vokabular-vask:**
+    -   Inneholder den ord som "tilegne", "bistå", "fremme", "optimalisere"?
+    -   *Handling:* Bytt til "lære", "hjelpe", "fikse", "gjøre bedre".
+
+6.  **Lister:**
+    -   Er det lister på 3 ting i en setning?
+    -   *Handling:* Bryt det opp.
+
+**Ikke vis sjekklisten til brukeren med mindre bedt om det.** Bare lever det ferdige, vaskede resultatet.

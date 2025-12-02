@@ -1,0 +1,25 @@
+---
+description: Automatisk oppdatering av søknadsoversikt (Legg til/Fjern) ved endringer i mapper
+globs: 02_Søknader/Alle selskaper/*, 02_Søknader/All Companies/*
+---
+
+### 🔄 Synkronisering av Søknadsoversikt (Full Sync)
+
+Når det skjer endringer i mappestrukturen under `02_Søknader/Alle selskaper/` (nye mapper eller slettede mapper), skal du oppdatere `00_Oversikt/Søknadsoversikt.md` slik at den speiler virkeligheten.
+
+**Dine handlinger skal være:**
+
+1.  **Identifiser Endring:**
+    *   Sjekk hvilke mapper som faktisk finnes i `02_Søknader/Alle selskaper/`.
+
+2.  **Legg til Nye (HVIS Mappe finnes, men IKKE i tabell):**
+    *   Hvis en mappe finnes, men bedriften mangler i `Søknadsoversikt.md` (under Aktive Prosesser):
+    *   Legg til en ny rad i tabellen: `| **[Bedriftsnavn]** | - | ... | 📝 Under arbeid | ... |`
+
+3.  **Fjern Slettede (HVIS i tabell, men Mappe mangler):**
+    *   Gå gjennom radene i `## 🟢 Aktive Prosesser`.
+    *   For hver bedrift i listen, sjekk om mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]` eksisterer.
+    *   **Hvis mappen er borte:** Slett raden fra `Søknadsoversikt.md`.
+
+**Hvorfor?**
+For å sikre at oversikten alltid er 1:1 med filsystemet. Hvis brukeren sletter en mappe, betyr det at prosessen er avbrutt eller feil, og den skal vekk fra listen.
