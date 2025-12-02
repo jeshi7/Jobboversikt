@@ -30,17 +30,16 @@ async function parseOverview() {
 
   const content = await fs.readFile(overviewPath, 'utf-8');
   const lines = content.split('\n');
-  const startIndex = lines.findIndex((line) => line.includes('| Bedrift |'));
-  if (startIndex === -1) {
+  const headerIndex = lines.findIndex((line) => line.includes('| Bedrift |'));
+  if (headerIndex === -1) {
     return {};
   }
 
   const overview = {};
 
-  for (let i = startIndex + 2; i < lines.length; i++) {
+  for (let i = headerIndex + 2; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line) continue;
-    if (!line.startsWith('|')) break;
+    if (!line || !line.startsWith('|')) break;
     if (line.startsWith('| - |')) break;
 
     const rawCells = line.split('|').map((cell) => cell.trim());
