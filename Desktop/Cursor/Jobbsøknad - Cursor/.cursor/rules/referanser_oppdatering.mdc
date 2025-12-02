@@ -1,0 +1,22 @@
+---
+description: Automatisk oppdatering av profil og kompetanse ved nye referanser
+globs: Referanseliste.md
+---
+
+### 🔄 Synkronisering av Referanser
+
+Når brukeren legger til en ny referanse eller et sitat i `05_Referanser/Referanseliste.md`, skal du **ALLTID** vurdere om denne informasjonen styrker brukerens profil og bør reflekteres i andre nøkkeldokumenter.
+
+**Dine handlinger skal være:**
+
+1.  **Sjekk `Min_Profil_Analyse.md`:**
+    *   Bekrefter referansen noen av styrkene som står der?
+    *   Er det kommet frem nye styrker ("Soft skills" eller faglige) som bør legges til i analysen?
+    *   *Hvis ja:* Oppdater analysen med den nye innsikten.
+
+2.  **Sjekk `Kompetansebank.md`:**
+    *   Kan sitatet eller erfaringen bli en ny "Modultekst"? (F.eks. "Tidligere leder beskriver meg som...")
+    *   *Hvis ja:* Lag et utkast til en ny modul i Kompetansebanken basert på referansen.
+
+**Hvorfor?**
+For å sikre at "bevisene" (referansene) blir aktivt brukt i salgsarbeidet (søknadene), ikke bare gjemt bort i en liste.

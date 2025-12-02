@@ -1,0 +1,39 @@
+---
+description: Ensure job listing links are added to Utlysning.md for app visibility
+globs: ["**/Utlysning.md", "**/*.md"]
+---
+
+# Listing Link Sync
+
+This rule ensures that every time a new job listing is added to a company folder (typically as `Utlysning.md`), the URL to the original job advertisement is included in the metadata header. This allows the JobTracker app to display a "Se Utlysning" button.
+
+## Triggers
+- When creating a new `Utlysning.md` file.
+- When creating a new "Planlagt søknad" (Planned Application).
+- When moving a planned application to `Alle selskaper`.
+
+## Requirements
+
+1.  **Format:** The markdown file MUST start with a metadata-like header section.
+2.  **Field:** The header MUST include a line starting with `* **Link:**` or `* **URL:**` followed by the full URL.
+
+### Example Template
+
+```markdown
+# [Stillingstittel]
+
+**[Selskapsnavn]**
+
+*   **Frist:** [Frist]
+*   **Sted:** [Sted]
+*   **Link:** [Sett inn URL her]
+
+## Om stillingen
+...
+```
+
+## Actions
+
+1.  **If URL is known:** Always insert the `* **Link:**` line immediately below the Location/Sted line.
+2.  **If URL is unknown:** Insert `* **Link:** (Lim inn link her)` as a placeholder to remind the user (or yourself) to add it later.
+3.  **App Compatibility:** Ensure the file is saved in a location readable by the app (e.g., `JobbTracker/Data/...` if syncing is active) or that the app's regex parser can find the "Link:" pattern.

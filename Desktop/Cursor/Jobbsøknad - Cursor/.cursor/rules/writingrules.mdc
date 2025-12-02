@@ -1,0 +1,102 @@
+---
+alwaysApply: true
+---
+
+
+
+
+### Anti-AI / Humaniserings-regler (Nivå 2):
+
+1. **Drep "lim-ordene" og konklusjoner:**
+   - Unngå typiske AI-overganger som "I tillegg", "Videre", "Derimot", "Samtidig", "Avslutningsvis", "Oppsummert".
+   - Start heller setninger rett på sak, eller bruk "Og", "Men", "Også".
+   - Aldri oppsummer til slutt. Bare slutt å skrive når du er ferdig.
+
+2. **Nedgrader vokabularet (Corporate vs. Human):**
+   - Ikke skriv "iverksette", skriv "starte".
+   - Ikke skriv "tilegne meg kunnskap", skriv "lære".
+   - Ikke skriv "sikre god kommunikasjon", skriv "snakke godt sammen".
+   - Ikke skriv "innehar erfaring", skriv "har jobbet med".
+   - **Regel:** Hvis du ikke ville sagt ordet til en venn over en kaffe, ikke skriv det.
+
+3. **Bryt balansen:**
+   - AI elsker strukturen: "X gjør at vi oppnår Y."
+   - Mennesker sier: "Jeg liker X. Det gjør at Y skjer."
+   - Unngå lister inne i setninger (f.eks. "løsninger som er skalerbare, robuste og brukervennlige"). Velg heller én ting og fokuser på den.
+
+4. **Ingen Em-dash (—):**
+   - **ALDRI** bruk den lange tankestreken (em-dash: —) eller en-dash (–) i tekst som skal leses. Det er en sterk AI-markør.
+   - Bruk heller en enkel bindestrek med mellomrom ( - ) hvis du må skyte inn noe. Det ser mer "skrevet" ut på et tastatur.
+   - Eller bruk parenteser/komma.
+   - *Før:* "Dette er viktig — mener jeg." (AI-stil)
+   - *Etter:* "Dette er viktig - mener jeg." (Menneskelig stil)
+
+5. **Vær mer subjektiv/ydmyk:**
+   - AI er ofte veldig påståelig ("Dette vil føre til...").
+   - Bruk heller: "Jeg tror...", "Jeg tenker at...", "For min del så..."
+
+6. **Setningslengde-kaos:**
+   - Skriv en veldig lang, litt kronglete setning. Følg opp med en på 3 ord.
+
+   ### Anti-AI / Kaos-regler (Nivå 3 - For å lure detektorene):
+
+1. **Drep listene:**
+   - AI elsker lister på 3 ting ("wireframes, brukerflyt og prototyper").
+   - **Regel:** Aldri skriv lister på 3 ting i en setning. Del dem opp. Eller skriv bare om én av dem.
+   - *Før:* "Jeg kan X, Y og Z."
+   - *Etter:* "Jeg jobber mest med X. Men bruker også Y og Z en del."
+
+2. **Lag grammatisk "grums":**
+   - Start setninger på en måte læreren din ville mislikt.
+   - Start med: "Når det gjelder...", "For å være ærlig...", "Tingen er at..."
+   - Bruk punktum der det strengt tatt kunne vært komma. Det skaper en mer stakkato, menneskelig rytme.
+
+3. **Unngå "CV-ordene":**
+   - Ord som "tilegne", "inneha", "bistå", "fasilitere" og "implementere" lyser rødt hos detektorer.
+   - Bruk heller: "lære", "ha", "hjelpe", "fikse", "lage".
+   - *Test:* Ville du sagt ordet i en bar? Hvis nei -> stryk det.
+
+4. **Vær vag (med vilje):**
+   - AI er ofte veldig presis. Mennesker generaliserer.
+   - Bruk uttrykk som: "alt mulig egentlig", "ganske mye", "stort sett", "en god del".
+
+### Anti-AI / Total Kaos (Nivå 4 - Detektorkilleren):
+
+1. **Bruk "Fyllord" som mening:**
+   - AI bruker aldri ord som egentlig ikke betyr noe, men som gir tekstur.
+   - Bruk: "altså", "jo", "nok", "vel", "liksom".
+   - *Eksempel:* "Det er *jo* ikke sånn at jeg kan alt." vs "Jeg kan ikke alt."
+
+2. **Still retoriske spørsmål:**
+   - AI leverer svar. Mennesker undrer seg.
+   - *Eksempel:* "Er det perfekt? Nei. Men det funker."
+
+3. **Vær emosjonell/subjektiv:**
+   - AI er objektiv. Du skal mene noe.
+   - Bruk ord som: "Elsker", "Hater", "Kjedelig", "Spennende", "Gøy", "Slitsomt".
+   - *Før:* "Prosjektet var utfordrende."
+   - *Etter:* "Jeg holdt på å rive meg i håret av det prosjektet. Men vi landet det til slutt."
+
+4. **"Erfaring gjør noe med deg"-grepet:**
+   - Start gjerne en profil eller et avsnitt med en refleksjon over tid.
+   - *Mal:* "X år med [jobb/bransje] gjør noe med deg. Du slutter å [vanlig feil], og begynner å [din styrke]."
+   - *Eksempel:* "10 år i servicebransjen gjør noe med deg. Du slutter å se problemer, og begynner å se løsninger."
+
+5. **Unngå "AI-frasene" som pesten:**
+   - Bannlys ord som: "Landskap", "Fremme", "Styrke", "Optimalisere", "Sammenfattende", "Viktigheten av".
+   - Hvis setningen din høres ut som en LinkedIn-post, slett den og start på nytt.
+
+6. **Call to Action (CTA):**
+   - Aldri avslutt med passive fraser som "Håper å høre fra dere".
+   - Vær proaktiv og inviterende.
+   - *Standard:* "Jeg tar gjerne en kaffe eller et møte på teams og forteller mer om hvordan jeg jobber."
+
+### CV profile and Cover letter Strategy
+
+**1. The Distinction:**
+   - **CV Profile:** Focus on *personality* and *approach*. Who are you? How do you think? What drives you? Use subjective language ("I believe", "I love", "My approach is"). Keep it personal and character-driven. Less about specific hard skills (lists), more about *how* you use them.
+   - **Cover Letter:** Focus on *fit* and *experience*. Why you for *this* job? Connect your background to their specific needs. Show enthusiasm for the company.
+
+**2. Formatting:**
+   - **CV Profile:** Short, punchy. Can be 1-3 short paragraphs, or one solid block.
+   - **Cover Letter:** Standard letter format, but keep the tone human (see Anti-AI rules).

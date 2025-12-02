@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4Subsea Interview Preparation - Jessie Macharia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #003366 0%, #0066CC 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border-left: 4px solid #003366;
+        }
+
+        .nav-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-card h3 {
+            color: #003366;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .nav-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .nav-card .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #0066CC;
+        }
+
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .content-section h2 {
+            color: #003366;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #0066CC;
+        }
+
+        .back-btn {
+            background: #003366;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .back-btn:hover {
+            background: #0066CC;
+        }
+
+        .highlight-box {
+            background: #f0f8ff;
+            border-left: 4px solid #0066CC;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .success-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #0066CC;
+        }
+
+        .metric-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #003366;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .video-script {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #0066CC;
+        }
+
+        .video-script h4 {
+            color: #003366;
+            margin-bottom: 10px;
+        }
+
+        .visual-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-style: italic;
+        }
+
+        .key-points {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .key-points h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .key-points ul {
+            margin-left: 20px;
+        }
+
+        .key-points li {
+            margin-bottom: 5px;
+        }
+
+        .contact-info {
+            background: #e2e3e5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .contact-info h4 {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>4Subsea Interview Preparation</h1>
+            <p class="subtitle">Jessie Macharia - Marketing Specialist Position</p>
+        </header>
+
+        <!-- Navigation Grid -->
+        <div class="nav-grid" id="navGrid">
+            <div class="nav-card" onclick="showSection('talking-points')">
+                <div class="icon">💬</div>
+                <h3>Talking Points</h3>
+                <p>Key responses and strategies for interview questions</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('job-listing')">
+                <div class="icon">📋</div>
+                <h3>Job Listing Analysis</h3>
+                <p>Detailed breakdown of requirements and responsibilities</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('portfolio')">
+                <div class="icon">📁</div>
+                <h3>Portfolio</h3>
+                <p>Your professional background and relevant experience</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('research')">
+                <div class="icon">🔍</div>
+                <h3>Company Research</h3>
+                <p>4Subsea background, culture, and industry insights</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('marketing-materials')">
+                <div class="icon">📢</div>
+                <h3>Marketing Materials</h3>
+                <p>Sample content and campaign ideas for 4Subsea</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('video-scripts')">
+                <div class="icon">🎬</div>
+                <h3>Video Scripts</h3>
+                <p>Detailed video content with visual specifications</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('preparation-summary')">
+                <div class="icon">📝</div>
+                <h3>Preparation Summary</h3>
+                <p>Complete overview of all preparation materials</p>
+            </div>
+
+            <div class="nav-card" onclick="showSection('quick-reference')">
+                <div class="icon">⚡</div>
+                <h3>Quick Reference</h3>
+                <p>Key facts, metrics, and talking points at a glance</p>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        
+        <!-- Talking Points Section -->
+        <div class="content-section" id="talking-points">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Interview Talking Points</h2>
+            
+            <div class="highlight-box">
+                <h4>🎯 Always Emphasize:</h4>
+                <ul>
+                    <li>Your fast learning ability and commitment to mastering new systems</li>
+                    <li>Experience with WordPress, Google Analytics, and CRM systems</li>
+                    <li>Quality control of AI-generated content with human oversight</li>
+                    <li>Technical content creation experience in industrial/engineering sectors</li>
+                    <li>Understanding of established brand guidelines and consistency</li>
+                    <li>International marketing experience and cultural sensitivity</li>
+                </ul>
+            </div>
+
+            <div class="success-metrics">
+                <div class="metric-card">
+                    <div class="metric-number">25%</div>
+                    <div class="metric-label">Production Efficiency Increase</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">18%</div>
+                    <div class="metric-label">Cost Reduction</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">40%</div>
+                    <div class="metric-label">Fewer Unplanned Shutdowns</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">50+</div>
+                    <div class="metric-label">Assets Monitored</div>
+                </div>
+            </div>
+
+            <h3>Key Response Areas:</h3>
+            <div class="key-points">
+                <h4>Technical Skills & Learning:</h4>
+                <ul>
+                    <li>"I'm a fast learner and will spend my free time mastering WordPress, CRM systems, and any new software needed"</li>
+                    <li>"I have experience with Google Analytics and can quickly adapt to new analytics platforms"</li>
+                    <li>"I understand the importance of data-driven decision making in B2B marketing"</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>AI & Content Quality:</h4>
+                <ul>
+                    <li>"I will thoroughly review, correct, and revise all AI-generated content to ensure it meets requirements"</li>
+                    <li>"Human oversight is crucial for maintaining quality and brand consistency"</li>
+                    <li>"I use AI as a tool to enhance productivity while maintaining editorial control"</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>Industry Knowledge:</h4>
+                <ul>
+                    <li>"I'm committed to learning the subsea and offshore wind industries in my free time"</li>
+                    <li>"I understand the energy transition and can support both traditional and renewable energy operations"</li>
+                    <li>"I have experience creating technical content for engineering and industrial sectors"</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Job Listing Section -->
+        <div class="content-section" id="job-listing">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Job Listing Analysis</h2>
+            
+            <div class="highlight-box">
+                <h4>🎯 Position: Marketing Specialist - Marketing & Sales · Asker</h4>
+                <p><strong>Key Quote:</strong> "If you want an engaging job where your contribution really matters and you enjoy working in a "geeky" environment with stellar engineers and data scientists, we hope to hear from you!"</p>
+            </div>
+
+            <h3>Required Qualifications:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Education:</strong> BS/MS degree in marketing or related field</li>
+                    <li><strong>Experience:</strong> 3-5 years' relevant work experience, preferably B2B marketing</li>
+                    <li><strong>Technical Skills:</strong> WordPress, Google Analytics, CRM systems (Microsoft Dynamics)</li>
+                    <li><strong>Communication:</strong> Strong written and verbal skills in English (Norwegian is a plus)</li>
+                </ul>
+            </div>
+
+            <h3>Key Responsibilities:</h3>
+            <div class="key-points">
+                <ul>
+                    <li>Develop and execute integrated marketing campaigns</li>
+                    <li>Create and manage marketing materials (web content, email campaigns, presentations)</li>
+                    <li>Coordinate with internal stakeholders across product, sales, and technical teams</li>
+                    <li>Support event planning and execution</li>
+                    <li>Monitor and report on marketing effectiveness</li>
+                    <li>Ensure brand consistency across all touchpoints</li>
+                    <li>Conduct market research and competitive analysis</li>
+                </ul>
+            </div>
+
+            <h3>Personal Traits They're Looking For:</h3>
+            <div class="key-points">
+                <ul>
+                    <li>Appreciates creativity AND analytical skills</li>
+                    <li>Enjoys challenging conventional thinking and introducing new ideas</li>
+                    <li>Efficient individual with pedagogical and guiding approach</li>
+                    <li>Enjoys fast pace and continuous changes</li>
+                    <li>Good listener and collaborator across time zones and cultures</li>
+                    <li>Project management skills and ability to prioritize</li>
+                </ul>
+            </div>
+
+            <div class="contact-info">
+                <h4>Contact Information:</h4>
+                <p><strong>HR/HSE Advisor:</strong> Bente G. Solbakken (+47 91395354)</p>
+                <p><strong>Head of Marketing:</strong> Ina Ellingsen (+47 99296114)</p>
+                <p><strong>Location:</strong> Asker, Norway (5 minutes walk from train station)</p>
+                <p><strong>Deadline:</strong> Please submit by 15 July</p>
+            </div>
+        </div>
+
+        <!-- Portfolio Section -->
+        <div class="content-section" id="portfolio">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Professional Portfolio</h2>
+            
+            <div class="highlight-box">
+                <h4>🎯 Jessie Macharia - Marketing Specialist</h4>
+                <p>Experienced B2B marketer with expertise in technical content creation, digital marketing, and brand management. Fast learner committed to mastering new technologies and industry knowledge.</p>
+            </div>
+
+            <h3>Core Competencies:</h3>
+            <div class="key-points">
+                <h4>Technical Skills:</h4>
+                <ul>
+                    <li><strong>CMS Platforms:</strong> Webflow (experienced), WordPress (fast learner)</li>
+                    <li><strong>Analytics:</strong> Google Analytics, Tableau AI, Power BI, Adobe Analytics</li>
+                    <li><strong>CRM Systems:</strong> HubSpot AI, Microsoft Dynamics (fast learner)</li>
+                    <li><strong>Design Tools:</strong> Adobe Creative Suite, Canva AI</li>
+                    <li><strong>AI/LLM Tools:</strong> Cursor, ChatGPT, Jasper, Copy.ai, Grammarly</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>Marketing Expertise:</h4>
+                <ul>
+                    <li><strong>Content Creation:</strong> Technical content, B2B marketing materials, brand guidelines</li>
+                    <li><strong>Campaign Management:</strong> Integrated marketing campaigns, lead generation</li>
+                    <li><strong>Analytics:</strong> Performance tracking, ROI analysis, data-driven optimization</li>
+                    <li><strong>International Marketing:</strong> Multi-language content, cultural sensitivity</li>
+                </ul>
+            </div>
+
+            <h3>Relevant Experience:</h3>
+            
+            <div class="key-points">
+                <h4>🍔 Smash Buddies - Restaurant Menu Design & Brand Enhancement</h4>
+                <p><strong>Graphic Design, Print Design, Brand Identity, Visual Communication</strong></p>
+                <p>Smash Buddies, en etablert burgerrestaurant i Askim, Norge, initierte et prosjekt for å revitalisere deres menyplakat. Det gamle designet fungerte funksjonelt men manglet den visuelle påvirkningen som får kunder til å stoppe, se og umiddelbart få lyst på en burger.</p>
+                <ul>
+                    <li><strong>Leveranser:</strong> Omfattende menyplakat med moderne visuelt design, print-annonse med høy kvalitet, bildebehandling av matfotografier, merkevareidentitetsutvikling</li>
+                    <li><strong>Resultater:</strong> Forbedret kundeopplevelse gjennom mer engasjerende visuell presentasjon, økt interesse i menyprodukter, styrket merkevareidentitet</li>
+                    <li><strong>Ferdigheter Demonstrert:</strong> Strategisk visuell designutvikling, merkevareidentitetsutvikling, omfattende visuell kommunikasjon</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>Technical Content Marketing:</h4>
+                <ul>
+                    <li>Created technical documentation for engineering solutions</li>
+                    <li>Developed B2B marketing materials for industrial sectors</li>
+                    <li>Experience with complex technical concepts and audience adaptation</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>AI Integration & Quality Control:</h4>
+                <ul>
+                    <li>Human oversight and revision of all AI-generated content</li>
+                    <li>Quality assurance processes for automated content</li>
+                    <li>Balanced use of AI tools with editorial control</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>Brand Management:</h4>
+                <ul>
+                    <li>Working within established brand guidelines</li>
+                    <li>Maintaining brand consistency across all channels</li>
+                    <li>Understanding of established company identities</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Research Section -->
+        <div class="content-section" id="research">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>4Subsea Company Research</h2>
+            
+            <div class="highlight-box">
+                <h4>🏢 About 4Subsea</h4>
+                <p><strong>Established:</strong> 2007 | <strong>Headquarters:</strong> Asker, Norway | <strong>Parent:</strong> Subsea7 Group</p>
+                <p><strong>Mission:</strong> "Leading provider of technology and services that help operators optimize energy production from subsea oil & gas fields and offshore wind farms."</p>
+            </div>
+
+            <h3>Global Presence:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Norway:</strong> Asker (HQ), Bergen, Kristiansand, Stavanger</li>
+                    <li><strong>Brazil:</strong> Rio de Janeiro</li>
+                    <li><strong>Poland:</strong> Kraków</li>
+                    <li><strong>Scotland:</strong> Aberdeen</li>
+                </ul>
+            </div>
+
+            <h3>Core Technology & Services:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Predictive Analytics:</strong> AI-powered failure prediction with human oversight</li>
+                    <li><strong>Real-time Monitoring:</strong> 24/7 asset performance tracking</li>
+                    <li><strong>Digital Twins:</strong> Virtual replicas for simulation and optimization</li>
+                    <li><strong>Energy Transition Support:</strong> Both traditional and renewable energy optimization</li>
+                </ul>
+            </div>
+
+            <h3>Company Culture:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Entrepreneurial Mindset:</strong> Maintained over 15+ years despite growth</li>
+                    <li><strong>Agile Approach:</strong> Fast-paced, continuous changes</li>
+                    <li><strong>Team Collaboration:</strong> Cross-functional teamwork with engineers and data scientists</li>
+                    <li><strong>Vision-Driven:</strong> Values-based decision making</li>
+                </ul>
+            </div>
+
+            <h3>Industry Focus:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Subsea Oil & Gas:</strong> Production optimization, asset lifetime extension</li>
+                    <li><strong>Offshore Wind:</strong> Rapidly growing sector with similar challenges</li>
+                    <li><strong>Data Analytics:</strong> Domain expertise combined with cutting-edge technology</li>
+                    <li><strong>Sustainability:</strong> Supporting energy transition and efficiency goals</li>
+                </ul>
+            </div>
+
+            <div class="success-metrics">
+                <div class="metric-card">
+                    <div class="metric-number">15+</div>
+                    <div class="metric-label">Years Experience</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">6</div>
+                    <div class="metric-label">Global Offices</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">25%</div>
+                    <div class="metric-label">Typical Efficiency Gains</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">40%</div>
+                    <div class="metric-label">Fewer Shutdowns</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marketing Materials Section -->
+        <div class="content-section" id="marketing-materials">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Sample Marketing Materials</h2>
+            
+            <div class="highlight-box">
+                <h4>📢 Content Strategy Focus Areas:</h4>
+                <ul>
+                    <li>Technical content marketing for B2B audience</li>
+                    <li>Energy transition support messaging</li>
+                    <li>Global market adaptation</li>
+                    <li>Human oversight emphasis in AI content</li>
+                </ul>
+            </div>
+
+            <h3>Social Media Content Examples:</h3>
+            <div class="video-script">
+                <h4>Technology Leadership Post:</h4>
+                <p>"🔋 Maximizing Energy Production Through Data-Driven Insights</p>
+                <p>Did you know that subsea assets often operate at only 60-70% of their potential capacity?</p>
+                <p>At 4Subsea, we're changing that. Our advanced analytics and digital services help operators:</p>
+                <p>✅ Increase production efficiency by up to 25%<br>
+                ✅ Reduce operational costs through predictive maintenance<br>
+                ✅ Extend asset lifetime with data-driven optimization"</p>
+            </div>
+
+            <div class="video-script">
+                <h4>Energy Transition Post:</h4>
+                <p>"🌱 Supporting the Energy Transition: Traditional & Renewable</p>
+                <p>4Subsea is proud to support both traditional energy optimization and renewable energy development through our innovative technology solutions.</p>
+                <p>Our expertise in subsea monitoring and predictive maintenance is now helping offshore wind operators optimize their operations in harsh marine environments."</p>
+            </div>
+
+            <h3>Email Newsletter Content:</h3>
+            <div class="key-points">
+                <h4>Featured Article Example:</h4>
+                <ul>
+                    <li>Case study: 25% production efficiency increase</li>
+                    <li>AI-powered failure prediction with human oversight</li>
+                    <li>Real-time monitoring of 50+ subsea assets</li>
+                    <li>40% reduction in unplanned shutdowns</li>
+                </ul>
+            </div>
+
+            <h3>Gated Content Ideas:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Technical Whitepaper:</strong> "Digital Transformation in Subsea Operations"</li>
+                    <li><strong>Energy Transition Guide:</strong> "Supporting Traditional and Renewable Energy"</li>
+                    <li><strong>Case Study:</strong> "North Sea Operator Success Story"</li>
+                    <li><strong>ROI Calculator:</strong> "Predictive Maintenance ROI Framework"</li>
+                </ul>
+            </div>
+
+            <h3>Event Marketing:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Conference Booth:</strong> Interactive demos, technology displays</li>
+                    <li><strong>Webinar Series:</strong> "Digital Twins in Subsea Operations"</li>
+                    <li><strong>Speaking Sessions:</strong> Industry thought leadership</li>
+                    <li><strong>Networking:</strong> One-on-one consultations</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Video Scripts Section -->
+        <div class="content-section" id="video-scripts">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Video Content Scripts</h2>
+            
+            <div class="highlight-box">
+                <h4>🎬 7 Video Concepts with Detailed Visual Specifications</h4>
+                <p>Each script includes specific camera movements, animations, graphics, and production notes for professional video production.</p>
+            </div>
+
+            <h3>Video 1: Company Overview (2-3 minutes)</h3>
+            <div class="video-script">
+                <h4>"Optimizing Offshore Energy Assets with Data-Driven Insights"</h4>
+                <div class="visual-note">
+                    <strong>Opening:</strong> Dramatic aerial drone shot starting high above ocean, slowly descending to reveal offshore platforms and wind farms. Golden hour lighting, cinematic atmosphere.
+                </div>
+                <div class="visual-note">
+                    <strong>Problem Statement:</strong> Quick cuts between aging infrastructure shots. Handheld documentary style. Split screen before/after comparison.
+                </div>
+                <div class="visual-note">
+                    <strong>Solution:</strong> Modern office environment with 4Subsea team. 3D visualization of data flow. Animated dashboard interface.
+                </div>
+            </div>
+
+            <h3>Video 2: Technology Demo (3-4 minutes)</h3>
+            <div class="video-script">
+                <h4>"4Subsea Platform: A Deep Dive into Predictive Analytics"</h4>
+                <div class="visual-note">
+                    <strong>Platform Overview:</strong> Screen recording with smooth navigation. Dashboard elements appear with fade-in animations. Color-coded status indicators.
+                </div>
+                <div class="visual-note">
+                    <strong>Real-time Monitoring:</strong> Split screen showing live data feeds and sensor locations. Picture-in-picture effects. Particle effects for data transmission.
+                </div>
+                <div class="visual-note">
+                    <strong>Predictive Analytics:</strong> 3D visualization of equipment with failure probability indicators. Timeline of predicted failures with confidence intervals.
+                </div>
+            </div>
+
+            <h3>Video 3: Customer Testimonial (1-2 minutes)</h3>
+            <div class="video-script">
+                <h4>"Customer Success: North Sea Operator Achieves 25% Efficiency Gains"</h4>
+                <div class="visual-note">
+                    <strong>Interview Setup:</strong> Professional three-point lighting. Shallow depth of field. Customer name/title as lower third graphics.
+                </div>
+                <div class="visual-note">
+                    <strong>Results:</strong> Animated success metrics with counting animations. Performance dashboard showing real-time monitoring.
+                </div>
+            </div>
+
+            <h3>Video 4: Energy Transition (2-3 minutes)</h3>
+            <div class="video-script">
+                <h4>"Supporting the Energy Transition: From Traditional to Renewable Energy"</h4>
+                <div class="visual-note">
+                    <strong>Opening:</strong> Dramatic aerial shot transitioning from platforms to wind farms. Split screen effect merging traditional and renewable energy.
+                </div>
+                <div class="visual-note">
+                    <strong>Global Impact:</strong> Animated globe with data flow lines connecting regions. Regional statistics and success stories.
+                </div>
+            </div>
+
+            <h3>Video 5: Technical Deep Dive (3-4 minutes)</h3>
+            <div class="video-script">
+                <h4>"The Science Behind Predictive Maintenance in Subsea Operations"</h4>
+                <div class="visual-note">
+                    <strong>Technical Environment:</strong> Laboratory setting with engineers. Computer screens showing algorithms. 3D models with technical specifications.
+                </div>
+                <div class="visual-note">
+                    <strong>Quality Assurance:</strong> Human oversight process. Validation workflows. Quality control procedures with approval/rejection indicators.
+                </div>
+            </div>
+
+            <h3>Video 6: Event Marketing (1-2 minutes)</h3>
+            <div class="video-script">
+                <h4>"Join Us at Offshore Technology Conference 2024"</h4>
+                <div class="visual-note">
+                    <strong>Booth Highlights:</strong> Interactive demos and technology displays. Attendees engaging with team members. Animated booth layout.
+                </div>
+                <div class="visual-note">
+                    <strong>Networking:</strong> One-on-one consultations. Professional interactions. Team member profiles with expertise areas.
+                </div>
+            </div>
+
+            <h3>Video 7: Webinar Promotion (1 minute)</h3>
+            <div class="video-script">
+                <h4>"Digital Twins: The Future of Subsea Asset Management"</h4>
+                <div class="visual-note">
+                    <strong>Digital Twin Visualization:</strong> Virtual replica with real-time data overlay. Futuristic, high-tech aesthetic. 3D model with predictive capabilities.
+                </div>
+                <div class="visual-note">
+                    <strong>Registration:</strong> Easy sign-up process. Countdown timer. Calendar integration and reminder options.
+                </div>
+            </div>
+
+            <h3>Production Specifications:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Resolution:</strong> 1920x1080 (Full HD) minimum</li>
+                    <li><strong>Brand Colors:</strong> #003366 (primary blue), #0066CC (accent blue)</li>
+                    <li><strong>Typography:</strong> Arial Bold for headlines, clean professional fonts</li>
+                    <li><strong>Localization:</strong> Subtitles in English, Norwegian, Portuguese, Polish</li>
+                    <li><strong>Distribution:</strong> Website, social media, email marketing, events</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Preparation Summary Section -->
+        <div class="content-section" id="preparation-summary">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Complete Preparation Summary</h2>
+            
+            <div class="highlight-box">
+                <h4>🎯 Interview Preparation Overview</h4>
+                <p>Comprehensive preparation covering all aspects of the 4Subsea Marketing Specialist position, including technical skills, company research, and marketing materials.</p>
+            </div>
+
+            <h3>Key Preparation Areas:</h3>
+            <div class="key-points">
+                <h4>1. Technical Skills & Learning Commitment</h4>
+                <ul>
+                    <li>Emphasize fast learning ability and free time commitment</li>
+                    <li>WordPress, Google Analytics, CRM systems experience</li>
+                    <li>AI tools with human oversight and quality control</li>
+                    <li>Technical content creation for industrial sectors</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>2. Company Understanding</h4>
+                <ul>
+                    <li>15+ years of subsea technology expertise</li>
+                    <li>Global presence in Norway, Brazil, Poland, Scotland</li>
+                    <li>Energy transition support (traditional + renewable)</li>
+                    <li>Entrepreneurial culture with agile mindset</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>3. Marketing Materials Portfolio</h4>
+                <ul>
+                    <li>Social media content for B2B audience</li>
+                    <li>Email newsletter templates and sequences</li>
+                    <li>Gated content and lead generation materials</li>
+                    <li>Event marketing and webinar promotion</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h4>4. Video Content Strategy</h4>
+                <ul>
+                    <li>7 detailed video scripts with visual specifications</li>
+                    <li>Technical demos and customer testimonials</li>
+                    <li>Energy transition and sustainability focus</li>
+                    <li>Professional production standards</li>
+                </ul>
+            </div>
+
+            <h3>Success Metrics to Highlight:</h3>
+            <div class="success-metrics">
+                <div class="metric-card">
+                    <div class="metric-number">25%</div>
+                    <div class="metric-label">Production Efficiency</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">18%</div>
+                    <div class="metric-label">Cost Reduction</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">40%</div>
+                    <div class="metric-label">Fewer Shutdowns</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">50+</div>
+                    <div class="metric-label">Assets Monitored</div>
+                </div>
+            </div>
+
+            <h3>Interview Strategy:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Opening:</strong> Express enthusiasm for the "geeky" environment and technology focus</li>
+                    <li><strong>Technical Questions:</strong> Emphasize learning ability and relevant experience</li>
+                    <li><strong>Industry Knowledge:</strong> Show commitment to learning subsea and offshore wind</li>
+                    <li><strong>AI/Content:</strong> Stress human oversight and quality control</li>
+                    <li><strong>Culture Fit:</strong> Highlight adaptability and collaborative approach</li>
+                    <li><strong>Closing:</strong> Reiterate interest in contributing to their growth and success</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Quick Reference Section -->
+        <div class="content-section" id="quick-reference">
+            <button class="back-btn" onclick="showNav()">← Back to Menu</button>
+            <h2>Quick Reference Guide</h2>
+            
+            <div class="highlight-box">
+                <h4>⚡ Key Facts at a Glance</h4>
+                <p>Essential information for quick recall during interviews and conversations.</p>
+            </div>
+
+            <h3>Company Quick Facts:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Founded:</strong> 2007</li>
+                    <li><strong>Headquarters:</strong> Asker, Norway</li>
+                    <li><strong>Parent Company:</strong> Subsea7 Group</li>
+                    <li><strong>Global Offices:</strong> 6 locations (Norway, Brazil, Poland, Scotland)</li>
+                    <li><strong>Industry Focus:</strong> Subsea oil & gas + offshore wind</li>
+                    <li><strong>Key Technology:</strong> Predictive analytics, real-time monitoring, digital twins</li>
+                </ul>
+            </div>
+
+            <h3>Job Requirements Summary:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Education:</strong> BS/MS in marketing or related field</li>
+                    <li><strong>Experience:</strong> 3-5 years B2B marketing</li>
+                    <li><strong>Technical Skills:</strong> WordPress, Google Analytics, CRM systems</li>
+                    <li><strong>Languages:</strong> English (required), Norwegian (plus)</li>
+                    <li><strong>Location:</strong> Asker, Norway (5 min from train station)</li>
+                    <li><strong>Deadline:</strong> 15 July</li>
+                </ul>
+            </div>
+
+            <h3>Your Key Strengths:</h3>
+            <div class="key-points">
+                <ul>
+                    <li><strong>Fast Learning:</strong> Will master new systems in free time</li>
+                    <li><strong>Technical Content:</strong> Experience with industrial/engineering sectors</li>
+                    <li><strong>AI Integration:</strong> Human oversight and quality control</li>
+                    <li><strong>Brand Management:</strong> Working within established guidelines</li>
+                    <li><strong>International:</strong> Multi-language content and cultural sensitivity</li>
+                    <li><strong>Analytics:</strong> Data-driven decision making experience</li>
+                </ul>
+            </div>
+
+            <h3>Success Metrics to Mention:</h3>
+            <div class="success-metrics">
+                <div class="metric-card">
+                    <div class="metric-number">25%</div>
+                    <div class="metric-label">Efficiency Gain</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">18%</div>
+                    <div class="metric-label">Cost Reduction</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">40%</div>
+                    <div class="metric-label">Fewer Shutdowns</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-number">50+</div>
+                    <div class="metric-label">Assets Monitored</div>
+                </div>
+            </div>
+
+            <h3>Key Talking Points:</h3>
+            <div class="key-points">
+                <h4>Always Emphasize:</h4>
+                <ul>
+                    <li>"I'm excited about the geeky environment with engineers and data scientists"</li>
+                    <li>"I will spend my free time mastering WordPress, CRM systems, and industry knowledge"</li>
+                    <li>"I ensure human oversight and quality control of all AI-generated content"</li>
+                    <li>"I understand the importance of working within established brand guidelines"</li>
+                    <li>"I have experience creating technical content for industrial sectors"</li>
+                    <li>"I can support both traditional and renewable energy operations"</li>
+                </ul>
+            </div>
+
+            <div class="contact-info">
+                <h4>Interview Contacts:</h4>
+                <p><strong>HR/HSE Advisor:</strong> Bente G. Solbakken (+47 91395354)</p>
+                <p><strong>Head of Marketing:</strong> Ina Ellingsen (+47 99296114)</p>
+                <p><strong>Location:</strong> Asker, Norway</p>
+                <p><strong>Application Deadline:</strong> 15 July</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // Hide navigation grid
+            document.getElementById('navGrid').style.display = 'none';
+            
+            // Hide all content sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+        }
+
+        function showNav() {
+            // Show navigation grid
+            document.getElementById('navGrid').style.display = 'grid';
+            
+            // Hide all content sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+        }
+    </script>
+</body>
+</html> 
