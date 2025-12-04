@@ -3,54 +3,44 @@ description: Automatisk oppdatering av planlagte søknader til Under planlegging
 globs: 02_Søknader/Planlagte_Søknader/*.md
 ---
 
-### 🟡 Synkronisering av Planlagte Søknader (KRITISK - ALLTID UTFØR)
+### 🟡 Synkronisering av Planlagte Søknader (KRITISK)
 
-**VIKTIG:** Alt som ligger i `02_Søknader/Planlagte_Søknader/` skal ALLTID vises:
-- I `00_Oversikt/Søknadsoversikt.md` under seksjonen **"🟡 Under planlegging (Ikke startet)"**
-- I appen under **"Planlagt"**-kolonnen i pipelinen
+**VIKTIG:** `Planlagte_Søknader/` inneholder KUN ideer du IKKE har startet på ennå.
 
-Når brukeren legger til en ny `.md`-fil i `02_Søknader/Planlagte_Søknader/`, **SKAL du ALLTID og UMIDDELBART** oppdatere `Søknadsoversikt.md`.
+**Når noe er i `Planlagte_Søknader/`:**
+- Vises i `Søknadsoversikt.md` under **"🟡 Under planlegging (Ikke startet)"**
+- Vises i appen under **"Planlagt"**-kolonnen
 
-**Dine handlinger skal være:**
+**Når brukeren legger til en ny `.md`-fil i `Planlagte_Søknader/`:**
 
 1.  **Identifiser bedriften:**
     *   Bruk filnavnet (uten .md) som bedriftsnavn.
     *   Eksempel: `E-Wheels Norge.md` → bedrift = **E-Wheels Norge**
 
 2.  **Trekk ut info fra filen:**
-    *   Stilling (første overskrift)
-    *   Frist
-    *   Ansettelsesform (Fast/Engasjement/Deltid)
-    *   Sted
-    *   Kontaktperson + tittel + kontaktinfo
-    *   Link til utlysning
+    *   Stilling, Frist, Ansettelsesform, Sted, Kontaktperson, Link
 
 3.  **Oppdater `Søknadsoversikt.md`:**
-    *   Gå til seksjonen `## 🟡 Under planlegging (Ikke startet)`.
-    *   Legg til en ny rad med all tilgjengelig info.
-    *   Formatet skal være:
-    ```
-    | **Bedrift** | Stilling | Form | % | Sted | Frist | Kontaktperson | Tittel | Kontaktinfo | Notater | Lenke |
-    ```
+    *   Legg til rad i `## 🟡 Under planlegging (Ikke startet)`.
 
-4.  **Når søknaden starter (flyttes til Aktive Prosesser):**
-    *   Når bedriftsmappen i `Alle selskaper/` får dokumenter, flyttes raden fra "Under planlegging" til "Aktive Prosesser" med status `📝 Under arbeid`.
-    *   Først når BEGGE PDF-er (CV + Søknadsbrev) er på plass, endres status til `✉️ Sendt`.
+**Når arbeidet starter (bruker ber om å starte søknad):**
+1.  Opprett mappe i `Alle selskaper/[Bedrift]/`
+2.  Kopier utlysningen som `Utlysning.md` i den nye mappen
+3.  **SLETT filen fra `Planlagte_Søknader/`** ← VIKTIG!
+4.  Flytt raden i `Søknadsoversikt.md` fra "Under planlegging" til "Aktive Prosesser" med status `📝 Under arbeid`
 
-**Eksempel på flyt:**
+**Flyt-diagram:**
 ```
-1. Ny fil: Planlagte_Søknader/Spotify.md
-   → Legg til i "Under planlegging"-tabellen
-   → Vises som "Planlagt" i appen
-
-2. Mappe opprettes: Alle selskaper/Spotify/
-   → Flytt til "Aktive Prosesser" med 📝 Under arbeid
-   → Vises som "Sendt" i appen (men ikke ferdig)
-
-3. Begge PDF-er lastes opp
-   → Status endres til ✉️ Sendt + Dato sendt fylles
-   → Nedtelling starter
+Planlagte_Søknader/Bedrift.md
+        ↓ (bruker starter arbeid)
+    [SLETT filen]
+        ↓
+Alle selskaper/Bedrift/Utlysning.md
 ```
 
 **Hvorfor?**
-For å ha én kilde til sannhet: `Planlagte_Søknader/` = ideer du vurderer, `Alle selskaper/` = aktive prosesser. Appen og oversikten skal alltid speile dette.
+Én kilde til sannhet:
+- `Planlagte_Søknader/` = kun ideer du vurderer
+- `Alle selskaper/` = alt du har begynt å jobbe med
+
+Filer skal ALDRI være begge steder samtidig.

@@ -1,25 +1,35 @@
 ---
-description: Automatisk oppdatering av søknadsoversikt (Legg til/Fjern) ved endringer i mapper
-globs: 02_Søknader/Alle selskaper/*, 02_Søknader/All Companies/*
+description: Automatisk oppdatering av søknadsoversikt ved endringer i mapper
+globs: 02_Søknader/Alle selskaper/*, 02_Søknader/Planlagte_Søknader/*
 ---
 
 ### 🔄 Synkronisering av Søknadsoversikt (Full Sync)
 
-Når det skjer endringer i mappestrukturen under `02_Søknader/Alle selskaper/` (nye mapper eller slettede mapper), skal du oppdatere `00_Oversikt/Søknadsoversikt.md` slik at den speiler virkeligheten.
+`Søknadsoversikt.md` skal ALLTID speile mappestrukturen:
 
-**Dine handlinger skal være:**
+**Kilde → Seksjon i Søknadsoversikt:**
+- `Planlagte_Søknader/*.md` → "🟡 Under planlegging (Ikke startet)"
+- `Alle selskaper/*/` → "🟢 Aktive Prosesser (Sendt / I dialog)"
 
-1.  **Identifiser Endring:**
-    *   Sjekk hvilke mapper som faktisk finnes i `02_Søknader/Alle selskaper/`.
+**Dine handlinger ved endringer:**
 
-2.  **Legg til Nye (HVIS Mappe finnes, men IKKE i tabell):**
-    *   Hvis en mappe finnes, men bedriften mangler i `Søknadsoversikt.md` (under Aktive Prosesser):
-    *   Legg til en ny rad i tabellen: `| **[Bedriftsnavn]** | - | ... | 📝 Under arbeid | ... |`
+1.  **Ny fil i `Planlagte_Søknader/`:**
+    *   Legg til i "Under planlegging"-tabellen.
 
-3.  **Fjern Slettede (HVIS i tabell, men Mappe mangler):**
-    *   Gå gjennom radene i `## 🟢 Aktive Prosesser`.
-    *   For hver bedrift i listen, sjekk om mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]` eksisterer.
-    *   **Hvis mappen er borte:** Slett raden fra `Søknadsoversikt.md`.
+2.  **Ny mappe i `Alle selskaper/`:**
+    *   Legg til i "Aktive Prosesser" med `📝 Under arbeid`.
+    *   Hvis bedriften var i "Under planlegging": FLYTT raden (ikke dupliser).
+
+3.  **Fil slettet fra `Planlagte_Søknader/`:**
+    *   Fjern fra "Under planlegging" (med mindre den nå er i Aktive Prosesser).
+
+4.  **Mappe slettet fra `Alle selskaper/`:**
+    *   Fjern fra "Aktive Prosesser".
+    *   Vurder å flytte til "🔴 Avsluttet / Arkivert".
+
+**Regler:**
+- En bedrift skal ALDRI være i både "Under planlegging" OG "Aktive Prosesser" samtidig.
+- `Planlagte_Søknader/` og `Alle selskaper/` skal ALDRI ha samme bedrift.
 
 **Hvorfor?**
-For å sikre at oversikten alltid er 1:1 med filsystemet. Hvis brukeren sletter en mappe, betyr det at prosessen er avbrutt eller feil, og den skal vekk fra listen.
+For å sikre at oversikten alltid er 1:1 med filsystemet - én kilde til sannhet.
