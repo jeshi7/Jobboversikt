@@ -29,6 +29,7 @@ export interface Application {
   contact?: string;
   applyTo?: string;
   listingUrl?: string;
+  angle?: string;
 }
 
 const ROOT = process.cwd();
@@ -72,6 +73,7 @@ export function loadApplications(): Application[] {
     let contact: string | undefined;
     let applyTo: string | undefined;
     let listingUrl: string | undefined;
+    let angle: string | undefined;
     const postingPath = path.join(full, "Utlysning.md");
     if (fs.existsSync(postingPath)) {
       try {
@@ -150,8 +152,30 @@ export function loadApplications(): Application[] {
           ? firstParagraph.replace(/[*`]/g, "").trim()
           : undefined;
       }
+
+      // Finn "Din vinkel"-seksjonen
+      const angleIdx = lowerLines.findIndex((l) =>
+        l.includes("din vinkel")
+      );
+      if (angleIdx !== -1) {
+        const angleParts: string[] = [];
+        // Start fra linjen etter "Din vinkel"-overskriften
+        const startIdx = lowerLines[angleIdx].includes("**") ? angleIdx + 1 : angleIdx + 1;
+        for (let i = startIdx; i < lines.length; i++) {
+          const rawLine = lines[i];
+          const trimmed = rawLine.trim();
+          if (!trimmed) continue;
+          if (trimmed.startsWith("## ")) break; // neste seksjon
+          if (trimmed.startsWith("Link:")) break; // slutt på innhold
+          angleParts.push(trimmed);
+        }
+        if (angleParts.length > 0) {
+          angle = angleParts.join("\n").trim();
+        }
+      }
       } catch {
         jobSnippet = undefined;
+        angle = undefined;
       }
     }
 
@@ -209,7 +233,8 @@ export function loadApplications(): Application[] {
       location,
       contact,
       applyTo,
-      listingUrl
+      listingUrl,
+      angle
     });
   }
 
@@ -237,6 +262,7 @@ export function loadApplications(): Application[] {
      let contact: string | undefined;
      let applyTo: string | undefined;
      let listingUrl: string | undefined;
+     let angle: string | undefined;
 
      try {
        const raw = fs.readFileSync(full, "utf8");
@@ -309,8 +335,30 @@ export function loadApplications(): Application[] {
            ? firstParagraph.replace(/[*`]/g, "").trim()
            : undefined;
        }
+
+       // Finn "Din vinkel"-seksjonen
+       const angleIdx = lowerLines.findIndex((l) =>
+         l.includes("din vinkel")
+       );
+       if (angleIdx !== -1) {
+         const angleParts: string[] = [];
+         // Start fra linjen etter "Din vinkel"-overskriften
+         const startIdx = lowerLines[angleIdx].includes("**") ? angleIdx + 1 : angleIdx + 1;
+         for (let i = startIdx; i < lines.length; i++) {
+           const rawLine = lines[i];
+           const trimmed = rawLine.trim();
+           if (!trimmed) continue;
+           if (trimmed.startsWith("## ")) break; // neste seksjon
+           if (trimmed.startsWith("Link:")) break; // slutt på innhold
+           angleParts.push(trimmed);
+         }
+         if (angleParts.length > 0) {
+           angle = angleParts.join("\n").trim();
+         }
+       }
      } catch {
        jobSnippet = undefined;
+       angle = undefined;
      }
 
     all.push({
@@ -334,7 +382,8 @@ export function loadApplications(): Application[] {
       location,
       contact,
       applyTo,
-      listingUrl
+      listingUrl,
+      angle
     });
   }
 

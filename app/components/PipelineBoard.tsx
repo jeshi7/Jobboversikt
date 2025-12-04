@@ -107,6 +107,20 @@ export function PipelineBoard({ planned, sent, interview }: PipelineBoardProps) 
                 </BodyShort>
               </div>
 
+              {open.app.angle && (
+                <div className="space-y-1">
+                  <Heading level="3" size="xsmall">
+                    Din vinkel
+                  </Heading>
+                  <BodyShort
+                    size="small"
+                    className="whitespace-pre-wrap text-slate-700"
+                  >
+                    {open.app.angle}
+                  </BodyShort>
+                </div>
+              )}
+
               {(open.app.listingUrl ||
                 open.app.applyTo ||
                 open.app.contact) && (

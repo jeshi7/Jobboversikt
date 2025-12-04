@@ -44,5 +44,8 @@ Hos Ditio kommer du tett på brukerne og får en sentral rolle i hele designløp
 **Om arbeidsgiveren:**
 Ditio består av to applikasjoner: Ditio Core (produksjonsoppfølging og datafangst) og Ditio Flow (oppfølging av massetransport). De samarbeider tett med kunder som bygger kritisk infrastruktur gjennom store vei-, bro- og tunnelprosjekter. Ved hjelp av sosiale funksjoner og smarte algoritmer sørger de for at appene er både brukervennlige og verdifulle.
 
+**Din vinkel:**
+Trekk frem pragmatisk tilnærming til innsikt og raske iterasjoner - matcher deres fokus på quick wins. Vektlegg erfaring med designsystemer (Aksel) og UU, siden det er bonuspoeng. Emfaser tverrfaglig samarbeid og hvordan du snakker med utviklere om komponenter. Vis at du forstår komplekse B2B-systemer gjennom erfaring med Aksel, Sanity og Opera. Kort sagt: pragmatisk innsikt + designsystemer + tverrfaglig samarbeid = perfekt match for Ditio.
+
 Link: https://www.finn.no/job/ad/439278404
 

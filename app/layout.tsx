@@ -11,6 +11,7 @@ const navItems = [
   { href: "/applications", label: "Søknader" },
   { href: "/resources", label: "Ressurser" },
   { href: "/kompetanse", label: "Kompetanse" },
+  { href: "/tips", label: "Tips" },
   { href: "/stats", label: "Tall" }
 ];
 
