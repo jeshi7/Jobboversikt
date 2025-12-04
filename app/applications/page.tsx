@@ -70,10 +70,7 @@ export default function ApplicationsPage() {
                       <StatusPill status={app.status} />
                     </td>
                     <td className="px-4 py-3 align-top text-xs text-slate-500">
-                      {app.type === "planlagt" && 
-                       app.resources.filter(r => !r.name.toLowerCase().includes("utlysning")).length === 0
-                        ? "Planlagt idé / notat"
-                        : hasBothPdfs(app.resources)
+                      {hasBothPdfs(app.resources)
                         ? "Sendt søknad"
                         : "Forbereder"}
                     </td>
