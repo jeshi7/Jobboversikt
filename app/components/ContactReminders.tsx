@@ -84,7 +84,7 @@ export function ContactReminders({ reminders }: Props) {
   return (
     <>
       <ul className="space-y-2 text-sm">
-        {reminders.slice(0, 5).map((reminder) => (
+        {reminders.map((reminder) => (
           <li
             key={reminder.id}
             className="flex items-center justify-between rounded-xl border border-borderSoft/70 bg-slate-50 px-3 py-2"
