@@ -1,12 +1,16 @@
 import { loadApplications, summariseApplications } from "../lib/applications";
 import { loadOverviewRows } from "../lib/overview";
+import { loadDreamlist, groupByCategory } from "../lib/dreamlist";
 import { PipelineBoard } from "./components/PipelineBoard";
 import { ContactReminders } from "./components/ContactReminders";
+import { DreamList } from "./components/DreamList";
 import { Heading, BodyShort, Panel, Button } from "@navikt/ds-react";
 
 export default function DashboardPage() {
   const apps = loadApplications();
   const summary = summariseApplications(apps);
+  const dreamCompanies = loadDreamlist();
+  const groupedDreams = groupByCategory(dreamCompanies);
 
   const sentApps = apps.filter((a) => a.status === "sendt");
   const interviewApps = apps.filter((a) => a.status === "intervju");
@@ -123,6 +127,22 @@ export default function DashboardPage() {
             </BodyShort>
           </div>
           <ContactReminders reminders={contactReminders} />
+        </Panel>
+      </section>
+
+      {/* Dream list section */}
+      <section>
+        <Panel border>
+          <div className="mb-4">
+            <Heading level="2" size="small">
+              Drømmelista
+            </Heading>
+            <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
+              Selskaper du drømmer om å jobbe hos. Klikk på et selskap for å se
+              din vinkel og tips.
+            </BodyShort>
+          </div>
+          <DreamList companies={dreamCompanies} grouped={groupedDreams} />
         </Panel>
       </section>
     </div>
