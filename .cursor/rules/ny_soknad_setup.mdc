@@ -3,23 +3,28 @@ description: Automatisk oppsett av bedriftsmappe og kopiering av utlysning ved n
 globs: 02_Søknader/Planlagte_Søknader/*.md
 ---
 
-### 🚀 Oppsett av Ny Søknad
+### 🚀 Oppsett av Ny Søknad (KRITISK - ALLTID UTFØR)
 
-Når en ny `.md`-fil (utlysning) opprettes i `02_Søknader/Planlagte_Søknader/`, skal du utføre følgende "oppstarts-rituale" for å gjøre alt klart til søknadsskriving.
+Når en ny `.md`-fil (utlysning) opprettes i `02_Søknader/Planlagte_Søknader/`, **SKAL du ALLTID og UMIDDELBART** utføre følgende handlinger. Dette er ikke valgfritt.
 
 **Dine handlinger skal være:**
 
-1.  **Standardiser Filnavn (hvis mulig):**
-    *   Prøv å sikre at filnavnet kun er bedriftsnavnet (f.eks. `Viking.md` istedenfor `Viking_Digital_Designer.md`). *Hvis brukeren ber om å lagre en stilling, bruk kun bedriftsnavnet som filnavn.*
+1.  **Standardiser Filnavn:**
+    *   Filnavnet skal kun være bedriftsnavnet (f.eks. `E-Wheels Norge.md`, ikke `E-Wheels_Content_Creator.md`).
 
-2.  **Opprett Bedriftsmappe:**
+2.  **Opprett Bedriftsmappe i `Alle selskaper`:**
     *   Bruk filnavnet (uten .md) som bedriftsnavn.
-    *   Sjekk om mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]/` finnes.
-    *   Hvis ikke, opprett den.
+    *   **ALLTID** opprett mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]/` hvis den ikke finnes.
+    *   Eksempel: `E-Wheels Norge.md` → opprett `02_Søknader/Alle selskaper/E-Wheels Norge/`
 
-3.  **Kopier Utlysning:**
-    *   Kopier `.md`-filen fra `02_Søknader/Planlagte_Søknader/` inn i den nye mappen `02_Søknader/Alle selskaper/[Bedriftsnavn]/`.
-    *   Gi filen navnet `Utlysning.md` inne i den nye mappen (slik at vi har en standard referanse).
+3.  **Kopier Utlysning til bedriftsmappen:**
+    *   Kopier innholdet fra `.md`-filen i `Planlagte_Søknader/` til en ny fil `Utlysning.md` inne i den nye mappen.
+    *   Eksempel: Innholdet fra `Planlagte_Søknader/E-Wheels Norge.md` → `Alle selskaper/E-Wheels Norge/Utlysning.md`
+
+4.  **Bekreft til brukeren:**
+    *   Fortell brukeren at mappen er opprettet og klar for CV/søknadsarbeid.
+
+**VIKTIG:** Disse stegene skal utføres I SAMME OPERASJON som når utlysningen lagres. Ikke vent på at brukeren ber om det.
 
 **Hvorfor?**
 For å umiddelbart klargjøre arbeidsområdet i `Alle selskaper` slik at brukeren kan begynne å produsere innhold (CV/Søknad) med en gang, uten å manuelt måtte opprette mapper og flytte tekst.
