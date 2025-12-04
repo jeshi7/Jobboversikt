@@ -44,3 +44,6 @@ Konkurransedyktig lønn etter erfaring og kompetanse.
 **Arbeidssted**
 
 Enebakkveien 443, 1290 Oslo.
+
+**Din vinkel:**
+Emfaser presisjon og kvalitetskontroll - rollen handler om å "levere presis kvalitet hver gang". Trekk frem at du kan jobbe selvstendig og prioritere ved produksjonstopper. Vektlegg at du forstår hele prosessen fra fil til ferdig produkt. Vis at du kan kommunisere tydelig og jobbe sammen med lager og logistikk. Kort sagt: presisjon + kvalitetskontroll + selvstendighet + prosessforståelse.

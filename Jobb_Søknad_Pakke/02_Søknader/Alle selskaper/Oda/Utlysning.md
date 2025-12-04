@@ -27,5 +27,8 @@ We’re reviewing applications (and portfolios) as they come in, so don’t wait
 * **Design customer-facing solutions and the back-end tooling to support them:** Create digital experiences for web and mobile that help make life easier for Scandinavian families—ordering weekly groceries, discovering new products, managing accounts, and getting deliveries smoothly.
 * **Run user research and usability testing:** Conduct customer interviews, usability tests, and gather feedback to inform and validate your designs.
 * **Create clear and usable interfaces:** Design user interfaces within our design system, ensuring clarity, usability, and consistency across platforms.
-* **Collaborate across disciplines:** Work c...
+* **Collaborate across disciplines:** Work closely with product managers, developers, and other designers to bring ideas to life.
+
+**Din vinkel:**
+Trekk frem prosjektledelse og eierskap fra start til slutt - de trenger noen som kan "ta eierskap til produktprosessen fra innsikt til testing". Vektlegg designsystemer og hvordan du jobber innenfor et system, siden de har et eget designsystem. Emfaser tverrfaglig samarbeid med utviklere og datafolk. Vis at du kan drive brukerresearch og usability testing. Kort sagt: prosjektledelse + designsystemer + tverrfaglig samarbeid + brukerresearch.
 

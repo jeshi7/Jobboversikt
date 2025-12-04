@@ -38,5 +38,6 @@ Scoopr ser etter en digital markedsfører som tør å tenke annerledes. En råta
 **Om arbeidsgiveren:**
 Scoopr AS er en norsk aktør innen personlig finans som støtter privatpersoner i å håndtere og forbedre sin økonomiske situasjon. Målet er at flere skal føle kontroll, trygghet og ro i egen økonomi.
 
-Link: https://www.finn.no/job/ad/440217170
+**Din vinkel:**
+Emfaser kommersielt fokus og hvordan kreativitet skaper konverteringer - de vil ha noen som "tør tenke annerledes" men alltid med mål om effekt. Trekk frem erfaring med å utvikle konsepter fra idé til leveranse, siden de leter etter noen som kan "forme historier og bygge tydelige konsepter". Vektlegg prosjektledelse og struktur - de trenger noen som håndterer flere prosjekter samtidig. Vis at du kan analysere resultater og jobbe med KPI-er. Kort sagt: kreativitet med kommersielt fokus + konseptutvikling + prosjektledelse.
 

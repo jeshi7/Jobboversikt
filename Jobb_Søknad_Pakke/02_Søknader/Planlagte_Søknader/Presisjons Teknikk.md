@@ -40,5 +40,6 @@ Som markedsfører jobber du strategisk for å styrke selskapets digitale synligh
 **Om arbeidsgiveren:**
 Presisjons Teknikk AS er et lite selskap i vekst som leverer avansert test- og måleutstyr. De har vært i bransjen siden 1995 og tilbyr både salg, utleie, reparasjon/kalibrering, kurs og opplæring. Selskapet består av 6 ansatte og har kontor sentralt på Skøyen i Oslo.
 
-Link: https://www.finn.no/job/ad/439872549
+**Din vinkel:**
+Emfaser at du kan jobbe selvstendig og ta ansvar - de er et lite team som trenger noen som kan "påvirke". Trekk frem SEO og digital annonsering, siden det er hovedoppgavene. Vektlegg at du kan produsere variert innhold (artikler, nyhetsbrev, produktark) og analysere resultater. Vis at du trives med å jobbe tett med leder og koordinere med byråer. Kort sagt: selvstendighet + SEO + innholdsproduksjon + analyse.
 

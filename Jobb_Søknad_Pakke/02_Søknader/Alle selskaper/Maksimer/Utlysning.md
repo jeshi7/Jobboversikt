@@ -42,5 +42,8 @@ Som Digital Designer jobber du med alt fra kjøpsreiser og brukeropplevelser til
 **Om arbeidsgiveren:**
 Maksimer ble etablert i 2009 og er et ledende e-handelsbyrå i Norden. Med over 70 eksperter i Norge, Sverige og Serbia skaper de nettbutikker som leverer resultater. Kontorer i Bergen, Oslo, Bryne, Førde, Göteborg, Stockholm, Beograd og Litauen.
 
+**Din vinkel:**
+Trekk frem erfaring med e-handel og hvordan design påvirker konvertering - de bygger nettbutikker som "selger og skaper lojalitet". Vektlegg designsystemer og komponentbibliotek i Figma, siden de spesifikt nevner det. Emfaser tverrfaglig samarbeid med rådgivere og utviklere. Vis at du kan oversette merkevarestrategi til visuelle konsepter - de trenger noen som kan "videreutvikle og oversette merkevarer". Kort sagt: e-handel + designsystemer + merkevareoversettelse + tverrfaglig samarbeid.
+
 Link: https://www.finn.no/job/ad/435418490
 

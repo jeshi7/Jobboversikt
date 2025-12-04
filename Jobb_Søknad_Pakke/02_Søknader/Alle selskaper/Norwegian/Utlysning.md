@@ -70,3 +70,6 @@ Here's what you can look forward to:
 * Possibility to participate in activities run by Norwegian SportsClub
 * Opportunity to join our share saving plan
 
+**Din vinkel:**
+Fokuser på visuell storytelling og at du "elsker å utføre, ikke bare idémyldre" - de leter etter noen som kan levere fra idé til ferdig innhold. Trekk frem erfaring med foto, video og redigering (Premiere Pro, After Effects). Vektlegg SEO og publisering, siden det er en del av rollen. Emfaser at du kan jobbe selvstendig men også samarbeide tett med Content Marketing Manager. Kort sagt: visuell storytelling + produksjon + SEO + samarbeid.
+

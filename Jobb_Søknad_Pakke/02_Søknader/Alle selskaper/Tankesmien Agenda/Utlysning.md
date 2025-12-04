@@ -33,5 +33,8 @@ Tankesmien Agenda etterstreber å være en arbeidsplass med et spennende fagmilj
 **Om arbeidsgiveren:**
 Tankesmien Agenda er en partipolitisk uavhengig tenketank for det moderne sentrum-venstre som jobber med politisk analyse og politikkutvikling, er til stede i det offentlige ordskiftet og formidler kunnskap om politiske saker og prosesser.
 
+**Din vinkel:**
+Emfaser at du kan ha mange baller i luften samtidig - de leter etter noen som er "selvstendig og som liker og evner å ha mange baller i luften". Trekk frem erfaring med video, podkast og sosiale medier. Vektlegg at du kan optimalisere innhold basert på innsikt og analyser. Vis at du kan være sparringspartner og bidra med strategi. Kort sagt: multitasking + innholdsproduksjon + analyse + strategisk tenkning.
+
 Link: https://www.finn.no/job/ad/438239494
 

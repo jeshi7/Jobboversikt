@@ -32,5 +32,8 @@ Du er en allround-produksjonsprofil som kan grafisk design, art direction, video
 *   Faglig utvikling og rom for å vokse
 *   Et miljø hvor alle bidrar til å gjøre markedsføring enkelt – for kundene og for hverandre
 
+**Din vinkel:**
+Emfaser allround-profilen - de trenger noen som kan "grafisk design, art direction, videoredigering og web". Trekk frem at du kan ta ansvar for hele prosessen fra idé til leveranse. Vektlegg time management og at du alltid leverer til deadline. Vis at du trives med høyt tempo og mange prosjekter samtidig. Kort sagt: allround-produksjon + prosjektledelse + time management + høyt tempo.
+
 Link: https://www.finn.no/job/ad/437144543
 

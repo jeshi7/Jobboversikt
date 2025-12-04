@@ -29,5 +29,8 @@ De leter etter en tekstforfatter som kan ta innholdet til neste nivå. Du blir e
 **Om arbeidsgiveren:**
 E-Wheels Norge AS er den største aktøren i markedet på el-sparkesykler og el-sykler i Norge, med fotfeste i Norge, Sverige og Sveits. Suksessen er bygget på kvalitet, innovasjon og produkter som passer alle - fra pendleren i storbyen til de eventyrlystne.
 
+**Din vinkel:**
+Fokuser på SEO og konvertering - de trenger noen som forstår hva som får folk til å klikke "Kjøp nå". Trekk frem erfaring med dataanalyse og hvordan du bruker innsikt til å optimalisere innhold. Vektlegg AI-verktøy som effektiviserer produksjon, siden de spesifikt nevner det. Vis at du kan skrive for flere språk og kanaler - de har 15+ nettsteder på 9+ språk. Kort sagt: SEO + konvertering + AI-effektivisering + flerspråklig innhold.
+
 Link: https://www.finn.no/job/ad/435413733
 

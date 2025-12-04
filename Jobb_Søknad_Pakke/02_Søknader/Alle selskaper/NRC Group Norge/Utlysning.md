@@ -45,5 +45,8 @@ Du liker å bruke ulike former for verktøy for å få frem budskapet, enten det
 *   Et nordisk team med erfarne og dyktige kommunikasjonskolleger
 *   Et selskap som bygger med mening og som skal vokse
 
+**Din vinkel:**
+Fokuser på at du kan finne gode historier og synliggjøre arbeid - de trenger noen som kan "finne de gode historiene, ute i prosjektene". Trekk frem erfaring med sosiale medier, foto og videoredigering. Vektlegg at du kan jobbe selvstendig men også samarbeide på tvers av fag og nivå. Emfaser at du bruker data som grunnlag for forbedring. Kort sagt: historiefortelling + innholdsproduksjon + tverrfaglig samarbeid + datadrevet forbedring.
+
 Link: https://www.finn.no/job/ad/436956165
 

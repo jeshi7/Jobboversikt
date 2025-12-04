@@ -25,5 +25,8 @@ Dette er ikke en vanlig stillingsutlysning for en ledig jobb. Hvis du velger å 
 
 Skriv et søknadsbrev som forteller hvorfor du har lyst på og passer til en jobb hos oss og legg også ved CV'en din (skriv på norsk, fordi vi kommuniserer med kundene våre på norsk). Rekutteringsteamet til IKEA vil så vurdere deg og kontakter deg hvis det dukker opp en ledig stilling vi tror du passer til.
 
+**Din vinkel:**
+Trekk frem servicebakgrunn fra hotell og barnehage - IKEA leter etter noen som "møter kundene med et hej og et smil". Emfaser at du trives med høyt tempo og varierte oppgaver. Vis at du er lærevillig og allsidig - de trenger "alle typer folk, til alle typer jobber". Vektlegg at du kan jobbe selvstendig men også i team. Kort sagt: servicementalitet + fleksibilitet + lærevillighet.
+
 Link: https://jobs.ikea.com/no/jobb/billingstad/apen-s%C3%B8knad-som-varehusmedarbeider-pa-ikea-talentbase/24107/46886227072
 

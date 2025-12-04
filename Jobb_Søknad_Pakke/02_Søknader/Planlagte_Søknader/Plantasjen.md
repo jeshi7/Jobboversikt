@@ -39,5 +39,6 @@ Rollen kombinerer idé, tekst, video, foto og visuelt uttrykk. Du blir en viktig
 **Om arbeidsgiveren:**
 Plantasjen er Nordens største hagesenterkjede. De er lidenskapelig opptatt av planter og alt som hører til, med et stort utvalg som hele tiden vokser og forandrer seg i takt med årets gang og sesonger. Plantasjen skal være et sted hvor nysgjerrigheten kan vokse og interessen blomstre.
 
-Link: https://www.finn.no/job/ad/438800337
+**Din vinkel:**
+Fokuser på visuell storytelling og hvordan du fanger trender raskt - de trenger noen som kan "fange opp trender og raskt omskaper dem til innhold". Trekk frem erfaring med video, foto og tekst - rollen kombinerer alt. Vektlegg AI som kreativt verktøy, siden de spesifikt nevner det. Emfaser at du produserer mye og raskt, og at du kan tilpasse innhold til norske målgrupper. Kort sagt: visuell storytelling + trendfanging + AI-verktøy + rask produksjon.
 
