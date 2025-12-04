@@ -1,10 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { 
+  isGitHubConfigured, 
+  readFileFromGitHub, 
+  writeFileToGitHub 
+} from "../../../lib/github";
 
 export const runtime = "nodejs";
-
-// Force Vercel to rebuild with latest fixes
 
 const ROOT = process.cwd();
 const BASE_DIR = path.join(
@@ -20,20 +23,28 @@ const OVERVIEW_PATH = path.join(
   "Søknadsoversikt.md"
 );
 
+// Relative paths for GitHub API
+const GITHUB_BASE_PATH = "Jobb_Søknad_Pakke/02_Søknader/Alle selskaper";
+const GITHUB_OVERVIEW_PATH = "Jobb_Søknad_Pakke/00_Oversikt/Søknadsoversikt.md";
+
 type ContactType = "kontakt1" | "kontakt2" | "kontakt3" | "kontakt4" | "kontakt5";
 type IntervjuType = "intervju1" | "intervju2" | "intervju3" | "intervju4";
 type NoteType = ContactType | IntervjuType;
 
+const isVercel = process.env.VERCEL === "1";
+
 function getNotePath(company: string, type: NoteType) {
   const safeCompany = company.trim();
-  const dir = path.join(BASE_DIR, safeCompany);
   let fileName: string;
   if (type.startsWith("kontakt")) {
     fileName = `Kontakt${type.replace("kontakt", "")}-Notat.md`;
   } else {
     fileName = `Intervju${type.replace("intervju", "")}-Notat.md`;
   }
-  return path.join(dir, fileName);
+  return { 
+    local: path.join(BASE_DIR, safeCompany, fileName),
+    github: `${GITHUB_BASE_PATH}/${safeCompany}/${fileName}`
+  };
 }
 
 export async function GET(request: Request) {
@@ -50,18 +61,30 @@ export async function GET(request: Request) {
     return NextResponse.json({ text: "" }, { status: 400 });
   }
 
-  const fullPath = getNotePath(company, type);
+  const paths = getNotePath(company, type);
 
-  if (!fullPath.startsWith(BASE_DIR)) {
-    return NextResponse.json({ text: "" }, { status: 403 });
-  }
+  try {
+    // On Vercel with GitHub configured, use GitHub API
+    if (isVercel && isGitHubConfigured()) {
+      const file = await readFileFromGitHub(paths.github);
+      return NextResponse.json({ text: file?.content ?? "" });
+    }
 
-  if (!fs.existsSync(fullPath)) {
+    // Local development: use file system
+    if (!paths.local.startsWith(BASE_DIR)) {
+      return NextResponse.json({ text: "" }, { status: 403 });
+    }
+
+    if (!fs.existsSync(paths.local)) {
+      return NextResponse.json({ text: "" });
+    }
+
+    const text = fs.readFileSync(paths.local, "utf8");
+    return NextResponse.json({ text });
+  } catch (error) {
+    console.error("Error reading note:", error);
     return NextResponse.json({ text: "" });
   }
-
-  const text = fs.readFileSync(fullPath, "utf8");
-  return NextResponse.json({ text });
 }
 
 export async function POST(request: Request) {
@@ -80,45 +103,129 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: "Ugyldig forespørsel" }, { status: 400 });
   }
 
-  const fullPath = getNotePath(body.company, body.type);
-
-  if (!fullPath.startsWith(BASE_DIR)) {
-    return NextResponse.json({ ok: false, message: "Ugyldig filsti" }, { status: 403 });
-  }
+  const paths = getNotePath(body.company, body.type);
+  const textToWrite = (body.text ?? "").trim();
 
   try {
-    const dir = path.dirname(fullPath);
+    // On Vercel with GitHub configured, use GitHub API
+    if (isVercel && isGitHubConfigured()) {
+      const noteTypeLabel = body.type.startsWith("kontakt") 
+        ? `Kontakt ${body.type.replace("kontakt", "")}` 
+        : `Intervju ${body.type.replace("intervju", "")}`;
+      
+      await writeFileToGitHub(
+        paths.github,
+        textToWrite,
+        `Oppdater ${noteTypeLabel} notat for ${body.company}`
+      );
+
+      // Also update the overview on GitHub
+      if (textToWrite.length > 0) {
+        await updateOverviewOnGitHub(body.company, body.type);
+      }
+
+      return NextResponse.json({ ok: true });
+    }
+
+    // Local development: use file system
+    if (!paths.local.startsWith(BASE_DIR)) {
+      return NextResponse.json({ ok: false, message: "Ugyldig filsti" }, { status: 403 });
+    }
+
+    const dir = path.dirname(paths.local);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    const textToWrite = (body.text ?? "").trim();
-    fs.writeFileSync(fullPath, textToWrite, "utf8");
+    fs.writeFileSync(paths.local, textToWrite, "utf8");
 
     // Update Søknadsoversikt.md when any note is saved
     if (textToWrite.length > 0 && body.type && body.company) {
-      updateOverviewNote(body.company, body.type);
+      updateOverviewLocal(body.company, body.type);
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    // Vercel has a read-only file system - this will fail in production
-    const isVercel = process.env.VERCEL === "1";
-    const message = isVercel 
-      ? "Lagring fungerer kun lokalt. Vercel har et read-only filsystem."
-      : `Kunne ikke lagre: ${error instanceof Error ? error.message : "Ukjent feil"}`;
+    const message = error instanceof Error ? error.message : "Ukjent feil";
+    console.error("Error saving note:", message);
+    
+    // Check if it's a GitHub config issue
+    if (isVercel && !isGitHubConfigured()) {
+      return NextResponse.json({ 
+        ok: false, 
+        message: "GitHub token er ikke konfigurert. Legg til GITHUB_TOKEN i Vercel miljøvariabler." 
+      }, { status: 500 });
+    }
     
     return NextResponse.json({ ok: false, message }, { status: 500 });
   }
 }
 
-function updateOverviewNote(company: string, noteType: NoteType) {
+async function updateOverviewOnGitHub(company: string, noteType: NoteType) {
+  try {
+    const file = await readFileFromGitHub(GITHUB_OVERVIEW_PATH);
+    if (!file) return;
+
+    const today = new Date();
+    const dateStr = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear().toString().slice(2)}`;
+
+    const lines = file.content.split(/\r?\n/);
+    const startIdx = lines.findIndex((line) =>
+      line.startsWith("## 🟢 Aktive Prosesser")
+    );
+    if (startIdx === -1) return;
+
+    const contactIndexMap: Record<ContactType, number> = {
+      kontakt1: 11, kontakt2: 12, kontakt3: 13, kontakt4: 14, kontakt5: 15
+    };
+    const intervjuIndexMap: Record<IntervjuType, number> = {
+      intervju1: 16, intervju2: 17, intervju3: 18, intervju4: 19
+    };
+    
+    const columnIndex = noteType.startsWith("kontakt")
+      ? contactIndexMap[noteType as ContactType]
+      : intervjuIndexMap[noteType as IntervjuType];
+
+    for (let i = startIdx + 3; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith("## ")) break;
+      if (!line.trim().startsWith("|")) continue;
+
+      const parts = line.split("|").map((p) => p.trim());
+      if (parts.length < 21) continue;
+
+      const rawCompany = parts[1] || "";
+      const companyName = rawCompany.replace(/\*\*/g, "").trim();
+
+      if (companyName.toLowerCase() === company.toLowerCase()) {
+        parts[columnIndex] = dateStr;
+        lines[i] = "|" + parts.slice(1).join(" | ") + "|";
+        break;
+      }
+    }
+
+    const noteTypeLabel = noteType.startsWith("kontakt") 
+      ? `Kontakt ${noteType.replace("kontakt", "")}` 
+      : `Intervju ${noteType.replace("intervju", "")}`;
+
+    await writeFileToGitHub(
+      GITHUB_OVERVIEW_PATH,
+      lines.join("\n"),
+      `Oppdater ${noteTypeLabel} dato for ${company}`,
+      file.sha
+    );
+  } catch (error) {
+    console.error("Error updating overview on GitHub:", error);
+  }
+}
+
+function updateOverviewLocal(company: string, noteType: NoteType) {
   if (!fs.existsSync(OVERVIEW_PATH)) return;
 
   const today = new Date();
   const dateStr = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear().toString().slice(2)}`;
 
-  let content = fs.readFileSync(OVERVIEW_PATH, "utf8");
+  const content = fs.readFileSync(OVERVIEW_PATH, "utf8");
   const lines = content.split(/\r?\n/);
 
   const startIdx = lines.findIndex((line) =>
@@ -126,39 +233,29 @@ function updateOverviewNote(company: string, noteType: NoteType) {
   );
   if (startIdx === -1) return;
 
-  // Map note type to column index
   const contactIndexMap: Record<ContactType, number> = {
-    kontakt1: 11,
-    kontakt2: 12,
-    kontakt3: 13,
-    kontakt4: 14,
-    kontakt5: 15
+    kontakt1: 11, kontakt2: 12, kontakt3: 13, kontakt4: 14, kontakt5: 15
   };
   const intervjuIndexMap: Record<IntervjuType, number> = {
-    intervju1: 16,
-    intervju2: 17,
-    intervju3: 18,
-    intervju4: 19
+    intervju1: 16, intervju2: 17, intervju3: 18, intervju4: 19
   };
   
   const columnIndex = noteType.startsWith("kontakt")
     ? contactIndexMap[noteType as ContactType]
     : intervjuIndexMap[noteType as IntervjuType];
 
-  // Find the row for this company and update the appropriate column
   for (let i = startIdx + 3; i < lines.length; i++) {
     const line = lines[i];
     if (line.startsWith("## ")) break;
     if (!line.trim().startsWith("|")) continue;
 
     const parts = line.split("|").map((p) => p.trim());
-    if (parts.length < 21) continue; // Need at least 21 columns now
+    if (parts.length < 21) continue;
 
     const rawCompany = parts[1] || "";
     const companyName = rawCompany.replace(/\*\*/g, "").trim();
 
     if (companyName.toLowerCase() === company.toLowerCase()) {
-      // Update the appropriate column
       parts[columnIndex] = dateStr;
       lines[i] = "|" + parts.slice(1).join(" | ") + "|";
       break;
@@ -167,6 +264,3 @@ function updateOverviewNote(company: string, noteType: NoteType) {
 
   fs.writeFileSync(OVERVIEW_PATH, lines.join("\n"), "utf8");
 }
-
-
-
