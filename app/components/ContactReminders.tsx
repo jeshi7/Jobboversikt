@@ -13,6 +13,13 @@ interface Reminder {
   company: string;
   type: ReminderType;
   label: string;
+  daysLeft?: number; // For sorting and color coding
+}
+
+interface HistoryItem {
+  type: ReminderType;
+  date: string | null;
+  hasNote: boolean;
 }
 
 interface Props {
@@ -20,12 +27,33 @@ interface Props {
   intervjuReminders?: Reminder[];
 }
 
+// Helper to get urgency color
+function getUrgencyColor(daysLeft: number | undefined): {
+  bg: string;
+  border: string;
+  tag: "error" | "warning" | "success" | "neutral";
+} {
+  if (daysLeft === undefined) return { bg: "bg-slate-50", border: "border-borderSoft/70", tag: "neutral" };
+  if (daysLeft < 0) return { bg: "bg-red-50", border: "border-red-200", tag: "error" }; // Overdue
+  if (daysLeft === 0) return { bg: "bg-amber-50", border: "border-amber-200", tag: "warning" }; // Today
+  if (daysLeft <= 3) return { bg: "bg-green-50", border: "border-green-200", tag: "success" }; // Soon
+  return { bg: "bg-slate-50", border: "border-borderSoft/70", tag: "neutral" }; // Later
+}
+
+// Helper to get urgency label
+function getUrgencyLabel(daysLeft: number | undefined): string {
+  if (daysLeft === undefined) return "";
+  if (daysLeft < 0) return `${Math.abs(daysLeft)} dager siden`;
+  if (daysLeft === 0) return "i dag";
+  return `om ${daysLeft} dager`;
+}
+
 export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
   const router = useRouter();
   const [viewMode, setViewMode] = useState<"kontakt" | "intervju">("kontakt");
   const [open, setOpen] = useState<Reminder | null>(null);
   const [note, setNote] = useState("");
-  const [originalNote, setOriginalNote] = useState(""); // Track original to detect changes
+  const [originalNote, setOriginalNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -34,11 +62,21 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     noteType: ReminderType;
     note: string;
   } | null>(null);
+  const [historyPopup, setHistoryPopup] = useState<{
+    company: string;
+    history: HistoryItem[];
+  } | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   
   const skipFetchRef = useRef(false);
   const hasUnsavedChanges = note !== originalNote;
 
-  const currentReminders = viewMode === "kontakt" ? reminders : intervjuReminders;
+  // Sort reminders: overdue first (negative daysLeft), then by daysLeft ascending
+  const sortedReminders = [...(viewMode === "kontakt" ? reminders : intervjuReminders)].sort((a, b) => {
+    const aDays = a.daysLeft ?? 999;
+    const bDays = b.daysLeft ?? 999;
+    return aDays - bDays;
+  });
 
   useEffect(() => {
     if (!open) {
@@ -48,10 +86,9 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       return;
     }
 
-    // Skip fetch if we already have the note (e.g., from viewing popup)
     if (skipFetchRef.current) {
       skipFetchRef.current = false;
-      setOriginalNote(note); // Set original to current when skipping fetch
+      setOriginalNote(note);
       return;
     }
 
@@ -65,8 +102,8 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       .then((data: { text?: string }) => {
         const existingNote = data.text ?? "";
         setNote(existingNote);
-        setOriginalNote(existingNote); // Track original for change detection
-        setEditing(false); // Start in view mode if note exists
+        setOriginalNote(existingNote);
+        setEditing(false);
       })
       .catch(() => {
         setNote("");
@@ -94,7 +131,6 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       });
       if (res.ok) {
         setOpen(null);
-        // Refresh server data to update reminders
         router.refresh();
       } else {
         const data = await res.json().catch(() => ({}));
@@ -107,12 +143,58 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     }
   };
 
+  // Fetch full history for a company
+  const fetchHistory = async (company: string) => {
+    setHistoryLoading(true);
+    const history: HistoryItem[] = [];
+    
+    // Fetch all contact notes
+    for (let i = 1; i <= 5; i++) {
+      const type = `kontakt${i}` as ContactType;
+      try {
+        const params = new URLSearchParams({ company, type });
+        const res = await fetch(`/api/contact-notes?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          history.push({
+            type,
+            date: null, // We could get this from the overview if needed
+            hasNote: !!(data.text && data.text.trim())
+          });
+        }
+      } catch {
+        history.push({ type, date: null, hasNote: false });
+      }
+    }
+    
+    // Fetch all interview notes
+    for (let i = 1; i <= 4; i++) {
+      const type = `intervju${i}` as IntervjuType;
+      try {
+        const params = new URLSearchParams({ company, type });
+        const res = await fetch(`/api/contact-notes?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          history.push({
+            type,
+            date: null,
+            hasNote: !!(data.text && data.text.trim())
+          });
+        }
+      } catch {
+        history.push({ type, date: null, hasNote: false });
+      }
+    }
+    
+    setHistoryPopup({ company, history });
+    setHistoryLoading(false);
+  };
+
   const getAdvice = (company: string, type: ReminderType): string => {
     if (type.startsWith("intervju")) {
       return `Forbered deg på intervjuet med ${company}. Tenk gjennom spørsmål de kan stille, og hva du vil spørre dem om. Husk å være deg selv og vise entusiasme for stillingen.`;
     }
     
-    // Contact advice (existing logic)
     const contactNum = parseInt(type.replace("kontakt", ""), 10);
     if (contactNum === 1) {
       return `Ta kontakt med ${company} for å følge opp søknaden din. Vær høflig, kortfattet og vis interesse. Spør om de har mottatt søknaden og om det er noe mer de trenger.`;
@@ -121,11 +203,29 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     }
   };
 
-  if (currentReminders.length === 0) {
+  if (sortedReminders.length === 0) {
     return (
-      <BodyShort size="small" className="text-slate-500 text-[11px]">
-        Ingen {viewMode === "kontakt" ? "kontakter" : "intervjuer"} å følge opp akkurat nå.
-      </BodyShort>
+      <>
+        <div className="mb-4 flex gap-2">
+          <Button
+            size="xsmall"
+            variant={viewMode === "kontakt" ? "primary" : "secondary"}
+            onClick={() => setViewMode("kontakt")}
+          >
+            Kontakt
+          </Button>
+          <Button
+            size="xsmall"
+            variant={viewMode === "intervju" ? "primary" : "secondary"}
+            onClick={() => setViewMode("intervju")}
+          >
+            Intervju
+          </Button>
+        </div>
+        <BodyShort size="small" className="text-slate-500 text-[11px]">
+          Ingen {viewMode === "kontakt" ? "kontakter" : "intervjuer"} å følge opp akkurat nå.
+        </BodyShort>
+      </>
     );
   }
 
@@ -149,123 +249,221 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       </div>
 
       <ul className="space-y-2 text-sm">
-        {currentReminders.map((reminder) => {
+        {sortedReminders.map((reminder) => {
           const isIntervju = reminder.type.startsWith("intervju");
           const num = parseInt(reminder.type.replace(/^(kontakt|intervju)/, ""), 10);
+          const urgency = getUrgencyColor(reminder.daysLeft);
           
           return (
             <li
               key={reminder.id}
-              className="flex items-center justify-between rounded-xl border border-borderSoft/70 bg-slate-50 px-3 py-2"
+              className={`flex items-center justify-between rounded-xl border ${urgency.border} ${urgency.bg} px-3 py-2 transition-colors`}
             >
-              <div>
-                <p className="font-medium text-slate-900 navds-body-short navds-body-short--small">
-                  {reminder.company}
-                </p>
-                <p className="text-slate-500 text-[11px] navds-body-short navds-body-short--small">
-                  {reminder.label}
-                </p>
-                {!isIntervju && num > 1 ? (
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {/* Show links to all previous contact notes */}
-                    {[1, 2, 3, 4, 5].slice(0, num - 1).map((prevNum) => {
-                      const prevType = `kontakt${prevNum}` as ContactType;
-                      return (
-                        <button
-                          key={prevNum}
-                          type="button"
-                          className="text-[11px] text-accent underline underline-offset-2"
-                          onClick={async () => {
-                            try {
-                              const params = new URLSearchParams({
-                                company: reminder.company,
-                                type: prevType
-                              });
-                              const res = await fetch(`/api/contact-notes?${params.toString()}`);
-                              if (res.ok) {
-                                const data = (await res.json()) as { text?: string };
-                                setViewingNote({
-                                  company: reminder.company,
-                                  noteType: prevType,
-                                  note: data.text ?? ""
-                                });
-                              }
-                            } catch {
-                              // Silent fail
-                            }
-                          }}
-                        >
-                          Se Kontakt {prevNum} notat
-                        </button>
-                      );
-                    })}
-                    <button
-                      type="button"
-                      className="text-[11px] text-accent underline underline-offset-2"
-                      onClick={() => setOpen(reminder)}
-                    >
-                      Legg til notat
-                    </button>
-                  </div>
-                ) : isIntervju && num > 1 ? (
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {/* Show links to all previous interview notes */}
-                    {[1, 2, 3, 4].slice(0, num - 1).map((prevNum) => {
-                      const prevType = `intervju${prevNum}` as IntervjuType;
-                      return (
-                        <button
-                          key={prevNum}
-                          type="button"
-                          className="text-[11px] text-accent underline underline-offset-2"
-                          onClick={async () => {
-                            try {
-                              const params = new URLSearchParams({
-                                company: reminder.company,
-                                type: prevType
-                              });
-                              const res = await fetch(`/api/contact-notes?${params.toString()}`);
-                              if (res.ok) {
-                                const data = (await res.json()) as { text?: string };
-                                setViewingNote({
-                                  company: reminder.company,
-                                  noteType: prevType,
-                                  note: data.text ?? ""
-                                });
-                              }
-                            } catch {
-                              // Silent fail
-                            }
-                          }}
-                        >
-                          Se Intervju {prevNum} notat
-                        </button>
-                      );
-                    })}
-                    <button
-                      type="button"
-                      className="text-[11px] text-accent underline underline-offset-2"
-                      onClick={() => setOpen(reminder)}
-                    >
-                      Legg til notat
-                    </button>
-                  </div>
-                ) : (
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    className="mt-1 text-[11px] text-accent underline underline-offset-2"
+                    className="font-medium text-slate-900 navds-body-short navds-body-short--small hover:underline text-left"
+                    onClick={() => fetchHistory(reminder.company)}
+                  >
+                    {reminder.company}
+                  </button>
+                  {reminder.daysLeft !== undefined && reminder.daysLeft < 0 && (
+                    <span className="text-[10px] text-red-600 font-medium">⚠️ Forfalt</span>
+                  )}
+                </div>
+                <p className="text-slate-500 text-[11px] navds-body-short navds-body-short--small">
+                  {isIntervju ? `Intervju ${num}` : `Kontakt ${num}`} · {getUrgencyLabel(reminder.daysLeft)}
+                </p>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {/* Show links to previous notes */}
+                  {!isIntervju && num > 1 && [1, 2, 3, 4, 5].slice(0, num - 1).map((prevNum) => (
+                    <button
+                      key={prevNum}
+                      type="button"
+                      className="text-[11px] text-accent underline underline-offset-2"
+                      onClick={async () => {
+                        const prevType = `kontakt${prevNum}` as ContactType;
+                        try {
+                          const params = new URLSearchParams({ company: reminder.company, type: prevType });
+                          const res = await fetch(`/api/contact-notes?${params.toString()}`);
+                          if (res.ok) {
+                            const data = await res.json();
+                            setViewingNote({ company: reminder.company, noteType: prevType, note: data.text ?? "" });
+                          }
+                        } catch { /* Silent */ }
+                      }}
+                    >
+                      K{prevNum}
+                    </button>
+                  ))}
+                  {isIntervju && num > 1 && [1, 2, 3, 4].slice(0, num - 1).map((prevNum) => (
+                    <button
+                      key={prevNum}
+                      type="button"
+                      className="text-[11px] text-accent underline underline-offset-2"
+                      onClick={async () => {
+                        const prevType = `intervju${prevNum}` as IntervjuType;
+                        try {
+                          const params = new URLSearchParams({ company: reminder.company, type: prevType });
+                          const res = await fetch(`/api/contact-notes?${params.toString()}`);
+                          if (res.ok) {
+                            const data = await res.json();
+                            setViewingNote({ company: reminder.company, noteType: prevType, note: data.text ?? "" });
+                          }
+                        } catch { /* Silent */ }
+                      }}
+                    >
+                      I{prevNum}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="text-[11px] text-accent underline underline-offset-2"
                     onClick={() => setOpen(reminder)}
                   >
-                    Legg til notat
+                    + Notat
                   </button>
-                )}
+                </div>
               </div>
-              <Tag size="small" variant="neutral">
-                {isIntervju ? `Intervju ${num}` : `Kontakt ${num}`}
+              <Tag size="small" variant={urgency.tag}>
+                {isIntervju ? `I${num}` : `K${num}`}
               </Tag>
             </li>
           );
         })}
       </ul>
+
+      {/* History Timeline Popup */}
+      {historyPopup && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-5 shadow-subtle max-h-[80vh] overflow-y-auto">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Heading level="2" size="small">
+                  Tidslinje: {historyPopup.company}
+                </Heading>
+                <BodyShort size="small" className="mt-1 text-slate-600 text-[11px]">
+                  All kontakt og intervjuhistorikk
+                </BodyShort>
+              </div>
+              <Button size="xsmall" variant="tertiary" onClick={() => setHistoryPopup(null)}>
+                Lukk
+              </Button>
+            </div>
+            
+            <div className="mt-4 space-y-2">
+              <BodyShort size="small" className="font-medium text-slate-700">Kontakter</BodyShort>
+              <div className="space-y-1">
+                {historyPopup.history.filter(h => h.type.startsWith("kontakt")).map((item) => {
+                  const num = parseInt(item.type.replace("kontakt", ""), 10);
+                  return (
+                    <div
+                      key={item.type}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                        item.hasNote ? "bg-green-50 border border-green-200" : "bg-slate-50 border border-slate-200"
+                      }`}
+                    >
+                      <span className="text-sm">Kontakt {num}</span>
+                      <div className="flex items-center gap-2">
+                        {item.hasNote ? (
+                          <>
+                            <span className="text-[11px] text-green-600">✓ Notat</span>
+                            <button
+                              type="button"
+                              className="text-[11px] text-accent underline"
+                              onClick={async () => {
+                                const params = new URLSearchParams({ company: historyPopup.company, type: item.type });
+                                const res = await fetch(`/api/contact-notes?${params.toString()}`);
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  setViewingNote({ company: historyPopup.company, noteType: item.type, note: data.text ?? "" });
+                                }
+                              }}
+                            >
+                              Se
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-[11px] text-accent underline"
+                            onClick={() => {
+                              setHistoryPopup(null);
+                              setOpen({
+                                id: `${historyPopup.company}-${item.type}`,
+                                company: historyPopup.company,
+                                type: item.type,
+                                label: `Kontakt ${num}`
+                              });
+                            }}
+                          >
+                            + Legg til
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <BodyShort size="small" className="font-medium text-slate-700 mt-4">Intervjuer</BodyShort>
+              <div className="space-y-1">
+                {historyPopup.history.filter(h => h.type.startsWith("intervju")).map((item) => {
+                  const num = parseInt(item.type.replace("intervju", ""), 10);
+                  return (
+                    <div
+                      key={item.type}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                        item.hasNote ? "bg-green-50 border border-green-200" : "bg-slate-50 border border-slate-200"
+                      }`}
+                    >
+                      <span className="text-sm">Intervju {num}</span>
+                      <div className="flex items-center gap-2">
+                        {item.hasNote ? (
+                          <>
+                            <span className="text-[11px] text-green-600">✓ Notat</span>
+                            <button
+                              type="button"
+                              className="text-[11px] text-accent underline"
+                              onClick={async () => {
+                                const params = new URLSearchParams({ company: historyPopup.company, type: item.type });
+                                const res = await fetch(`/api/contact-notes?${params.toString()}`);
+                                if (res.ok) {
+                                  const data = await res.json();
+                                  setViewingNote({ company: historyPopup.company, noteType: item.type, note: data.text ?? "" });
+                                }
+                              }}
+                            >
+                              Se
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-[11px] text-accent underline"
+                            onClick={() => {
+                              setHistoryPopup(null);
+                              setOpen({
+                                id: `${historyPopup.company}-${item.type}`,
+                                company: historyPopup.company,
+                                type: item.type,
+                                label: `Intervju ${num}`
+                              });
+                            }}
+                          >
+                            + Legg til
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Popup for adding/editing note */}
       {open && (
@@ -280,11 +478,7 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
                   {open.company}
                 </BodyShort>
               </div>
-              <Button
-                size="xsmall"
-                variant="tertiary"
-                onClick={() => setOpen(null)}
-              >
+              <Button size="xsmall" variant="tertiary" onClick={() => setOpen(null)}>
                 Lukk
               </Button>
             </div>
@@ -317,9 +511,7 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
                   </>
                 ) : (
                   <div>
-                    <BodyShort size="small" className="mb-2 text-slate-600">
-                      Notat
-                    </BodyShort>
+                    <BodyShort size="small" className="mb-2 text-slate-600">Notat</BodyShort>
                     <div className="rounded-lg border border-borderSoft bg-white p-3 text-sm text-slate-700 whitespace-pre-wrap min-h-[120px]">
                       {note || "Ingen notat lagret ennå."}
                     </div>
@@ -334,31 +526,17 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
               <div className="flex gap-2">
                 {editing || !note ? (
                   <>
-                    <Button
-                      size="small"
-                      variant="primary"
-                      onClick={handleSave}
-                      disabled={saving || loading}
-                    >
+                    <Button size="small" variant="primary" onClick={handleSave} disabled={saving || loading}>
                       {saving ? "Lagrer..." : "Lagre"}
                     </Button>
                     {note && (
-                      <Button
-                        size="small"
-                        variant="secondary"
-                        onClick={() => setEditing(false)}
-                        disabled={saving || loading}
-                      >
+                      <Button size="small" variant="secondary" onClick={() => setEditing(false)} disabled={saving || loading}>
                         Avbryt
                       </Button>
                     )}
                   </>
                 ) : (
-                  <Button
-                    size="small"
-                    variant="primary"
-                    onClick={() => setEditing(true)}
-                  >
+                  <Button size="small" variant="primary" onClick={() => setEditing(true)}>
                     Rediger
                   </Button>
                 )}
@@ -370,7 +548,7 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
 
       {/* Popup for viewing previous notes */}
       {viewingNote && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-md rounded-2xl bg-surface p-5 shadow-subtle">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -383,16 +561,12 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
                   {viewingNote.company}
                 </BodyShort>
               </div>
-              <Button
-                size="xsmall"
-                variant="tertiary"
-                onClick={() => setViewingNote(null)}
-              >
+              <Button size="xsmall" variant="tertiary" onClick={() => setViewingNote(null)}>
                 Lukk
               </Button>
             </div>
             <div className="mt-4">
-              <div className="rounded-lg border border-borderSoft bg-white p-3 text-sm text-slate-700 whitespace-pre-wrap">
+              <div className="rounded-lg border border-borderSoft bg-white p-3 text-sm text-slate-700 whitespace-pre-wrap min-h-[100px]">
                 {viewingNote.note || "Ingen notat lagret ennå."}
               </div>
               <Button
