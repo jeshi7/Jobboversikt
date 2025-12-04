@@ -155,20 +155,53 @@ export function loadApplications(): Application[] {
       }
     }
 
-    const status: ApplicationStatus = files.some((f) =>
+    // Determine status based on folder contents
+    const hasInterview = files.some((f) =>
       f.toLowerCase().includes("intervju")
-    )
-      ? "intervju"
-      : "sendt";
+    );
+    const hasCvPdf = files.some((f) =>
+      f.toLowerCase().includes("cv") && f.toLowerCase().endsWith(".pdf")
+    );
+    const hasCoverLetterPdf = files.some((f) =>
+      (f.toLowerCase().includes("søknad") ||
+        f.toLowerCase().includes("cover letter") ||
+        f.toLowerCase().includes("søknadsbrev")) &&
+      f.toLowerCase().endsWith(".pdf")
+    );
+    const hasOnlyUtlysning =
+      files.length === 1 && files[0].toLowerCase() === "utlysning.md";
+    const hasWorkStarted = files.length > 1 && !hasOnlyUtlysning;
+
+    let status: ApplicationStatus;
+    let appType: "planlagt" | "søknad";
+
+    if (hasInterview) {
+      status = "intervju";
+      appType = "søknad";
+    } else if (hasCvPdf && hasCoverLetterPdf) {
+      status = "sendt";
+      appType = "søknad";
+    } else if (hasOnlyUtlysning) {
+      // Folder with only Utlysning.md = still planned, not active
+      status = "planlagt";
+      appType = "planlagt";
+    } else if (hasWorkStarted) {
+      // Has files beyond Utlysning.md but not both PDFs = under arbeid
+      status = "forberedes";
+      appType = "søknad";
+    } else {
+      status = "planlagt";
+      appType = "planlagt";
+    }
 
     all.push({
       id: `soknad-${companyFolder}`,
       company: companyFolder,
       folder: path.relative(ROOT, full).replace(/\\/g, "/"),
       status,
-      type: "søknad",
+      type: appType,
       resources,
-      sentAt: stat.mtime,
+      sentAt: hasCvPdf && hasCoverLetterPdf ? stat.mtime : undefined,
       jobSnippet,
       jobTitle,
       deadline,
@@ -180,7 +213,9 @@ export function loadApplications(): Application[] {
     });
   }
 
-  // Planned applications
+  // Planned applications (only if NOT already in Alle selskaper)
+  const existingCompanies = new Set(all.map((a) => a.company));
+
   for (const file of safeReadDir(planlagteDir)) {
     if (file.startsWith(".")) continue;
 
@@ -190,6 +225,9 @@ export function loadApplications(): Application[] {
 
     const companyName = file.replace(/\.[^/.]+$/, "").trim();
     if (!companyName) continue;
+
+    // Skip if already added from Alle selskaper
+    if (existingCompanies.has(companyName)) continue;
 
      let jobSnippet: string | undefined;
      let jobTitle: string | undefined;

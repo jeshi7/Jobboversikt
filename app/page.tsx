@@ -12,7 +12,7 @@ export default function DashboardPage() {
   const dreamCompanies = loadDreamlist();
   const groupedDreams = groupByCategory(dreamCompanies);
 
-  const sentApps = apps.filter((a) => a.status === "sendt");
+  const sentApps = apps.filter((a) => a.status === "sendt" || a.status === "forberedes");
   const interviewApps = apps.filter((a) => a.status === "intervju");
   const plannedApps = apps.filter((a) => a.type === "planlagt");
   const contactReminders = buildContactReminders(apps);
