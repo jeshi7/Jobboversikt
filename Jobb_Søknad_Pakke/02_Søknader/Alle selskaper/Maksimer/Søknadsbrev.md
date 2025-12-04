@@ -1,65 +1,32 @@
-# Søknadsbrev: Maksimer - Digital Designer
+# Søknadsbrev - Maksimer
+
+**Stilling:** Digital Designer  
+**Søker:** Jessie Macharia
 
 ---
 
-Hei Anja og Anders,
+Hei,
 
-Jeg søker på stillingen som Digital Designer.
+Jeg søker stillingen som Digital Designer hos Maksimer.
 
-Dere bygger nettbutikker som skal selge og skape lojalitet.
+Tingen er at jeg alltid har vært litt besatt av nettbutikker. Ikke bare fordi de ser fine ut - men fordi det er så tydelig når de funker. Du merker det i flyten. I hvordan produktbildet glir over i "legg i handlekurv". I at checkout ikke føles som en byrde. Og det er akkurat den typen design jeg vil jobbe med.
 
-Det er den kombinasjonen jeg synes er mest interessant.
+**Hvorfor meg?**
 
-Det holder ikke å lage noe pent. Det må føles riktig for brukeren og levere resultater for kunden.
+Jeg har erfaring med hele kjeden - fra merkevare til ferdig nettside. Jeg har jobbet med klienter som trengte å oversette hvem de var til noe digitalt, og jeg har sett hvordan små justeringer i brukerreisen kan utgjøre stor forskjell for konverteringen. Designsystemer i Figma er noe jeg faktisk liker å bygge (ja, jeg er en av de). Og jeg forstår nok kode til å vite hva som er realistisk å få til.
 
-Jeg har erfaring med e-handel og digitale løsninger. Både som freelancer og i byrå.
+Det som skiller meg fra andre? Jeg har jobbet med mennesker i ulike settinger - hotell, barnehage, NAV. Det har gitt meg en slags innebygd empati for brukeren. Jeg tenker alltid: "Hva prøver denne personen å få til? Og hvordan gjør vi det lettere?"
 
-Da jeg jobbet i Change Marketing lærte jeg hvor mye små designjusteringer kan bety.
+**Hvorfor Maksimer?**
 
-En bedre plassert knapp. En tydeligere produktbeskrivelse. En raskere checkout.
+Dere er ikke et vanlig byrå. Dere har bygget opp noe solid i e-handel, med et team som faktisk kan faget sitt. Jeg ser for meg et sted der jeg kan lære av folk som er bedre enn meg på ting jeg vil bli god på - samtidig som jeg kan bidra med det jeg allerede kan.
 
-De tingene gjør faktisk en forskjell.
+Jeg tar gjerne en kaffe (eller et Teams-møte) og viser dere hvordan jeg jobber.
 
-Designsystemer i Figma er noe jeg trives med.
-
-Jeg liker å bygge komponenter som er lette å gjenbruke. Det gjør samarbeidet med utviklerne smidigere.
-
-Målet er å slippe misforståelser. At ting blir bygget som planlagt.
-
-En ting jeg tror kan være nyttig for dere er at jeg forstår det tekniske.
-
-Jeg har bygget nettsider i WordPress og Webflow. Vet hvordan CSS og HTML fungerer.
-
-Det betyr at jeg designer løsninger som faktisk lar seg bygge.
-
-Ikke bare ting som ser bra ut i en presentasjon.
-
-Jeg bruker AI-verktøy for idémyldring og for å utforske flere retninger raskere.
-
-Men det er jeg som tar de kreative valgene.
-
-Dere ser etter en som trives med ansvar og er effektiv.
-
-Det er meg.
-
-Jeg har drevet eget. Levert til over 40 klienter. Vant til å ha oversikt over hele prosessen.
-
-Jeg liker fart. Men ikke stress.
-
-Struktur gjør meg raskere.
-
-Tar gjerne en kaffe eller et videomøte for å vise frem porteføljen.
-
-Med vennlig hilsen,
+Med vennlig hilsen,  
 Jessie Macharia
 
-📧 [e-post]
-📱 [telefon]
-🔗 [portefølje-lenke]
-
 ---
 
-## Notater
-- Tilpass kontaktinfo før sending
-- Legg ved portefølje
-- Send via FINN
+**Vedlegg:** CV, portefølje
+

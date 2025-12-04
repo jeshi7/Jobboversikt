@@ -1,15 +1,10 @@
-# CV-profil: Maksimer - Digital Designer
+# CV-profil for Maksimer
+
+**Stilling:** Digital Designer
 
 ---
 
-## Profiltekst
+Jeg er en designer som tenker i systemer - fra merkevare til ferdig nettbutikk. Jeg har bygget nettsider i WordPress og Webflow, designet i Figma, og brukt AI-verktøy til alt fra idémyldring til prototyper. Designsystemer og komponentbibliotek er noe jeg brenner for. Det sparer tid, skaper konsistens, og gjør at alle på teamet snakker samme språk.
 
-Jeg designer det som faktisk selger. Ikke bare det som ser bra ut.
+Min bakgrunn fra service (hotell, NAV) har gitt meg en innebygd empati for brukeren. Jeg tenker alltid på hele flyten - fra noen ser et produkt til de trykker "betal". Jeg forstår nok kode til å designe ting som faktisk lar seg bygge, og liker å jobbe tett med utviklere for å få det til.
 
-Etter å ha jobbet med både små nettbutikker og større merkevarer, har jeg lært at god e-handelsdesign handler om å forstå hele kjøpsreisen. Fra første tanke til siste klikk.
-
-Verktøyene jeg bruker mest er Adobe CS, Figma og Cursor. Jeg liker å bygge designsystemer og komponenter som er lette å gjenbruke. Det sparer tid for alle - spesielt utviklerne som skal bygge det jeg har tegnet.
-
-Å oversette merkevarer til digitale flater er noe jeg har blitt god på. Det handler om mer enn riktig logo og farger. Det handler om å fange følelsen og få det til å funke der folk faktisk skal handle.
-
-Jeg forstår hvordan ting fungerer under panseret. Har bygget nettsider i WordPress og Webflow. Bruker AI-verktøy for å jobbe raskere. Men det er jeg som tar valgene.

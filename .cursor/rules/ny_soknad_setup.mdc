@@ -40,5 +40,16 @@ DU GJØR (alt samtidig):
 1.  Flytt rad i Søknadsoversikt fra "Under planlegging" → "Aktive Prosesser" med `📝 Under arbeid`
 2.  Slett filen fra `Planlagte_Søknader/` (utlysningen ligger allerede i `Alle selskaper/`)
 
+**Format for CV-profil:**
+- **MAKS 2 avsnitt** - kort og konsist
+- Fokuser på det viktigste for stillingen
+- Bruk "Din vinkel" fra utlysningen som utgangspunkt
+
+**Format for søknadsbrev:**
+- Personlig og direkte tone (følg Anti-AI reglene)
+- Åpne med interesse for stillingen/selskapet
+- Forklar hvorfor du passer (koble til utlysningen)
+- Avslutt med invitasjon til samtale
+
 **Hvorfor?**
 Mappen i `Alle selskaper/` klargjøres umiddelbart slik at brukeren kan starte arbeid når som helst uten ekstra oppsett. `Planlagte_Søknader/` brukes kun som "huskeliste" for ideer.
