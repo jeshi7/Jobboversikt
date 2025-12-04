@@ -60,9 +60,12 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       .finally(() => setLoading(false));
   }, [open]);
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSave = async () => {
     if (!open) return;
     setSaving(true);
+    setError(null);
     try {
       const res = await fetch("/api/contact-notes", {
         method: "POST",
@@ -77,9 +80,12 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
         setOpen(null);
         // Reload page to refresh reminders
         window.location.reload();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(`Kunne ikke lagre: ${res.status} ${data.message || ""}`);
       }
-    } catch {
-      // Silent fail
+    } catch (err) {
+      setError(`Nettverksfeil: ${err instanceof Error ? err.message : "Ukjent feil"}`);
     } finally {
       setSaving(false);
     }
@@ -292,6 +298,11 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
                   </div>
                 )}
               </div>
+              {error && (
+                <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
               <div className="flex gap-2">
                 {editing || !note ? (
                   <>
