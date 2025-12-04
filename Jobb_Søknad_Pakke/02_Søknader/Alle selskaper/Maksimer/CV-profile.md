@@ -4,26 +4,12 @@
 
 ## Profiltekst
 
-Jeg designer ikke bare det som ser bra ut - jeg designer det som faktisk selger. Etter å ha jobbet med alt fra små nettbutikker til større merkevarer, har jeg lært at god e-handelsdesign handler om å forstå hele kjøpsreisen. Fra den første tanken til det siste klikket på "Betal".
+Jeg designer det som faktisk selger. Ikke bare det som ser bra ut.
 
-Figma og Adobe er mitt hovedverktøy. Jeg bygger designsystemer og komponentbiblioteker fordi jeg vet at det sparer tid senere - og gjør det lettere for utviklerne å bygge det jeg har tegnet. Jeg liker jo at ting faktisk blir som planlagt.
+Etter å ha jobbet med både små nettbutikker og større merkevarer, har jeg lært at god e-handelsdesign handler om å forstå hele kjøpsreisen. Fra første tanke til siste klikk.
 
-En ting jeg har blitt god på er å oversette merkevarer til digitale flater. Det handler ikke bare om å bruke riktig logo og farger. Det handler om å fange følelsen, tonen, opplevelsen - og så få det til å funke i en nettbutikk der folk skal handle. Ikke bare scrolle.
+Verktøyene jeg bruker mest er Adobe CS, Figma og Cursor. Jeg liker å bygge designsystemer og komponenter som er lette å gjenbruke. Det sparer tid for alle - spesielt utviklerne som skal bygge det jeg har tegnet.
 
-Jeg snakker godt med utviklere fordi jeg forstår hvordan ting fungerer under panseret. Har bygget nettsider i WordPress og Webflow, og jeg bruker AI-verktøy aktivt for å jobbe raskere i idéfasen. Men det er alltid jeg som styrer rattet.
+Å oversette merkevarer til digitale flater er noe jeg har blitt god på. Det handler om mer enn riktig logo og farger. Det handler om å fange følelsen og få det til å funke der folk faktisk skal handle.
 
----
-
-## Nøkkelord for ATS
-- Digital design
-- E-handel / nettbutikk
-- UX/UI
-- Figma
-- Designsystemer
-- Komponentbibliotek
-- Merkevarestrategi
-- Konverteringsoptimalisering
-- Tverrfaglig samarbeid
-- AI-assistert design
-- WordPress / Webflow
-
+Jeg forstår hvordan ting fungerer under panseret. Har bygget nettsider i WordPress og Webflow. Bruker AI-verktøy for å jobbe raskere. Men det er jeg som tar valgene.

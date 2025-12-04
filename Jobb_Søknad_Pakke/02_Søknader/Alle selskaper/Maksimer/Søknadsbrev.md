@@ -4,21 +4,51 @@
 
 Hei Anja og Anders,
 
-Jeg søker på stillingen som Digital Designer hos Maksimer.
+Jeg søker på stillingen som Digital Designer.
 
-Dere bygger nettbutikker som skal selge og skape lojalitet. Det er akkurat den kombinasjonen jeg synes er mest interessant å jobbe med. Det holder ikke å lage noe pent - det må føles riktig for brukeren og levere resultater for kunden.
+Dere bygger nettbutikker som skal selge og skape lojalitet.
 
-Jeg har jobbet med e-handel og digitale løsninger i flere år, både som freelancer og i byråsammenheng. I Change Marketing lærte jeg hvor mye små designjusteringer kan bety for bunnlinjen. En bedre plassert knapp, en tydeligere produktbeskrivelse, en raskere checkout. Det er de tingene som faktisk gjør en forskjell.
+Det er den kombinasjonen jeg synes er mest interessant.
 
-Når det gjelder designsystemer i Figma - det er noe jeg trives med. Jeg liker å bygge komponenter som er lette å gjenbruke og som gjør samarbeidet med utviklerne smidigere. Da slipper vi misforståelser, og ting blir faktisk bygget som planlagt. Det handler om å spare tid for alle.
+Det holder ikke å lage noe pent. Det må føles riktig for brukeren og levere resultater for kunden.
 
-En ting jeg tror kan være nyttig for dere er at jeg forstår litt av det tekniske også. Jeg har bygget nettsider i WordPress og Webflow, og vet hvordan CSS og HTML fungerer i praksis. Det betyr at jeg designer løsninger som faktisk lar seg bygge - ikke bare ting som ser bra ut i en presentasjon.
+Jeg har erfaring med e-handel og digitale løsninger. Både som freelancer og i byrå.
 
-Jeg bruker AI-verktøy aktivt for idémyldring og for å utforske flere retninger raskere. Men jeg er også bevisst på at det er jeg som tar de kreative valgene til slutt.
+Da jeg jobbet i Change Marketing lærte jeg hvor mye små designjusteringer kan bety.
 
-Dere skriver at dere ser etter en som trives med ansvar og er effektiv. Det er meg. Jeg har drevet eget, levert til over 40 klienter, og er vant til å ha oversikt over hele prosessen fra innsikt til ferdig leveranse. Jeg liker fart, men ikke stress. Struktur gjør meg raskere.
+En bedre plassert knapp. En tydeligere produktbeskrivelse. En raskere checkout.
 
-Jeg tar gjerne en kaffe eller et videomøte for å vise frem porteføljen og snakke mer om hvordan jeg kan bidra hos dere.
+De tingene gjør faktisk en forskjell.
+
+Designsystemer i Figma er noe jeg trives med.
+
+Jeg liker å bygge komponenter som er lette å gjenbruke. Det gjør samarbeidet med utviklerne smidigere.
+
+Målet er å slippe misforståelser. At ting blir bygget som planlagt.
+
+En ting jeg tror kan være nyttig for dere er at jeg forstår det tekniske.
+
+Jeg har bygget nettsider i WordPress og Webflow. Vet hvordan CSS og HTML fungerer.
+
+Det betyr at jeg designer løsninger som faktisk lar seg bygge.
+
+Ikke bare ting som ser bra ut i en presentasjon.
+
+Jeg bruker AI-verktøy for idémyldring og for å utforske flere retninger raskere.
+
+Men det er jeg som tar de kreative valgene.
+
+Dere ser etter en som trives med ansvar og er effektiv.
+
+Det er meg.
+
+Jeg har drevet eget. Levert til over 40 klienter. Vant til å ha oversikt over hele prosessen.
+
+Jeg liker fart. Men ikke stress.
+
+Struktur gjør meg raskere.
+
+Tar gjerne en kaffe eller et videomøte for å vise frem porteføljen.
 
 Med vennlig hilsen,
 Jessie Macharia
@@ -29,8 +59,7 @@ Jessie Macharia
 
 ---
 
-## Notater til meg selv
-- Tilpass e-post/telefon/portefølje før sending
-- Legg ved portefølje som PDF eller lenke
-- Send via FINN som spesifisert
-
+## Notater
+- Tilpass kontaktinfo før sending
+- Legg ved portefølje
+- Send via FINN
