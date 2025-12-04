@@ -1,21 +1,56 @@
 ---
-description: Automatisk oppdatering av planlagte søknader
+description: Automatisk oppdatering av planlagte søknader til Under planlegging-seksjonen
 globs: 02_Søknader/Planlagte_Søknader/*.md
 ---
 
-### 🟡 Synkronisering av Planlagte Søknader
+### 🟡 Synkronisering av Planlagte Søknader (KRITISK - ALLTID UTFØR)
 
-Når brukeren legger til en ny `.md`‑fil (typisk en utlysning) i `02_Søknader/Planlagte_Søknader/`, betyr det at brukeren vurderer å søke. Du skal da **ALLTID** oppdatere `00_Oversikt/Søknadsoversikt.md` for å reflektere dette.
+**VIKTIG:** Alt som ligger i `02_Søknader/Planlagte_Søknader/` skal ALLTID vises:
+- I `00_Oversikt/Søknadsoversikt.md` under seksjonen **"🟡 Under planlegging (Ikke startet)"**
+- I appen under **"Planlagt"**-kolonnen i pipelinen
+
+Når brukeren legger til en ny `.md`-fil i `02_Søknader/Planlagte_Søknader/`, **SKAL du ALLTID og UMIDDELBART** oppdatere `Søknadsoversikt.md`.
 
 **Dine handlinger skal være:**
 
-1.  **Filnavn for utlysning:** Hvis filen inneholder en faktisk jobbutlysning med `*   **Link:** …`, skal filen hete `Utlysning.md` – ikke `Tankesmien Agenda.md`, `Norwegian.md` osv.
-2.  **Identifiser bedriften:** Bruk mappenavn eller innholdet i filen til å finne bedriftsnavn (f.eks. `02_Søknader/Planlagte_Søknader/Spotify/Utlysning.md` → bedrift = Spotify).
-3.  **Oppdater tabellen:**
-    *   Gå til seksjonen `## 🟡 Under planlegging (Ikke startet)` i `Søknadsoversikt.md`.
-    *   Legg til en ny rad for den nye bedriften.
-    *   Prøv å trekke ut info om Stilling og Frist fra filinnholdet hvis mulig.
-   *   Lag en relativ lenke til utlysningen i `[URL]`‑kolonnen (f.eks. `[Link](../02_Søknader/Planlagte_Søknader/Spotify/Utlysning.md)`).
+1.  **Identifiser bedriften:**
+    *   Bruk filnavnet (uten .md) som bedriftsnavn.
+    *   Eksempel: `E-Wheels Norge.md` → bedrift = **E-Wheels Norge**
+
+2.  **Trekk ut info fra filen:**
+    *   Stilling (første overskrift)
+    *   Frist
+    *   Ansettelsesform (Fast/Engasjement/Deltid)
+    *   Sted
+    *   Kontaktperson + tittel + kontaktinfo
+    *   Link til utlysning
+
+3.  **Oppdater `Søknadsoversikt.md`:**
+    *   Gå til seksjonen `## 🟡 Under planlegging (Ikke startet)`.
+    *   Legg til en ny rad med all tilgjengelig info.
+    *   Formatet skal være:
+    ```
+    | **Bedrift** | Stilling | Form | % | Sted | Frist | Kontaktperson | Tittel | Kontaktinfo | Notater | Lenke |
+    ```
+
+4.  **Når søknaden starter (flyttes til Aktive Prosesser):**
+    *   Når bedriftsmappen i `Alle selskaper/` får dokumenter, flyttes raden fra "Under planlegging" til "Aktive Prosesser" med status `📝 Under arbeid`.
+    *   Først når BEGGE PDF-er (CV + Søknadsbrev) er på plass, endres status til `✉️ Sendt`.
+
+**Eksempel på flyt:**
+```
+1. Ny fil: Planlagte_Søknader/Spotify.md
+   → Legg til i "Under planlegging"-tabellen
+   → Vises som "Planlagt" i appen
+
+2. Mappe opprettes: Alle selskaper/Spotify/
+   → Flytt til "Aktive Prosesser" med 📝 Under arbeid
+   → Vises som "Sendt" i appen (men ikke ferdig)
+
+3. Begge PDF-er lastes opp
+   → Status endres til ✉️ Sendt + Dato sendt fylles
+   → Nedtelling starter
+```
 
 **Hvorfor?**
-For å la brukeren "samle" interessante stillinger i en mappe, og automatisk få dem inn i oversikten uten manuelt arbeid.
+For å ha én kilde til sannhet: `Planlagte_Søknader/` = ideer du vurderer, `Alle selskaper/` = aktive prosesser. Appen og oversikten skal alltid speile dette.
