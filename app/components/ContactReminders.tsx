@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BodyShort, Tag, Button, Heading, Textarea } from "@navikt/ds-react";
 
 type ContactType = "kontakt1" | "kontakt2" | "kontakt3" | "kontakt4" | "kontakt5";
@@ -31,6 +31,8 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     noteType: ReminderType;
     note: string;
   } | null>(null);
+  
+  const skipFetchRef = useRef(false);
 
   const currentReminders = viewMode === "kontakt" ? reminders : intervjuReminders;
 
@@ -38,6 +40,12 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     if (!open) {
       setNote("");
       setEditing(false);
+      return;
+    }
+
+    // Skip fetch if we already have the note (e.g., from viewing popup)
+    if (skipFetchRef.current) {
+      skipFetchRef.current = false;
       return;
     }
 
@@ -372,6 +380,9 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
                 variant="secondary"
                 className="mt-3"
                 onClick={() => {
+                  setNote(viewingNote.note);
+                  setEditing(true);
+                  skipFetchRef.current = true;
                   setOpen({
                     id: `${viewingNote.company}-${viewingNote.noteType}`,
                     company: viewingNote.company,
