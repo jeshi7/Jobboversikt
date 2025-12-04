@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { getNote, saveNote, isKVAvailable } from "../../../lib/db";
 
 export const runtime = "nodejs";
+
+// Force Vercel to rebuild with latest fixes
 
 const ROOT = process.cwd();
 const BASE_DIR = path.join(
@@ -49,18 +50,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ text: "" }, { status: 400 });
   }
 
-  // Try KV first (for Vercel), then fall back to file system (for local)
-  if (isKVAvailable()) {
-    try {
-      const text = await getNote(company, type);
-      return NextResponse.json({ text });
-    } catch (error) {
-      console.error("KV read error:", error);
-      return NextResponse.json({ text: "" });
-    }
-  }
-
-  // Local file system fallback
   const fullPath = getNotePath(company, type);
 
   if (!fullPath.startsWith(BASE_DIR)) {
@@ -88,51 +77,29 @@ export async function POST(request: Request) {
   ];
 
   if (!body.company || !body.type || !validTypes.includes(body.type)) {
-    return NextResponse.json({ ok: false, error: "Invalid parameters" }, { status: 400 });
+    return NextResponse.json({ ok: false }, { status: 400 });
   }
 
-  const textToWrite = (body.text ?? "").trim();
-
-  // Try KV first (for Vercel), then fall back to file system (for local)
-  if (isKVAvailable()) {
-    try {
-      const success = await saveNote(body.company, body.type, textToWrite);
-      if (success) {
-        return NextResponse.json({ ok: true, storage: "kv" });
-      } else {
-        return NextResponse.json({ ok: false, error: "KV save failed" }, { status: 500 });
-      }
-    } catch (error) {
-      console.error("KV write error:", error);
-      return NextResponse.json({ ok: false, error: "KV error" }, { status: 500 });
-    }
-  }
-
-  // Local file system fallback
   const fullPath = getNotePath(body.company, body.type);
 
   if (!fullPath.startsWith(BASE_DIR)) {
-    return NextResponse.json({ ok: false, error: "Invalid path" }, { status: 403 });
+    return NextResponse.json({ ok: false }, { status: 403 });
   }
 
-  try {
-    const dir = path.dirname(fullPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    fs.writeFileSync(fullPath, textToWrite, "utf8");
-
-    // Update Søknadsoversikt.md when any note is saved (local only)
-    if (textToWrite.length > 0 && body.type && body.company) {
-      updateOverviewNote(body.company, body.type);
-    }
-
-    return NextResponse.json({ ok: true, storage: "filesystem" });
-  } catch (error) {
-    console.error("Filesystem write error:", error);
-    return NextResponse.json({ ok: false, error: "Filesystem error" }, { status: 500 });
+  const dir = path.dirname(fullPath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
+
+  const textToWrite = (body.text ?? "").trim();
+  fs.writeFileSync(fullPath, textToWrite, "utf8");
+
+  // Update Søknadsoversikt.md when any note is saved
+  if (textToWrite.length > 0 && body.type && body.company) {
+    updateOverviewNote(body.company, body.type);
+  }
+
+  return NextResponse.json({ ok: true });
 }
 
 function updateOverviewNote(company: string, noteType: NoteType) {
@@ -141,7 +108,7 @@ function updateOverviewNote(company: string, noteType: NoteType) {
   const today = new Date();
   const dateStr = `${today.getDate().toString().padStart(2, "0")}.${(today.getMonth() + 1).toString().padStart(2, "0")}.${today.getFullYear().toString().slice(2)}`;
 
-  const content = fs.readFileSync(OVERVIEW_PATH, "utf8");
+  let content = fs.readFileSync(OVERVIEW_PATH, "utf8");
   const lines = content.split(/\r?\n/);
 
   const startIdx = lines.findIndex((line) =>
@@ -175,12 +142,13 @@ function updateOverviewNote(company: string, noteType: NoteType) {
     if (!line.trim().startsWith("|")) continue;
 
     const parts = line.split("|").map((p) => p.trim());
-    if (parts.length < 21) continue;
+    if (parts.length < 21) continue; // Need at least 21 columns now
 
     const rawCompany = parts[1] || "";
     const companyName = rawCompany.replace(/\*\*/g, "").trim();
 
     if (companyName.toLowerCase() === company.toLowerCase()) {
+      // Update the appropriate column
       parts[columnIndex] = dateStr;
       lines[i] = "|" + parts.slice(1).join(" | ") + "|";
       break;
@@ -189,3 +157,6 @@ function updateOverviewNote(company: string, noteType: NoteType) {
 
   fs.writeFileSync(OVERVIEW_PATH, lines.join("\n"), "utf8");
 }
+
+
+
