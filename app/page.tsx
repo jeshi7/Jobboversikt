@@ -7,11 +7,12 @@ import { DreamList } from "./components/DreamList";
 import { Heading, BodyShort, Panel, Button } from "@navikt/ds-react";
 import fs from "node:fs";
 import path from "node:path";
+import { hasNote as kvHasNote, getContactDates, isKVAvailable } from "../lib/db";
 
 // Force dynamic rendering to ensure fresh file system reads
 export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const apps = loadApplications();
   const summary = summariseApplications(apps);
   const dreamCompanies = loadDreamlist();
@@ -20,8 +21,8 @@ export default function DashboardPage() {
   const sentApps = apps.filter((a) => a.status === "sendt" || a.status === "forberedes");
   const interviewApps = apps.filter((a) => a.status === "intervju");
   const plannedApps = apps.filter((a) => a.type === "planlagt");
-  const contactReminders = buildContactReminders(apps);
-  const intervjuReminders = buildIntervjuReminders(apps);
+  const contactReminders = await buildContactReminders(apps);
+  const intervjuReminders = await buildIntervjuReminders(apps);
 
   return (
     <div className="space-y-8">
@@ -159,70 +160,92 @@ type ContactType = "kontakt1" | "kontakt2" | "kontakt3" | "kontakt4" | "kontakt5
 type IntervjuType = "intervju1" | "intervju2" | "intervju3" | "intervju4";
 type ReminderType = ContactType | IntervjuType;
 
-function buildContactReminders(
+async function buildContactReminders(
   apps: ReturnType<typeof loadApplications>
-): {
+): Promise<{
   id: string;
   company: string;
   type: ReminderType;
   label: string;
-}[] {
+}[]> {
   const rows = loadOverviewRows();
+  const useKV = isKVAvailable();
 
-  return rows
-    .filter((row) => {
-      const status = row.status.toLowerCase();
-      const isSent = status.includes("✉️") || status.includes("sendt");
-      const inDialog = status.includes("dialog");
-      // Bare saker som faktisk er sendt eller i dialog
-      return isSent || inDialog;
-    })
-    .flatMap((row) => {
-      const contacts = [
-        row.contact1.trim(),
-        row.contact2.trim(),
-        row.contact3.trim(),
-        row.contact4.trim(),
-        row.contact5.trim()
-      ];
-      const app = apps.find(
-        (a) => a.company === row.company && a.type === "søknad"
-      );
+  const filteredRows = rows.filter((row) => {
+    const status = row.status.toLowerCase();
+    const isSent = status.includes("✉️") || status.includes("sendt");
+    const inDialog = status.includes("dialog");
+    return isSent || inDialog;
+  });
 
-      const items: {
-        id: string;
-        company: string;
-        type: ContactType;
-        label: string;
-      }[] = [];
+  const results: {
+    id: string;
+    company: string;
+    type: ReminderType;
+    label: string;
+  }[] = [];
 
-      // Check which contact notes exist
-      const basePath = path.join(
-        process.cwd(),
-        "Jobb_Søknad_Pakke",
-        "02_Søknader",
-        "Alle selskaper",
-        row.company
-      );
+  for (const row of filteredRows) {
+    const contacts = [
+      row.contact1.trim(),
+      row.contact2.trim(),
+      row.contact3.trim(),
+      row.contact4.trim(),
+      row.contact5.trim()
+    ];
+    const app = apps.find(
+      (a) => a.company === row.company && a.type === "søknad"
+    );
+
+    // Check which contact notes exist (from file system or KV)
+    const basePath = path.join(
+      process.cwd(),
+      "Jobb_Søknad_Pakke",
+      "02_Søknader",
+      "Alle selskaper",
+      row.company
+    );
+    
+    // Check file system first, then KV
+    const hasNotes: boolean[] = [];
+    for (let num = 1; num <= 5; num++) {
+      const fsExists = fs.existsSync(path.join(basePath, `Kontakt${num}-Notat.md`));
+      if (fsExists) {
+        hasNotes.push(true);
+      } else if (useKV) {
+        const kvExists = await kvHasNote(row.company, `kontakt${num}` as ContactType);
+        hasNotes.push(kvExists);
+      } else {
+        hasNotes.push(false);
+      }
+    }
+
+    // Also check KV for contact dates if available
+    let kvDates: Record<string, string> = {};
+    if (useKV) {
+      kvDates = await getContactDates(row.company);
+    }
+
+    // Find the first contact that needs to be done
+    for (let i = 0; i < 5; i++) {
+      const contactNum = i + 1;
+      let contactValue = contacts[i];
       
-      const hasNotes = [1, 2, 3, 4, 5].map((num) =>
-        fs.existsSync(path.join(basePath, `Kontakt${num}-Notat.md`))
-      );
+      // On Vercel, also check KV dates
+      if (useKV && kvDates[`kontakt${contactNum}`]) {
+        contactValue = kvDates[`kontakt${contactNum}`];
+      }
+      
+      const hasNote = hasNotes[i];
+      const hasPreviousNote = i > 0 ? hasNotes[i - 1] : false;
+      
+      // For Kontakt 1: show if no note exists and field is empty
+      // For Kontakt 2-5: show if previous note exists, current note doesn't exist, and field is empty
+      const needsContact = 
+        (contactNum === 1 && !hasNote && (contactValue === "" || contactValue === "-" || contactValue === "–")) ||
+        (contactNum > 1 && hasPreviousNote && !hasNote && (contactValue === "" || contactValue === "-" || contactValue === "–"));
 
-      // Find the first contact that needs to be done
-      for (let i = 0; i < 5; i++) {
-        const contactNum = i + 1;
-        const contactValue = contacts[i];
-        const hasNote = hasNotes[i];
-        const hasPreviousNote = i > 0 ? hasNotes[i - 1] : false;
-        
-        // For Kontakt 1: show if no note exists and field is empty
-        // For Kontakt 2-5: show if previous note exists, current note doesn't exist, and field is empty
-        const needsContact = 
-          (contactNum === 1 && !hasNote && (contactValue === "" || contactValue === "-" || contactValue === "–")) ||
-          (contactNum > 1 && hasPreviousNote && !hasNote && (contactValue === "" || contactValue === "-" || contactValue === "–"));
-
-        if (!needsContact) continue;
+      if (!needsContact) continue;
 
         const contactType = `kontakt${contactNum}` as ContactType;
         let label = `Kontakt ${contactNum}`;
@@ -274,7 +297,7 @@ function buildContactReminders(
           }
         }
 
-        items.push({
+        results.push({
           id: `${row.company}-${contactType}`,
           company: row.company,
           type: contactType,
@@ -284,123 +307,133 @@ function buildContactReminders(
         // Only show the first contact that needs to be done
         break;
       }
+    }
 
-      return items;
-    });
+  return results;
 }
 
-function buildIntervjuReminders(
+async function buildIntervjuReminders(
   apps: ReturnType<typeof loadApplications>
-): {
+): Promise<{
   id: string;
   company: string;
   type: IntervjuType;
   label: string;
-}[] {
+}[]> {
   const rows = loadOverviewRows();
+  const useKV = isKVAvailable();
 
-  return rows
-    .filter((row) => {
-      const status = row.status.toLowerCase();
-      const isSent = status.includes("✉️") || status.includes("sendt");
-      const inDialog = status.includes("dialog");
-      const hasIntervju = status.includes("intervju");
-      // Bare saker som faktisk er sendt, i dialog, eller har intervju
-      return isSent || inDialog || hasIntervju;
-    })
-    .flatMap((row) => {
-      const intervjuer = [
-        row.intervju1.trim(),
-        row.intervju2.trim(),
-        row.intervju3.trim(),
-        row.intervju4.trim()
-      ];
-      const app = apps.find(
-        (a) => a.company === row.company && a.type === "søknad"
-      );
+  const filteredRows = rows.filter((row) => {
+    const status = row.status.toLowerCase();
+    const isSent = status.includes("✉️") || status.includes("sendt");
+    const inDialog = status.includes("dialog");
+    const hasIntervju = status.includes("intervju");
+    return isSent || inDialog || hasIntervju;
+  });
 
-      const items: {
-        id: string;
-        company: string;
-        type: IntervjuType;
-        label: string;
-      }[] = [];
+  const results: {
+    id: string;
+    company: string;
+    type: IntervjuType;
+    label: string;
+  }[] = [];
 
-      // Check which interview notes exist
-      const basePath = path.join(
-        process.cwd(),
-        "Jobb_Søknad_Pakke",
-        "02_Søknader",
-        "Alle selskaper",
-        row.company
-      );
+  for (const row of filteredRows) {
+    const intervjuer = [
+      row.intervju1.trim(),
+      row.intervju2.trim(),
+      row.intervju3.trim(),
+      row.intervju4.trim()
+    ];
+    const app = apps.find(
+      (a) => a.company === row.company && a.type === "søknad"
+    );
+
+    // Check which interview notes exist
+    const basePath = path.join(
+      process.cwd(),
+      "Jobb_Søknad_Pakke",
+      "02_Søknader",
+      "Alle selskaper",
+      row.company
+    );
+    
+    // Check file system first, then KV
+    const hasNotes: boolean[] = [];
+    for (let num = 1; num <= 4; num++) {
+      const fsExists = fs.existsSync(path.join(basePath, `Intervju${num}-Notat.md`));
+      if (fsExists) {
+        hasNotes.push(true);
+      } else if (useKV) {
+        const kvExists = await kvHasNote(row.company, `intervju${num}` as IntervjuType);
+        hasNotes.push(kvExists);
+      } else {
+        hasNotes.push(false);
+      }
+    }
+
+    // Also check KV for interview dates if available
+    let kvDates: Record<string, string> = {};
+    if (useKV) {
+      kvDates = await getContactDates(row.company);
+    }
+
+    // Find the first interview that needs to be done
+    for (let i = 0; i < 4; i++) {
+      const intervjuNum = i + 1;
+      let intervjuValue = intervjuer[i];
       
-      const hasNotes = [1, 2, 3, 4].map((num) =>
-        fs.existsSync(path.join(basePath, `Intervju${num}-Notat.md`))
-      );
+      // On Vercel, also check KV dates
+      if (useKV && kvDates[`intervju${intervjuNum}`]) {
+        intervjuValue = kvDates[`intervju${intervjuNum}`];
+      }
+      
+      const hasNote = hasNotes[i];
+      const hasPreviousNote = i > 0 ? hasNotes[i - 1] : false;
+      
+      // For Intervju 1: show if no note exists and field is empty
+      // For Intervju 2-4: show if previous note exists, current note doesn't exist, and field is empty
+      const needsIntervju = 
+        (intervjuNum === 1 && !hasNote && (intervjuValue === "" || intervjuValue === "-" || intervjuValue === "–")) ||
+        (intervjuNum > 1 && hasPreviousNote && !hasNote && (intervjuValue === "" || intervjuValue === "-" || intervjuValue === "–"));
 
-      // Find the first interview that needs to be done
-      for (let i = 0; i < 4; i++) {
-        const intervjuNum = i + 1;
-        const intervjuValue = intervjuer[i];
-        const hasNote = hasNotes[i];
-        const hasPreviousNote = i > 0 ? hasNotes[i - 1] : false;
+      if (!needsIntervju) continue;
+
+      const intervjuType = `intervju${intervjuNum}` as IntervjuType;
+      let label = `Intervju ${intervjuNum}`;
+
+      if (intervjuNum === 1) {
+        label = "Intervju 1 · planlagt";
+      } else {
+        // Intervju 2-4: based on previous interview date
+        const previousIntervjuValue = intervjuer[i - 1];
+        let previousDate = parseNorwegianDate(previousIntervjuValue);
         
-        // For Intervju 1: show if no note exists and field is empty
-        // For Intervju 2-4: show if previous note exists, current note doesn't exist, and field is empty
-        const needsIntervju = 
-          (intervjuNum === 1 && !hasNote && (intervjuValue === "" || intervjuValue === "-" || intervjuValue === "–")) ||
-          (intervjuNum > 1 && hasPreviousNote && !hasNote && (intervjuValue === "" || intervjuValue === "-" || intervjuValue === "–"));
-
-        if (!needsIntervju) continue;
-
-        const intervjuType = `intervju${intervjuNum}` as IntervjuType;
-        let label = `Intervju ${intervjuNum}`;
-
-        if (intervjuNum === 1) {
-          // Intervju 1: based on when interview was scheduled (use first contact date or sent date as fallback)
-          const firstContactDate = parseNorwegianDate(row.contact1.trim()) || 
-                                   parseNorwegianDate(row.sentDate ?? "");
-          
-          if (firstContactDate) {
-            label = `Intervju 1 · planlagt`;
-          } else {
-            label = "Intervju 1 · planlagt";
-          }
-        } else {
-          // Intervju 2-4: based on previous interview date
-          const previousIntervjuValue = intervjuer[i - 1];
-          let previousDate = parseNorwegianDate(previousIntervjuValue);
-          
-          // If previous interview field is empty but note exists, try to get date from file
-          if (!previousDate && hasPreviousNote) {
-            const previousNotePath = path.join(basePath, `Intervju${i}-Notat.md`);
-            if (fs.existsSync(previousNotePath)) {
-              const stat = fs.statSync(previousNotePath);
-              previousDate = stat.mtime;
-            }
-          }
-
-          if (previousDate) {
-            label = `Intervju ${intervjuNum} · planlagt`;
-          } else {
-            label = `Intervju ${intervjuNum} · planlagt`;
+        // If previous interview field is empty but note exists, try to get date from file
+        if (!previousDate && hasPreviousNote) {
+          const previousNotePath = path.join(basePath, `Intervju${i}-Notat.md`);
+          if (fs.existsSync(previousNotePath)) {
+            const stat = fs.statSync(previousNotePath);
+            previousDate = stat.mtime;
           }
         }
 
-        items.push({
-          id: `${row.company}-${intervjuType}`,
-          company: row.company,
-          type: intervjuType,
-          label
-        });
-        
-        // Only show the first interview that needs to be done
-        break;
+        label = `Intervju ${intervjuNum} · planlagt`;
       }
 
-      return items;
-    });
+      results.push({
+        id: `${row.company}-${intervjuType}`,
+        company: row.company,
+        type: intervjuType,
+        label
+      });
+      
+      // Only show the first interview that needs to be done
+      break;
+    }
+  }
+
+  return results;
 }
 
 function daysUntil(fromDate: Date, offsetDays: number): {
