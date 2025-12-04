@@ -12,13 +12,13 @@ Dette er ditt komplette bibliotek av ferdige tekstblokker.
 ## 🧠 1. UX, Brukerinnsikt & Tilgjengelighet (UU)
 
 **Variant A (Empati & Innsikt - "Service Heart"):**
-"Etter å ha jobbet med alt fra barnehagebarn til hotellgjester, har jeg lært at god UX handler om det samme som god service: Å se mennesket. Min tilnærming til design er dypt forankret i denne erfaringen. Jeg designer ikke bare for at det skal se pent ut, men for å fjerne friksjon og gjøre hverdagen enklere. Jeg er vant til å sette meg inn i andres perspektiv – en ferdighet jeg virkelig fikk testet som funksjonsassistent, der jeg lærte at 'tilgjengelighet' ikke bare er et krav, men en forutsetning for deltakelse."
+"Etter å ha jobbet med alt fra barnehagebarn til hotellgjester, har jeg lært at god UX handler om det samme som god service: Å se mennesket. Min tilnærming til design er dypt forankret i denne erfaringen. Jeg designer ikke bare for at det skal se pent ut, men for å fjerne friksjon og gjøre hverdagen enklere. Jeg er vant til å sette meg inn i andres perspektiv – en ferdighet jeg virkelig fikk testet som funksjonsassistent, der jeg lærte at 'tilgjengelighet' ikke bare er et krav, men en forutsetning for deltakelse. Fra hotellbransjen har jeg også erfaring med Opera, et komplekst system for reservasjoner og gjesteservice, som lærte meg hvordan gode systemer kan støtte opp under menneskelig interaksjon."
 
 **Variant B (Pragmatisk & Prosessorientert - "Lean UX"):**
 "Jeg tror på en pragmatisk tilnærming til innsikt. Vi trenger ikke alltid tunge rapporter; ofte handler det om å prate med folk, kjøre kjappe tester og observere hva de *faktisk* gjør, ikke bare hva de sier. Jeg bruker disse mønstrene direkte til å rydde opp i informasjonsarkitektur og brukerreiser. Målet mitt er alltid å redusere kognitiv last for brukeren – det skal være lett å gjøre rett."
 
 **Variant C (Tilgjengelighet / UU - Spesialkompetanse):**
-"Gjennom jobben min i NAV fikk jeg en praktisk masterclass i universell utforming (UU) ved å jobbe tett med en blind kollega. Det lærte meg å designe løsninger som fungerer for *alle*, uavhengig av funksjonsevne. Jeg vet hvordan en skjermleser tolker koden min, og hvorfor kontrast og semantikk er kritisk. For meg er UU en kvalitetsindikator på godt håndverk, ikke noe vi 'klistrer på' til slutt."
+"Gjennom jobben min i NAV fikk jeg en praktisk masterclass i universell utforming (UU) ved å jobbe tett med en blind kollega. Jeg ble godt kjent med Aksel, NAV sitt designsystem, som er bygget med UU som fundament. Det lærte meg å designe løsninger som fungerer for *alle*, uavhengig av funksjonsevne. Jeg vet hvordan en skjermleser tolker koden min, og hvorfor kontrast og semantikk er kritisk. For meg er UU en kvalitetsindikator på godt håndverk, ikke noe vi 'klistrer på' til slutt."
 
 **Variant D (Brukerreiser & Flyt):**
 "Jeg elsker å dykke ned i komplekse brukerreiser og forenkle dem. Enten det er en checkout-prosess eller et internt verktøy, ser jeg etter hvor brukeren stopper opp. Jeg kartlegger dagens situasjon ('As-is'), identifiserer smertepunkter, og skisserer en ønsket fremtid ('To-be') som både løser problemet og gir en bedre opplevelse."
@@ -31,7 +31,7 @@ Dette er ditt komplette bibliotek av ferdige tekstblokker.
 "Jeg trives best i krysningspunktet mellom det visuelle og det funksjonelle. Siden jeg ofte har jobbet i mindre team og som freelancer, er jeg vant til å se helheten – fra logo og fargepalett til ferdig nettside og innhold i sosiale medier. Jeg sjonglerer Photoshop, Illustrator og Figma sømløst for å sikre at merkevaren fremstår helhetlig i alle kanaler."
 
 **Variant B (Struktur & Designsystemer - "Atomic Design"):**
-"Kreativitet fungerer best når grunnmuren er solid. Jeg er kanskje mer strukturert enn jeg liker å innrømme, og trives med å bygge systemer for designet mitt. Jeg holder orden på filer, maler og komponenter (Design Systems) slik at det er lett for andre å ta over eller bygge videre. For meg er orden i sysakene nøkkelen til effektiv produksjon og skalerbarhet."
+"Kreativitet fungerer best når grunnmuren er solid. Jeg er kanskje mer strukturert enn jeg liker å innrømme, og trives med å bygge systemer for designet mitt. Jeg holder orden på filer, maler og komponenter (Design Systems) slik at det er lett for andre å ta over eller bygge videre. For meg er orden i sysakene nøkkelen til effektiv produksjon og skalerbarhet. I NAV jobbet jeg tett med Aksel, deres designsystem, noe som lærte meg å tenke i komponenter og universell utforming fra grunnen av."
 
 **Variant C (Visuell Storytelling):**
 "Design er mer enn pynt; det er visuell historiefortelling. Jeg jobber strategisk med typografi, fargebruk og bildevalg for å vekke de rette følelsene hos mottakeren. Jeg vet at et bilde kan si mer enn tusen ord, men bare hvis det er *riktig* bilde brukt i *riktig* kontekst."
@@ -68,6 +68,9 @@ Dette er ditt komplette bibliotek av ferdige tekstblokker.
 
 **Variant B (Hybrid-hodet Design/Tech):**
 "Selv om jeg er designer, er jeg ikke redd for koden. Jeg har bygget nettsider i Webflow og WordPress, og forstår logikken bak HTML og CSS. Det gjør at jeg kan snakke språket til utviklerne og designe løsninger som faktisk er mulige å bygge innenfor budsjett og tidsfrister. Jeg liker å vite hvordan ting fungerer 'under panseret'."
+
+**Variant C (Profesjonelle Systemer & Verktøy):**
+"Jeg har jobbet med profesjonelle systemer som krever både teknisk forståelse og brukeropplevelse. I NAV ble jeg godt kjent med Aksel (designsystemet deres) og Sanity (CMS), noe som lærte meg å tenke i komponenter og strukturert innhold. Fra hotellbransjen har jeg erfaring med Opera, et komplekst system for reservasjoner og gjesteservice. Disse erfaringene har gitt meg en unik forståelse for hvordan store systemer fungerer i praksis – både for brukerne og for de som bygger dem."
 
 ---
 

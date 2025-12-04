@@ -1,5 +1,5 @@
 # UX-Designer
-**Om Ditio**
+**Ditio**
 
 *   **Frist:** Snarest
 *   **Ansettelsesform:** Fast
