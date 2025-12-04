@@ -77,29 +77,39 @@ export async function POST(request: Request) {
   ];
 
   if (!body.company || !body.type || !validTypes.includes(body.type)) {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    return NextResponse.json({ ok: false, message: "Ugyldig forespørsel" }, { status: 400 });
   }
 
   const fullPath = getNotePath(body.company, body.type);
 
   if (!fullPath.startsWith(BASE_DIR)) {
-    return NextResponse.json({ ok: false }, { status: 403 });
+    return NextResponse.json({ ok: false, message: "Ugyldig filsti" }, { status: 403 });
   }
 
-  const dir = path.dirname(fullPath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  try {
+    const dir = path.dirname(fullPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    const textToWrite = (body.text ?? "").trim();
+    fs.writeFileSync(fullPath, textToWrite, "utf8");
+
+    // Update Søknadsoversikt.md when any note is saved
+    if (textToWrite.length > 0 && body.type && body.company) {
+      updateOverviewNote(body.company, body.type);
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    // Vercel has a read-only file system - this will fail in production
+    const isVercel = process.env.VERCEL === "1";
+    const message = isVercel 
+      ? "Lagring fungerer kun lokalt. Vercel har et read-only filsystem."
+      : `Kunne ikke lagre: ${error instanceof Error ? error.message : "Ukjent feil"}`;
+    
+    return NextResponse.json({ ok: false, message }, { status: 500 });
   }
-
-  const textToWrite = (body.text ?? "").trim();
-  fs.writeFileSync(fullPath, textToWrite, "utf8");
-
-  // Update Søknadsoversikt.md when any note is saved
-  if (textToWrite.length > 0 && body.type && body.company) {
-    updateOverviewNote(body.company, body.type);
-  }
-
-  return NextResponse.json({ ok: true });
 }
 
 function updateOverviewNote(company: string, noteType: NoteType) {
