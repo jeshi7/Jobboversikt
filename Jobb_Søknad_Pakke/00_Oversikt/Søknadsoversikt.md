@@ -22,6 +22,7 @@ Her holder vi oversikt over prosessene. Flytt linjene nedover etter hvert som st
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **E-Wheels Norge** | Content Creator | Fast | 100% | Drammen | Snarest | Frode Lund Nielsen | Group CPO | 48 11 88 11 | SEO, E-handel, AI | [Link](https://www.finn.no/job/ad/435413733) |
 | **Scoopr** | Digital markedsfører | Fast | 100% | Oslo | Snarest | Jannicke Østlie | Seniorrådgiver (Headon) | 95 25 25 65 | Konsepter, kampanjer, AI | [Link](https://www.finn.no/job/ad/440217170) |
+| **Maksimer** | Digital Designer | Fast | 100% | Bergen | Snarest | Anja Øren Wanvik | Head of Project | 41 49 77 22 | E-handel, UX/UI, Figma | [Link](https://www.finn.no/job/ad/435418490) |
 
 ## 🔴 Avsluttet / Arkivert
 
