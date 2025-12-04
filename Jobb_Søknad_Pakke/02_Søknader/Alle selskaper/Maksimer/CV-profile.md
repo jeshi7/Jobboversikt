@@ -4,7 +4,7 @@
 
 ---
 
-Jeg er en designer som tenker i systemer - fra merkevare til ferdig nettbutikk. Jeg har bygget nettsider i WordPress og Webflow, designet i Figma, og brukt AI-verktøy til alt fra idémyldring til prototyper. Designsystemer og komponentbibliotek er noe jeg brenner for. Det sparer tid, skaper konsistens, og gjør at alle på teamet snakker samme språk.
+Jeg liker å bygge ting som funker. Har rotet meg borti det meste egentlig - WordPress, Webflow, Figma. Bruker AI når det gir mening, men det er jo fortsatt jeg som bestemmer. Det jeg digger mest er når designet blir et system. Ikke fordi det høres fancy ut, men fordi det gjør jobben lettere for alle. Færre spørsmål, raskere leveranser.
 
-Min bakgrunn fra service (hotell, NAV) har gitt meg en innebygd empati for brukeren. Jeg tenker alltid på hele flyten - fra noen ser et produkt til de trykker "betal". Jeg forstår nok kode til å designe ting som faktisk lar seg bygge, og liker å jobbe tett med utviklere for å få det til.
+Bakgrunnen min er litt rar for en designer. Hotell. NAV. Men det har gitt meg noe viktig: jeg tenker på folk først. Hvem skal bruke dette? Hva prøver de å få til? Den tankegangen tar jeg med meg inn i alt jeg gjør. Og ja, jeg kan nok kode til å vite hva som er realistisk å bygge.
 
