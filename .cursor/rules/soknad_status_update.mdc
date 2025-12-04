@@ -81,6 +81,8 @@ Alle selskaper/Oda/
 - For Kontakt 2-5 vises lenker til alle forrige kontakt-notater i popup-en
 - Brukeren kan toggle mellom "Kontakt" og "Intervju" i "Hva du kan gjøre nå"-seksjonen
 - Eksisterende notater vises i read-only modus med "Rediger"-knapp for å aktivere redigering
+- **Rediger fra visnings-popup**: Når brukeren klikker "Rediger" i visnings-popup (for tidligere notater), åpnes redigerings-popup direkte i redigeringsmodus - ingen ekstra klikk nødvendig
+- **Feilhåndtering**: Hvis lagring feiler, vises en rød feilmelding i popup-en med detaljer om hva som gikk galt
 
 **Intervju-oppfølging (4 intervjuer):**
 - Systemet støtter opptil **4 intervjuer** per søknad
@@ -91,7 +93,14 @@ Alle selskaper/Oda/
   - Søknadsoversikt.md oppdateres automatisk med dagens dato i riktig "Intervju N"-kolonne
   - Neste intervju vises automatisk i appen
 - For Intervju 2-4 vises lenker til alle forrige intervju-notater i popup-en
-- Samme rediger-funksjonalitet som for kontakter
+- Samme rediger-funksjonalitet som for kontakter (direkte redigeringsmodus fra visnings-popup)
+
+**Notat-lagring (ContactReminders-komponenten):**
+- `ContactReminders.tsx` håndterer både kontakt- og intervju-notater
+- **Lagre-knappen**: Klikk "Lagre" for å lagre notatet - det lagres via `/api/contact-notes` API
+- **Rediger-flyt**: Når du klikker "Rediger" fra en visnings-popup, åpnes redigerings-popup direkte i redigeringsmodus (skipFetch-mekanisme)
+- **Feilmelding**: Hvis API-kallet feiler, vises en rød feilboks med detaljert informasjon
+- **Automatisk oppdatering**: Etter vellykket lagring lukkes popup-en og siden lastes på nytt for å vise oppdaterte data
 
 **Dokumentlenker:**
 - Filer som matcher "Utlysning.md" eller lignende (`.md`-filer med "utlysning" i navnet) lenker til `listingUrl` fra utlysningen i stedet for å laste ned filen
