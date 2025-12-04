@@ -15,6 +15,89 @@ interface Props {
   grouped: Record<string, DreamCompany[]>;
 }
 
+function getTailoredTips(company: DreamCompany): string[] {
+  const cat = company.category.toLowerCase();
+  const name = company.name;
+
+  // Outdoor / Lifestyle
+  if (cat.includes("outdoor") || cat.includes("lifestyle")) {
+    return [
+      `Vis frem visuell storytelling - ${name} lever av sterke bilder og følelser`,
+      "Lag et moodboard som matcher deres premium-estetikk og send det med søknaden",
+      "Trekk frem erfaring med merkevarebygging og helhetlig visuell identitet",
+      "Din bakgrunn fra service viser at du forstår kundeopplevelsen - bruk det aktivt",
+    ];
+  }
+
+  // Tech / UX / Produkt
+  if (cat.includes("tech") || cat.includes("ux") || cat.includes("produkt")) {
+    return [
+      "Fokuser på UX-tankesettet ditt - brukerreiser, friksjon og innsikt",
+      `${name} verdsetter folk som forstår både design og kode - vis at du kan snakke med utviklere`,
+      "Trekk frem AI-verktøyene du bruker og hvordan de gjør deg mer effektiv",
+      "Din erfaring med universell utforming fra NAV er gull verdt her",
+    ];
+  }
+
+  // Media / Produksjon / Innhold
+  if (cat.includes("media") || cat.includes("produksjon") || cat.includes("innhold")) {
+    return [
+      "Vis at du kan levere under press - de jobber med stramme frister",
+      `Send en kort video-pitch eller redigert demo til ${name} - vis frem produksjonsferdighetene`,
+      "Trekk frem din evne til å jobbe med tekst OG bilde - du er en hybrid",
+      "Din fortellerstemme er din styrke - bruk den i søknaden",
+    ];
+  }
+
+  // Designbyråer / Konsulenthus
+  if (cat.includes("byrå") || cat.includes("konsulent") || cat.includes("design")) {
+    return [
+      `${name} ser etter folk som tåler høyt tempo - vis at du trives når det koker`,
+      "Lag en case-studie av et tidligere prosjekt som viser prosess, ikke bare resultat",
+      "Din tverrfaglige profil (design + tech + innhold) passer perfekt for byråmodellen",
+      "Vis at du kan både ta imot og gi feedback - iterasjon er livsnerven i byrå",
+    ];
+  }
+
+  // In-house / Store merkevarer
+  if (cat.includes("in-house") || cat.includes("merkevare")) {
+    return [
+      `${name} har etablerte systemer - vis at du kan jobbe innenfor rammer og bygge videre`,
+      "Trekk frem din erfaring med designsystemer og struktur",
+      "Store selskaper verdsetter lagspillere - bruk fotball-metaforen din",
+      "Foreslå en konkret forbedring du ser på deres digitale flater",
+    ];
+  }
+
+  // Retail / E-commerce
+  if (cat.includes("retail") || cat.includes("e-commerce") || cat.includes("handel")) {
+    return [
+      "Snakk om konvertering og hvordan design påvirker kjøpsbeslutninger",
+      `${name} trenger folk som produserer raskt - vis at du kan levere volum uten å miste kvalitet`,
+      "Din forståelse for SEO og synlighet er relevant her - trekk det frem",
+      "Foreslå en A/B-test eller forbedring basert på deres nåværende nettside",
+    ];
+  }
+
+  // Kultur / Event / Opplevelser
+  if (cat.includes("kultur") || cat.includes("event") || cat.includes("opplevelse")) {
+    return [
+      `${name} handler om følelser og opplevelser - vis at du forstår dramaturgien`,
+      "Din bakgrunn fra hotell og service er direkte overførbar - 'live UX'",
+      "Lag en visuell pitch som viser hvordan du ville kommunisert en av deres opplevelser",
+      "Trekk frem evnen din til å jobbe med både det digitale og det fysiske",
+    ];
+  }
+
+  // Fallback for unknown categories
+  return [
+    `Undersøk ${name} sin kultur og tilpass søknaden til deres tone`,
+    "Vis frem din hybridkompetanse - design, innhold og teknisk forståelse",
+    "Bruk din autentiske stemme - den skiller deg fra andre søkere",
+    "Lag noe konkret som viser hva du kan tilføre dem",
+  ];
+}
+
 export function DreamList({ companies, grouped }: Props) {
   const [selected, setSelected] = useState<DreamCompany | null>(null);
 
@@ -87,13 +170,12 @@ export function DreamList({ companies, grouped }: Props) {
 
               <div className="space-y-1">
                 <Heading level="3" size="xsmall">
-                  Tips
+                  Tips tilpasset {selected.name}
                 </Heading>
                 <ul className="space-y-1 text-sm text-slate-600">
-                  <li>• Sjekk karrieresiden deres jevnlig</li>
-                  <li>• Finn kontaktpersoner på LinkedIn</li>
-                  <li>• Lag en skreddersydd spontansøknad</li>
-                  <li>• Tenk på hvem i nettverket ditt som kan introdusere deg</li>
+                  {getTailoredTips(selected).map((tip, i) => (
+                    <li key={i}>• {tip}</li>
+                  ))}
                 </ul>
               </div>
 
