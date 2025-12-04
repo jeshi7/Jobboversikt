@@ -1,46 +1,44 @@
 ---
-description: Automatisk oppsett av bedriftsmappe og kopiering av utlysning ved oppstart av søknad
-globs: 02_Søknader/Planlagte_Søknader/*.md, 02_Søknader/Alle selskaper/*
+description: Automatisk oppsett av bedriftsmappe og kopiering av utlysning ved ny planlagt søknad
+globs: 02_Søknader/Planlagte_Søknader/*.md
 ---
 
-### 🚀 Oppsett av Ny Søknad (KRITISK - ALLTID UTFØR)
+### 🚀 Oppsett av Ny Planlagt Søknad (KRITISK - ALLTID UTFØR)
 
-Når brukeren ber om å **starte arbeidet** med en søknad (f.eks. "lag søknad for E-Wheels"), **SKAL du ALLTID og UMIDDELBART** utføre følgende:
+Når en ny utlysning/stilling lagres som planlagt søknad, **SKAL du ALLTID og UMIDDELBART** utføre ALLE følgende handlinger i SAMME operasjon:
 
 **Dine handlinger skal være:**
 
-1.  **Opprett Bedriftsmappe:**
-    *   Opprett `02_Søknader/Alle selskaper/[Bedriftsnavn]/` hvis den ikke finnes.
+1.  **Opprett fil i `Planlagte_Søknader/`:**
+    *   Filnavn = bedriftsnavnet (f.eks. `Scoopr.md`)
+    *   Innhold = all info fra utlysningen
 
-2.  **Kopier/Opprett Utlysning:**
-    *   Hvis filen finnes i `Planlagte_Søknader/[Bedrift].md`:
-        *   Kopier innholdet til `Alle selskaper/[Bedrift]/Utlysning.md`
-        *   **SLETT originalfilen fra `Planlagte_Søknader/`** ← VIKTIG!
-    *   Hvis ikke, opprett `Utlysning.md` basert på info brukeren gir.
+2.  **Opprett mappe i `Alle selskaper/`:**
+    *   Opprett `02_Søknader/Alle selskaper/[Bedriftsnavn]/`
+    *   Eksempel: `Alle selskaper/Scoopr/`
 
-3.  **Oppdater `Søknadsoversikt.md`:**
-    *   Fjern bedriften fra "🟡 Under planlegging" (hvis den var der)
-    *   Legg til/oppdater i "🟢 Aktive Prosesser" med status `📝 Under arbeid`
+3.  **Kopier utlysning til bedriftsmappen:**
+    *   Kopier innholdet til `Alle selskaper/[Bedrift]/Utlysning.md`
+    *   Mappen er da klar for CV/søknadsarbeid senere
 
-4.  **Bekreft til brukeren:**
-    *   Fortell at mappen er opprettet og klar for CV/søknadsarbeid.
+4.  **Oppdater `Søknadsoversikt.md`:**
+    *   Legg til i "🟡 Under planlegging (Ikke startet)"
 
-**Eksempel på flyt:**
+5.  **Bekreft til brukeren:**
+    *   Fortell at stillingen er lagret og klar
+
+**Eksempel - bruker sier "lag planlagt søknad for Scoopr":**
 ```
-BRUKER: "Start søknad for E-Wheels Norge"
-
-DU GJØR:
-1. Opprett: Alle selskaper/E-Wheels Norge/
-2. Kopier: Planlagte_Søknader/E-Wheels Norge.md → Alle selskaper/E-Wheels Norge/Utlysning.md
-3. Slett: Planlagte_Søknader/E-Wheels Norge.md
-4. Oppdater: Søknadsoversikt.md (flytt fra Under planlegging → Aktive Prosesser)
+DU GJØR (alt samtidig):
+1. Opprett: Planlagte_Søknader/Scoopr.md
+2. Opprett: Alle selskaper/Scoopr/
+3. Kopier:  Alle selskaper/Scoopr/Utlysning.md
+4. Oppdater: Søknadsoversikt.md → "Under planlegging"
 ```
 
-**Når legges til en HELT NY utlysning (ikke i Planlagte_Søknader):**
-1.  Opprett bedriftsmappe i `Alle selskaper/`
-2.  Opprett `Utlysning.md` med all info
-3.  Legg direkte til i "Aktive Prosesser" med `📝 Under arbeid`
-4.  (Hopp over Planlagte_Søknader - går rett til arbeid)
+**Når arbeidet STARTER (bruker ber om CV/søknad):**
+1.  Flytt rad i Søknadsoversikt fra "Under planlegging" → "Aktive Prosesser" med `📝 Under arbeid`
+2.  Slett filen fra `Planlagte_Søknader/` (utlysningen ligger allerede i `Alle selskaper/`)
 
 **Hvorfor?**
-For å holde systemet rent: `Planlagte_Søknader/` = kun ideer, `Alle selskaper/` = aktive prosesser. Ingen duplikater.
+Mappen i `Alle selskaper/` klargjøres umiddelbart slik at brukeren kan starte arbeid når som helst uten ekstra oppsett. `Planlagte_Søknader/` brukes kun som "huskeliste" for ideer.
