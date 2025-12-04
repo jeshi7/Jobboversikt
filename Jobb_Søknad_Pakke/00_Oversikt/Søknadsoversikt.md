@@ -25,6 +25,7 @@ Her holder vi oversikt over prosessene. Flytt linjene nedover etter hvert som st
 | **Maksimer** | Digital Designer | Fast | 100% | Bergen | Snarest | Anja Øren Wanvik | Head of Project | 41 49 77 22 | E-handel, UX/UI, Figma | [Link](https://www.finn.no/job/ad/435418490) |
 | **Ditio** | UX-Designer | Fast | 100% | Bergen | Snarest | Oskar Kvamme | Teknisk produkteier | 48 12 59 04 | SaaS, UX-innsikt, Figma | [Link](https://www.finn.no/job/ad/439278404) |
 | **Plantasjen** | Content Creator | Fast | 100% | Skjetten | Snarest | Anna Blom Rian | Rekrutteringsleder | 90 07 39 99 | Video, foto, AI, SoMe | [Link](https://www.finn.no/job/ad/438800337) |
+| **Presisjons Teknikk** | Markedsfører | Fast | 100% | Oslo | Snarest | Tiril Normann | Rekrutterende Leveranseansvarlig (StudentConsulting) | - | SEO, SoMe, Google Ads | [Link](https://www.finn.no/job/ad/439872549) |
 
 ## 🔴 Avsluttet / Arkivert
 
