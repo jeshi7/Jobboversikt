@@ -13,17 +13,18 @@ Statusen til en søknad bestemmes av **hva som ligger i bedriftsmappen** i `Alle
 - Vises i "🟡 Under planlegging" i Søknadsoversikt
 - Vises i "Planlagt"-kolonnen i appen
 
-**Nivå 2: "Under arbeid"**
+**Nivå 2: "Under arbeid" / "Forbereder"**
 - Mappen inneholder `Utlysning.md` **pluss** andre filer (f.eks. `CV-profile.md`, `Søknadsbrev.md`, notater)
 - Men IKKE begge PDF-er ennå
 - Vises i "🟢 Aktive Prosesser" med status `📝 Under arbeid`
-- Vises i "Sendt"-kolonnen i appen (men ikke ferdig)
+- Vises i "Forbereder"-kolonnen i appen (kolonnen "Notat / søknad" viser "Forbereder" når det mangler begge PDF-filer)
 
 **Nivå 3: "Sendt"**
 - Mappen inneholder **begge PDF-er**:
   - ✅ `CV - [Navn].pdf`
   - ✅ `Søknadsbrev - [Bedrift].pdf` eller `Cover Letter - [Bedrift].pdf`
 - Vises i "🟢 Aktive Prosesser" med status `✉️ Sendt`
+- Vises i "Sendt søknad"-kolonnen i appen (kolonnen "Notat / søknad" viser "Sendt søknad" når begge PDF-filer er på plass)
 - `Dato sendt` fylles ut med dagens dato
 - Nedtelling starter for Kontakt 1/2
 
@@ -57,5 +58,10 @@ Alle selskaper/Oda/
     *   Status: `✉️ Sendt`
     *   Fyll ut `Dato sendt` med dagens dato
 
+**"Notat / søknad"-kolonne i appen:**
+- **"Planlagt idé / notat"**: For selskaper i `Planlagte_Søknader/` eller mapper med bare `Utlysning.md`
+- **"Forbereder"**: For selskaper i `Alle selskaper/` som mangler begge PDF-filer (enten ingen eller bare én PDF)
+- **"Sendt søknad"**: For selskaper i `Alle selskaper/` som har begge PDF-filer (CV og søknadsbrev/cover letter)
+
 **Hvorfor?**
-For å ha presis kontroll over hvor i prosessen hver søknad er. Bare det å ha en mappe klar betyr ikke at arbeidet har startet.
+For å ha presis kontroll over hvor i prosessen hver søknad er. Bare det å ha en mappe klar betyr ikke at arbeidet har startet. "Notat / søknad"-kolonnen gir rask visuell indikasjon på om søknaden er klar til å sendes eller ikke.

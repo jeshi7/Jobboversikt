@@ -66,7 +66,9 @@ export default function ApplicationsPage() {
                     <td className="px-4 py-3 align-top text-xs text-slate-500">
                       {app.type === "planlagt"
                         ? "Planlagt idé / notat"
-                        : "Sendt søknad"}
+                        : hasBothPdfs(app.resources)
+                        ? "Sendt søknad"
+                        : "Forbereder"}
                     </td>
                   <td className="px-4 py-3 align-top text-xs text-slate-500">
                     <ul className="space-y-0.5">
@@ -155,6 +157,24 @@ function getPrimaryResources(
   );
   const base = important.length > 0 ? important : resources;
   return base.slice(0, 3);
+}
+
+function hasBothPdfs(
+  resources: { name: string; relativePath: string }[]
+): boolean {
+  const hasCvPdf = resources.some(
+    (r) =>
+      r.name.toLowerCase().includes("cv") &&
+      r.name.toLowerCase().endsWith(".pdf")
+  );
+  const hasCoverLetterPdf = resources.some(
+    (r) =>
+      (r.name.toLowerCase().includes("søknad") ||
+        r.name.toLowerCase().includes("cover letter") ||
+        r.name.toLowerCase().includes("søknadsbrev")) &&
+      r.name.toLowerCase().endsWith(".pdf")
+  );
+  return hasCvPdf && hasCoverLetterPdf;
 }
 
 
