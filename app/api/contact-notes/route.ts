@@ -93,8 +93,8 @@ export async function POST(request: Request) {
   fs.writeFileSync(fullPath, textToWrite, "utf8");
 
   // Update Søknadsoversikt.md when any note is saved
-  if (textToWrite.length > 0 && body.type) {
-    updateOverviewNote(company, body.type);
+  if (textToWrite.length > 0 && body.type && body.company) {
+    updateOverviewNote(body.company, body.type);
   }
 
   return NextResponse.json({ ok: true });
