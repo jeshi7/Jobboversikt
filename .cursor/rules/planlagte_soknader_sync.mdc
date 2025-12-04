@@ -1,46 +1,40 @@
 ---
 description: Automatisk oppdatering av planlagte søknader til Under planlegging-seksjonen
-globs: 02_Søknader/Planlagte_Søknader/*.md
+globs: 02_Søknader/Planlagte_Søknader/*.md, 02_Søknader/Alle selskaper/*/Utlysning.md
 ---
 
 ### 🟡 Synkronisering av Planlagte Søknader (KRITISK)
 
-**VIKTIG:** `Planlagte_Søknader/` inneholder KUN ideer du IKKE har startet på ennå.
+**Hva er en "planlagt" søknad?**
+En søknad er "planlagt" / "under planlegging" så lenge:
+- Den ligger i `Planlagte_Søknader/`, ELLER
+- Mappen i `Alle selskaper/` inneholder **bare** `Utlysning.md`
 
-**Når noe er i `Planlagte_Søknader/`:**
-- Vises i `Søknadsoversikt.md` under **"🟡 Under planlegging (Ikke startet)"**
-- Vises i appen under **"Planlagt"**-kolonnen
+**Hvor vises planlagte søknader?**
+- I `Søknadsoversikt.md` under **"🟡 Under planlegging (Ikke startet)"**
+- I appen under **"Planlagt"**-kolonnen
 
-**Når brukeren legger til en ny `.md`-fil i `Planlagte_Søknader/`:**
-
-1.  **Identifiser bedriften:**
-    *   Bruk filnavnet (uten .md) som bedriftsnavn.
-    *   Eksempel: `E-Wheels Norge.md` → bedrift = **E-Wheels Norge**
-
-2.  **Trekk ut info fra filen:**
-    *   Stilling, Frist, Ansettelsesform, Sted, Kontaktperson, Link
-
-3.  **Oppdater `Søknadsoversikt.md`:**
-    *   Legg til rad i `## 🟡 Under planlegging (Ikke startet)`.
-
-**Når arbeidet starter (bruker ber om å starte søknad):**
-1.  Opprett mappe i `Alle selskaper/[Bedrift]/`
-2.  Kopier utlysningen som `Utlysning.md` i den nye mappen
-3.  **SLETT filen fra `Planlagte_Søknader/`** ← VIKTIG!
-4.  Flytt raden i `Søknadsoversikt.md` fra "Under planlegging" til "Aktive Prosesser" med status `📝 Under arbeid`
+**Når er noe IKKE lenger "planlagt"?**
+Når mappen i `Alle selskaper/` får flere filer enn bare `Utlysning.md`:
+- Da flyttes den til "🟢 Aktive Prosesser" med `📝 Under arbeid`
+- Filen i `Planlagte_Søknader/` slettes
 
 **Flyt-diagram:**
 ```
-Planlagte_Søknader/Bedrift.md
-        ↓ (bruker starter arbeid)
-    [SLETT filen]
-        ↓
-Alle selskaper/Bedrift/Utlysning.md
+1. Ny utlysning lagres
+   → Planlagte_Søknader/Bedrift.md
+   → Alle selskaper/Bedrift/Utlysning.md
+   → "Under planlegging" (bare Utlysning.md i mappen)
+
+2. Bruker starter arbeid (legger til CV-profile.md, notater, etc.)
+   → Slett Planlagte_Søknader/Bedrift.md
+   → Flytt til "Aktive Prosesser" med 📝 Under arbeid
+
+3. Begge PDF-er lastes opp
+   → Status: ✉️ Sendt
+   → Dato sendt fylles ut
+   → Nedtelling starter
 ```
 
 **Hvorfor?**
-Én kilde til sannhet:
-- `Planlagte_Søknader/` = kun ideer du vurderer
-- `Alle selskaper/` = alt du har begynt å jobbe med
-
-Filer skal ALDRI være begge steder samtidig.
+Å ha en tom mappe klar (med bare Utlysning.md) betyr ikke at arbeidet har startet - det er bare forberedelse. Først når du faktisk begynner å skrive, er søknaden "aktiv".

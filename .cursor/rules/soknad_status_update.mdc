@@ -1,55 +1,61 @@
 ---
-description: Automatisk oppdatering av status til 'Sendt' når både CV og Søknad er på plass
-globs: 02_Søknader/Alle selskaper/**/*.pdf, 02_Søknader/All Companies/**/*.pdf
+description: Automatisk oppdatering av status basert på innhold i bedriftsmappe
+globs: 02_Søknader/Alle selskaper/**/*
 ---
 
-### 🔄 Synkronisering av Søknadsstatus (Komplett sett)
+### 🔄 Statuslogikk for Søknader (KRITISK)
 
-**VIKTIG:** En søknad regnes ALDRI som "sendt" før BEGGE disse PDF-filene ligger i bedriftsmappen under `02_Søknader/Alle selskaper/[Bedrift]/`:
+Statusen til en søknad bestemmes av **hva som ligger i bedriftsmappen** i `Alle selskaper/`:
 
-1. **CV** (f.eks. `CV - Jessie Macharia.pdf`)
-2. **Søknadsbrev / Cover Letter** (f.eks. `Søknadsbrev - Bedrift.pdf` eller `Cover Letter - Bedrift.pdf`)
+**Nivå 1: "Under planlegging" / "Planlagt"**
+- Mappen inneholder **bare** `Utlysning.md`
+- Ingen andre filer er lagt til ennå
+- Vises i "🟡 Under planlegging" i Søknadsoversikt
+- Vises i "Planlagt"-kolonnen i appen
 
-Når brukeren legger til eller endrer PDF-filer i en bedriftsmappe, skal du sjekke om søknaden er **helt ferdig** før du oppdaterer status.
+**Nivå 2: "Under arbeid"**
+- Mappen inneholder `Utlysning.md` **pluss** andre filer (f.eks. `CV-profile.md`, `Søknadsbrev.md`, notater)
+- Men IKKE begge PDF-er ennå
+- Vises i "🟢 Aktive Prosesser" med status `📝 Under arbeid`
+- Vises i "Sendt"-kolonnen i appen (men ikke ferdig)
 
-**Dine handlinger skal være:**
+**Nivå 3: "Sendt"**
+- Mappen inneholder **begge PDF-er**:
+  - ✅ `CV - [Navn].pdf`
+  - ✅ `Søknadsbrev - [Bedrift].pdf` eller `Cover Letter - [Bedrift].pdf`
+- Vises i "🟢 Aktive Prosesser" med status `✉️ Sendt`
+- `Dato sendt` fylles ut med dagens dato
+- Nedtelling starter for Kontakt 1/2
 
-1.  **Sjekk mappen:**
-    *   Når en PDF legges til i f.eks. `.../Norwegian/`, skann hele mappen for filer.
+**Eksempler:**
 
-2.  **Verifiser dokumenter (BEGGE MÅ VÆRE PÅ PLASS):**
-    *   ✅ Fil som inneholder **"CV"** i navnet? (f.eks. `CV - Navn.pdf`)
-    *   **OG**
-    *   ✅ Fil som inneholder **"Søknad"** ELLER **"Cover Letter"** ELLER **"Søknadsbrev"** i navnet?
-
-3.  **Oppdater `00_Oversikt/Søknadsoversikt.md`:**
-    *   **HVIS BEGGE PDF-ER ER PÅ PLASS:**
-        *   Endre status i `Søknadsoversikt.md` til `✉️ Sendt`.
-        *   Sett kolonnen **"Dato sendt"** til dagens dato (f.eks. `04.12.25`).
-        *   Appen bruker `Dato sendt` til nedtelling:
-            *   Kontakt 1: `Dato sendt + 3 dager` → "om X dager / i dag / -X dager"
-            *   Kontakt 2: `Kontakt 1-dato + 7 dager` → samme mønster
-    *   **HVIS KUN ÉN PDF (ELLER INGEN) ER PÅ PLASS:**
-        *   Status skal være `📝 Under arbeid`.
-        *   La feltet **"Dato sendt"** stå tomt (`-`).
-        *   **IKKE** marker som sendt - søknaden er ikke komplett.
-
-**Eksempel på komplett mappe (✉️ Sendt):**
 ```
-02_Søknader/Alle selskaper/Norwegian/
-├── CV - Jessie Macharia.pdf       ✅
-├── Søknadsbrev - Norwegian.pdf    ✅
+Alle selskaper/E-Wheels Norge/
+├── Utlysning.md                    ← BARE denne = "Under planlegging"
+
+Alle selskaper/Norwegian/
 ├── Utlysning.md
-└── CV-profile.md
+├── CV-profile.md                   ← Arbeid startet = "Under arbeid"
+├── Søknadsbrev.md
+
+Alle selskaper/Oda/
+├── Utlysning.md
+├── CV - Jessie Macharia.pdf        ✅
+├── Søknadsbrev - Oda.pdf           ✅  ← Begge PDF = "Sendt"
 ```
 
-**Eksempel på ufullstendig mappe (📝 Under arbeid):**
-```
-02_Søknader/Alle selskaper/E-Wheels Norge/
-├── CV - Jessie Macharia.pdf       ✅
-├── Utlysning.md
-└── (mangler søknadsbrev)          ❌
-```
+**Når status endres:**
+
+1.  **Planlagt → Under arbeid:**
+    *   Når første fil utover `Utlysning.md` legges til
+    *   Flytt fra "Under planlegging" til "Aktive Prosesser"
+    *   Slett filen fra `Planlagte_Søknader/` hvis den finnes der
+    *   Status: `📝 Under arbeid`
+
+2.  **Under arbeid → Sendt:**
+    *   Når BEGGE PDF-er er på plass
+    *   Status: `✉️ Sendt`
+    *   Fyll ut `Dato sendt` med dagens dato
 
 **Hvorfor?**
-For å skille mellom arbeid som pågår og en faktisk innsendt søknad. Vi markerer kun som "Sendt" når pakken er komplett med begge dokumenter.
+For å ha presis kontroll over hvor i prosessen hver søknad er. Bare det å ha en mappe klar betyr ikke at arbeidet har startet.
