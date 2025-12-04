@@ -26,7 +26,14 @@ Statusen til en søknad bestemmes av **hva som ligger i bedriftsmappen** i `Alle
 - Vises i "🟢 Aktive Prosesser" med status `✉️ Sendt`
 - Vises i "Sendt søknad"-kolonnen i appen (kolonnen "Notat / søknad" viser "Sendt søknad" når begge PDF-filer er på plass)
 - `Dato sendt` fylles ut med dagens dato
-- Nedtelling starter for Kontakt 1/2
+- Nedtelling starter for Kontakt 1 (3 dager etter sendt), deretter Kontakt 2-5 (7 dager etter forrige kontakt)
+
+**Nivå 4: "Avslått" / "Ansatt"**
+- Status bestemmes av "Tilbud"-feltet i Søknadsoversikt.md:
+  - Hvis "Tilbud" = **"ja"**: Status blir `Avslått` (rød tag i appen)
+  - Hvis "Tilbud" = **"nei"**: Status blir `Ansatt` (grønn tag i appen)
+- Disse statusene overstyrer alle andre statuser
+- Vises i appen med henholdsvis "Avslag" (rød) og "Ansatt" (grønn) tags
 
 **Eksempler:**
 
@@ -62,6 +69,42 @@ Alle selskaper/Oda/
 - **"Planlagt idé / notat"**: For selskaper i `Planlagte_Søknader/` eller mapper med bare `Utlysning.md`
 - **"Forbereder"**: For selskaper i `Alle selskaper/` som mangler begge PDF-filer (enten ingen eller bare én PDF)
 - **"Sendt søknad"**: For selskaper i `Alle selskaper/` som har begge PDF-filer (CV og søknadsbrev/cover letter)
+
+**Kontakt-oppfølging (5 kontakter):**
+- Systemet støtter opptil **5 kontakter** per søknad
+- **Kontakt 1**: 3 dager etter "Dato sendt" - vises når søknad er sendt
+- **Kontakt 2-5**: 7 dager etter forrige kontakt - vises automatisk når forrige kontakt-notat er lagret
+- Når et kontakt-notat lagres:
+  - Notatet lagres som `Kontakt[N]-Notat.md` i selskapets mappe
+  - Søknadsoversikt.md oppdateres automatisk med dagens dato i riktig "Kontakt N"-kolonne
+  - Neste kontakt vises automatisk i appen
+- For Kontakt 2-5 vises lenker til alle forrige kontakt-notater i popup-en
+- Brukeren kan toggle mellom "Kontakt" og "Intervju" i "Hva du kan gjøre nå"-seksjonen
+- Eksisterende notater vises i read-only modus med "Rediger"-knapp for å aktivere redigering
+
+**Intervju-oppfølging (4 intervjuer):**
+- Systemet støtter opptil **4 intervjuer** per søknad
+- **Intervju 1**: Vises når søknad er sendt eller i dialog
+- **Intervju 2-4**: Vises automatisk når forrige intervju-notat er lagret
+- Når et intervju-notat lagres:
+  - Notatet lagres som `Intervju[N]-Notat.md` i selskapets mappe
+  - Søknadsoversikt.md oppdateres automatisk med dagens dato i riktig "Intervju N"-kolonne
+  - Neste intervju vises automatisk i appen
+- For Intervju 2-4 vises lenker til alle forrige intervju-notater i popup-en
+- Samme rediger-funksjonalitet som for kontakter
+
+**Dokumentlenker:**
+- Filer som matcher "Utlysning.md" eller lignende (`.md`-filer med "utlysning" i navnet) lenker til `listingUrl` fra utlysningen i stedet for å laste ned filen
+- Dette gjelder både i ResourceCard og PipelineBoard popups
+- Andre dokumenter (CV, søknadsbrev, etc.) lenker fortsatt til `/api/files` for nedlasting
+
+**Status-tags i appen:**
+- **Planlagt** (nøytral): Søknad er planlagt, ikke startet
+- **Forberedes** (nøytral): Arbeid har startet, men ikke begge PDF-er klare
+- **Sendt** (grønn): Begge PDF-er er klare og sendt
+- **Intervju** (gul): Intervju er planlagt eller gjennomført
+- **Avslag** (rød): "Tilbud"-feltet i Søknadsoversikt.md er satt til "ja"
+- **Ansatt** (grønn): "Tilbud"-feltet i Søknadsoversikt.md er satt til "nei"
 
 **Hvorfor?**
 For å ha presis kontroll over hvor i prosessen hver søknad er. Bare det å ha en mappe klar betyr ikke at arbeidet har startet. "Notat / søknad"-kolonnen gir rask visuell indikasjon på om søknaden er klar til å sendes eller ikke.

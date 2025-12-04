@@ -29,6 +29,12 @@ export default function ApplicationsPage() {
               <Tag size="small" variant="warning">
                 Intervju
               </Tag>
+              <Tag size="small" variant="error">
+                Avslag
+              </Tag>
+              <Tag size="small" variant="success">
+                Ansatt
+              </Tag>
             </div>
             <BodyShort size="small" className="text-slate-500">
               Hentes automatisk fra søknadsmappene dine.
@@ -64,7 +70,8 @@ export default function ApplicationsPage() {
                       <StatusPill status={app.status} />
                     </td>
                     <td className="px-4 py-3 align-top text-xs text-slate-500">
-                      {app.type === "planlagt"
+                      {app.type === "planlagt" && 
+                       app.resources.filter(r => !r.name.toLowerCase().includes("utlysning")).length === 0
                         ? "Planlagt idé / notat"
                         : hasBothPdfs(app.resources)
                         ? "Sendt søknad"
@@ -137,6 +144,10 @@ function StatusPill({ status }: { status: string }) {
     avslått: {
       label: "Avslått",
       variant: "error"
+    },
+    ansatt: {
+      label: "Ansatt",
+      variant: "success"
     }
   };
 

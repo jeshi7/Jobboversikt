@@ -1,12 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
+import { loadOverviewRows } from "./overview";
 
 export type ApplicationStatus =
   | "planlagt"
   | "forberedes"
   | "sendt"
   | "intervju"
-  | "avslått";
+  | "avslått"
+  | "ansatt";
 
 export interface ApplicationResource {
   name: string;
@@ -386,6 +388,25 @@ export function loadApplications(): Application[] {
       angle
     });
   }
+
+  // Check Søknadsoversikt.md for "Tilbud" field and update status
+  const overviewRows = loadOverviewRows();
+  const tilbudMap = new Map<string, string>();
+  overviewRows.forEach((row) => {
+    if (row.tilbud && row.tilbud.trim() !== "-") {
+      tilbudMap.set(row.company.toLowerCase(), row.tilbud.trim().toLowerCase());
+    }
+  });
+
+  // Update status based on "Tilbud" field
+  all.forEach((app) => {
+    const tilbud = tilbudMap.get(app.company.toLowerCase());
+    if (tilbud === "ja") {
+      app.status = "avslått";
+    } else if (tilbud === "nei") {
+      app.status = "ansatt";
+    }
+  });
 
   return all.sort((a, b) => a.company.localeCompare(b.company, "nb"));
 }

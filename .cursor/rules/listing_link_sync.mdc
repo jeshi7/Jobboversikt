@@ -38,3 +38,9 @@ This rule ensures that every time a new job listing is added to a company folder
 1.  **If URL is known:** Always insert the `* **Link:**` line immediately below the Location/Sted line.
 2.  **If URL is unknown:** Insert `* **Link:** (Lim inn link her)` as a placeholder to remind the user (or yourself) to add it later.
 3.  **App Compatibility:** Ensure the file is saved in a location readable by the app (e.g., `JobbTracker/Data/...` if syncing is active) or that the app's regex parser can find the "Link:" pattern.
+
+## App Behavior
+
+- **Utlysning.md-filer i appen:** Når en fil med navn som matcher "Utlysning.md" eller lignende (`.md`-filer med "utlysning" i navnet) vises i ResourceCard eller PipelineBoard, skal den lenke til `listingUrl` fra utlysningen i stedet for å laste ned filen via `/api/files`.
+- Dette gjør at brukeren kan klikke direkte på utlysningen for å se den på nettstedet der den opprinnelig ble publisert.
+- Andre dokumenter (CV, søknadsbrev, etc.) lenker fortsatt til `/api/files` for nedlasting.

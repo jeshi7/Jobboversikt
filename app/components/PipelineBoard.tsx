@@ -157,23 +157,29 @@ export function PipelineBoard({ planned, sent, interview }: PipelineBoardProps) 
                   <ul className="space-y-1 text-sm text-slate-700">
                     {open.app.resources
                       .filter((r) =>
-                        /cv|søknadsbrev|cover/i.test(r.name)
+                        /cv|søknadsbrev|cover|utlysning/i.test(r.name)
                       )
                       .slice(0, 4)
-                      .map((r) => (
-                        <li key={r.relativePath}>
-                          <a
-                            href={`/api/files?path=${encodeURIComponent(
-                              r.relativePath
-                            )}`}
-                            className="text-accent underline underline-offset-2"
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {r.name}
-                          </a>
-                        </li>
-                      ))}
+                      .map((r) => {
+                        // Check if this is an "Utlysning.md" file - if so, link to listingUrl instead
+                        const isUtlysning = /utlysning/i.test(r.name) && /\.md$/i.test(r.name);
+                        const href = isUtlysning && open.app.listingUrl
+                          ? open.app.listingUrl
+                          : `/api/files?path=${encodeURIComponent(r.relativePath)}`;
+                        
+                        return (
+                          <li key={r.relativePath}>
+                            <a
+                              href={href}
+                              className="text-accent underline underline-offset-2"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {r.name}
+                            </a>
+                          </li>
+                        );
+                      })}
                   </ul>
                 </div>
               )}

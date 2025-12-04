@@ -64,7 +64,7 @@ Dette er ditt komplette bibliotek av ferdige tekstblokker.
 ## 🤖 5. Teknologi, AI & Nysgjerrighet
 
 **Variant A (Den Ansvarlige Innovatøren):**
-"Jeg bruker AI-verktøy aktivt i hverdagen – til alt fra idémyldring og moodboards til å rydde i data eller generere placeholders. Jeg ser på AI som en 'superkraft' som gjør meg raskere og lar meg utforske flere retninger, men jeg er også bevisst på at det er *jeg* som styrer rattet. Det handler om å bruke teknologien til å frigjøre tid til det menneskelige og kreative arbeidet."
+"Jeg bruker AI-verktøy aktivt i hverdagen – til alt fra idémyldring og moodboards til å rydde i data eller generere placeholders. Jeg ser på AI som en 'superkraft' som gjør meg raskere og lar meg utforske flere retninger, men jeg er også bevisst på at det er jeg som styrer rattet. Det handler om å bruke teknologien til å frigjøre tid til det menneskelige og kreative arbeidet."
 
 **Variant B (Hybrid-hodet Design/Tech):**
 "Selv om jeg er designer, er jeg ikke redd for koden. Jeg har bygget nettsider i Webflow og WordPress, og forstår logikken bak HTML og CSS. Det gjør at jeg kan snakke språket til utviklerne og designe løsninger som faktisk er mulige å bygge innenfor budsjett og tidsfrister. Jeg liker å vite hvordan ting fungerer 'under panseret'."

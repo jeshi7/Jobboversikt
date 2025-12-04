@@ -12,6 +12,7 @@ type Props = {
   app: {
     company: string;
     resources: Resource[];
+    listingUrl?: string;
   };
 };
 
@@ -35,23 +36,31 @@ export function ResourceCard({ app }: Props) {
         </Heading>
       </div>
       <div className="flex flex-wrap gap-1.5 text-xs text-slate-600">
-        {visibleResources.map((r) => (
-          <a
-            key={r.relativePath}
-            href={`/api/files?path=${encodeURIComponent(r.relativePath)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="max-w-full"
-          >
-            <Tag
-              size="small"
-              variant="neutral"
-              className="max-w-full truncate"
+        {visibleResources.map((r) => {
+          // Check if this is an "Utlysning.md" file - if so, link to listingUrl instead
+          const isUtlysning = /utlysning/i.test(r.name) && /\.md$/i.test(r.name);
+          const href = isUtlysning && app.listingUrl
+            ? app.listingUrl
+            : `/api/files?path=${encodeURIComponent(r.relativePath)}`;
+          
+          return (
+            <a
+              key={r.relativePath}
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              className="max-w-full"
             >
-              {r.name}
-            </Tag>
-          </a>
-        ))}
+              <Tag
+                size="small"
+                variant="neutral"
+                className="max-w-full truncate"
+              >
+                {r.name}
+              </Tag>
+            </a>
+          );
+        })}
         {app.resources.length === 0 && (
           <BodyShort size="small" className="text-slate-500 text-[11px]">
             Ingen dokumenter registrert ennå.
