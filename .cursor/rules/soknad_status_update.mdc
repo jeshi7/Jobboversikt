@@ -18,10 +18,16 @@ Når brukeren legger til eller endrer PDF-filer i en bedriftsmappe, skal du sjek
     *   Ser du en fil som inneholder **"Søknad"** ELLER **"Cover Letter"** i navnet?
 
 3.  **Oppdater `00_Oversikt/Søknadsoversikt.md`:**
-    *   **HVIS BEGGE ER PÅ PLASS:**
-        *   Endre status i `Søknadsoversikt.md` til `✉️ Sendt`.
-    *   **HVIS KUN ÉN (ELLER INGEN) ER PÅ PLASS:**
-        *   Sørg for at status er `📝 Under arbeid`.
+   *   **HVIS BEGGE ER PÅ PLASS:**
+       *   Endre status i `Søknadsoversikt.md` til `✉️ Sendt`.
+       *   Sett kolonnen **"Dato sendt"** til dagens dato (f.eks. `10.12.25`) for riktig nedtelling til Kontakt 1.
+       *   Etter dette brukes `Dato sendt` til å regne ut en **nedtelling i dager** i appen:
+           *   Før frist for Kontakt 1: `Kontakt 1 · om X dager`
+           *   På selve dagen: `Kontakt 1 · i dag`
+           *   Etter frist: `Kontakt 1 · -1 dager`, `Kontakt 1 · -2 dager`, osv.
+           *   For Kontakt 2 brukes på samme måte datoen du skriver inn i kolonnen **"Kontakt 1"**, men med +7 dager.
+   *   **HVIS KUN ÉN (ELLER INGEN) ER PÅ PLASS:**
+       *   Sørg for at status er `📝 Under arbeid` og la feltet **"Dato sendt"** stå tomt (`-`). Da vises ingen nedtelling.
 
 **Hvorfor?**
 For å skille mellom arbeid som pågår (f.eks. bare CV er ferdig) og en innsendt søknad. Vi markerer kun som "Sendt" når pakken er komplett.

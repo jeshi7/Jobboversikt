@@ -5,17 +5,18 @@ globs: ["**/Utlysning.md", "**/*.md"]
 
 # Listing Link Sync
 
-This rule ensures that every time a new job listing is added to a company folder (typically as `Utlysning.md`), the URL to the original job advertisement is included in the metadata header. This allows the JobTracker app to display a "Se Utlysning" button.
+This rule ensures that every time a new job listing is added to a company folder (alltid som `Utlysning.md`, **ikke** som firmanavn), URL-en til original utlysning legges inn i metadata-headeren. Dette gjør at Jobboversikt-appen kan vise en "Se utlysning"‑knapp.
 
 ## Triggers
-- When creating a new `Utlysning.md` file.
-- When creating a new "Planlagt søknad" (Planned Application).
-- When moving a planned application to `Alle selskaper`.
+- Når du oppretter en ny `Utlysning.md`‑fil i en selskapsmappe under `Alle selskaper`.
+- Når du oppretter en ny "Planlagt søknad" (Planlagte_Søknader) og legger inn lenke til utlysning.
+- Når du flytter en planlagt søknad til `Alle selskaper` og kopierer inn utlysningen.
 
 ## Requirements
 
-1.  **Format:** The markdown file MUST start with a metadata-like header section.
-2.  **Field:** The header MUST include a line starting with `* **Link:**` or `* **URL:**` followed by the full URL.
+1.  **Filnavn:** Hvis `.md`‑filen inneholder lenke til en utlysning (`* **Link:**`), skal filen hete `Utlysning.md` – aldri `Tankesmien Agenda.md`, `Norwegian.md` osv.
+2.  **Format:** Markdown-filen MÅ starte med en enkel "header" slik som i eksempelet under.
+3.  **Felt:** Headeren MÅ ha en linje som starter med `*   **Link:**` eller `*   **URL:**` etterfulgt av full URL.
 
 ### Example Template
 

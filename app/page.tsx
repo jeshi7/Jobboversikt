@@ -168,17 +168,20 @@ function buildContactReminders(
         (cleanContact2 === "" || cleanContact2 === "-" || cleanContact2 === "–");
 
       if (needsContact1) {
-        const sentAt = app?.sentAt;
+        const sentDate = parseNorwegianDate(row.sentDate ?? "");
         let label = "Kontakt 1";
 
-        if (sentAt) {
-          const { daysLeft, overdue } = daysUntil(sentAt, 3);
-          label =
-            daysLeft === 0
-              ? "Kontakt 1 · i dag"
-              : daysLeft > 0
-                ? `Kontakt 1 · om ${daysLeft} dager`
-                : `Kontakt 1 · ${Math.abs(daysLeft)} dager på etterskudd`;
+        const computeLabel = (baseDate: Date) => {
+          const { daysLeft } = daysUntil(baseDate, 3);
+          if (daysLeft === 0) return "Kontakt 1 · i dag";
+          if (daysLeft > 0) return `Kontakt 1 · om ${daysLeft} dager`;
+          return `Kontakt 1 · ${daysLeft} dager`; // f.eks. -1, -2, -3
+        };
+
+        if (sentDate) {
+          label = computeLabel(sentDate);
+        } else if (app?.sentAt) {
+          label = computeLabel(app.sentAt);
         } else {
           label = "Kontakt 1 · ca. 3 dager etter sendt";
         }
@@ -200,7 +203,7 @@ function buildContactReminders(
               ? "Kontakt 2 · i dag"
               : daysLeft > 0
                 ? `Kontakt 2 · om ${daysLeft} dager`
-                : `Kontakt 2 · ${Math.abs(daysLeft)} dager på etterskudd`;
+                : `Kontakt 2 · ${daysLeft} dager`; // f.eks. -1, -2, -3
         } else {
           label = "Kontakt 2 · ca. 7 dager etter kontakt 1";
         }

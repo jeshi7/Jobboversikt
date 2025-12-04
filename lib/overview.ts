@@ -6,6 +6,7 @@ export interface OverviewRow {
   status: string;
   contact1: string;
   contact2: string;
+  sentDate?: string;
 }
 
 const ROOT = process.cwd();
@@ -36,14 +37,15 @@ export function loadOverviewRows(): OverviewRow[] {
     if (!line.trim().startsWith("|")) continue;
 
     const parts = line.split("|").map((p) => p.trim());
-    if (parts.length < 15) continue;
+    if (parts.length < 16) continue;
 
     const rawCompany = parts[1] || "";
     const company = rawCompany.replace(/\*\*/g, "").trim();
 
-    const status = parts[7] || "";
-    const contact1 = parts[10] || "";
-    const contact2 = parts[11] || "";
+    const sentDate = parts[7] || "";
+    const status = parts[8] || "";
+    const contact1 = parts[11] || "";
+    const contact2 = parts[12] || "";
 
     if (!company) continue;
 
@@ -51,11 +53,13 @@ export function loadOverviewRows(): OverviewRow[] {
       company,
       status,
       contact1,
-      contact2
+      contact2,
+      sentDate
     });
   }
 
   return rows;
 }
+
 
 

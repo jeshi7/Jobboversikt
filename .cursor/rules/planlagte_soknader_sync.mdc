@@ -5,16 +5,17 @@ globs: 02_Søknader/Planlagte_Søknader/*.md
 
 ### 🟡 Synkronisering av Planlagte Søknader
 
-Når brukeren legger til en ny `.md`-fil (typisk en utlysning) i `02_Søknader/Planlagte_Søknader/`, betyr det at brukeren vurderer å søke. Du skal da **ALLTID** oppdatere `00_Oversikt/Søknadsoversikt.md` for å reflektere dette.
+Når brukeren legger til en ny `.md`‑fil (typisk en utlysning) i `02_Søknader/Planlagte_Søknader/`, betyr det at brukeren vurderer å søke. Du skal da **ALLTID** oppdatere `00_Oversikt/Søknadsoversikt.md` for å reflektere dette.
 
 **Dine handlinger skal være:**
 
-1.  **Identifiser Bedriften:** Bruk filnavnet eller innholdet i filen til å finne bedriftsnavn (f.eks. hvis filen heter `Spotify.md`, er bedriften Spotify).
-2.  **Oppdater Tabellen:**
+1.  **Filnavn for utlysning:** Hvis filen inneholder en faktisk jobbutlysning med `*   **Link:** …`, skal filen hete `Utlysning.md` – ikke `Tankesmien Agenda.md`, `Norwegian.md` osv.
+2.  **Identifiser bedriften:** Bruk mappenavn eller innholdet i filen til å finne bedriftsnavn (f.eks. `02_Søknader/Planlagte_Søknader/Spotify/Utlysning.md` → bedrift = Spotify).
+3.  **Oppdater tabellen:**
     *   Gå til seksjonen `## 🟡 Under planlegging (Ikke startet)` i `Søknadsoversikt.md`.
     *   Legg til en ny rad for den nye bedriften.
     *   Prøv å trekke ut info om Stilling og Frist fra filinnholdet hvis mulig.
-    *   Lag en relativ lenke til filen i `[URL]`-kolonnen (f.eks. `[Link](../02_Søknader/Planlagte_Søknader/Spotify.md)`).
+   *   Lag en relativ lenke til utlysningen i `[URL]`‑kolonnen (f.eks. `[Link](../02_Søknader/Planlagte_Søknader/Spotify/Utlysning.md)`).
 
 **Hvorfor?**
 For å la brukeren "samle" interessante stillinger i en mappe, og automatisk få dem inn i oversikten uten manuelt arbeid.
