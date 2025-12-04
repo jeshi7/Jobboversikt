@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
+// Force Vercel to rebuild with latest fixes
+
 const ROOT = process.cwd();
 const BASE_DIR = path.join(
   ROOT,
