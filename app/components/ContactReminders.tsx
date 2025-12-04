@@ -25,6 +25,7 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
   const [viewMode, setViewMode] = useState<"kontakt" | "intervju">("kontakt");
   const [open, setOpen] = useState<Reminder | null>(null);
   const [note, setNote] = useState("");
+  const [originalNote, setOriginalNote] = useState(""); // Track original to detect changes
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -35,12 +36,14 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
   } | null>(null);
   
   const skipFetchRef = useRef(false);
+  const hasUnsavedChanges = note !== originalNote;
 
   const currentReminders = viewMode === "kontakt" ? reminders : intervjuReminders;
 
   useEffect(() => {
     if (!open) {
       setNote("");
+      setOriginalNote("");
       setEditing(false);
       return;
     }
@@ -48,6 +51,7 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     // Skip fetch if we already have the note (e.g., from viewing popup)
     if (skipFetchRef.current) {
       skipFetchRef.current = false;
+      setOriginalNote(note); // Set original to current when skipping fetch
       return;
     }
 
@@ -61,10 +65,12 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       .then((data: { text?: string }) => {
         const existingNote = data.text ?? "";
         setNote(existingNote);
+        setOriginalNote(existingNote); // Track original for change detection
         setEditing(false); // Start in view mode if note exists
       })
       .catch(() => {
         setNote("");
+        setOriginalNote("");
         setEditing(false);
       })
       .finally(() => setLoading(false));
@@ -290,13 +296,25 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
               </div>
               <div>
                 {editing || !note ? (
-                  <Textarea
-                    label="Notat"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    rows={8}
-                    disabled={loading || saving}
-                  />
+                  <>
+                    <Textarea
+                      label="Notat"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      rows={8}
+                      disabled={loading || saving}
+                    />
+                    {hasUnsavedChanges && !saving && (
+                      <BodyShort size="small" className="mt-2 text-amber-600 text-[11px]">
+                        ⚠️ Ikke lagret ennå - klikk &quot;Lagre&quot; for å lagre
+                      </BodyShort>
+                    )}
+                    {saving && (
+                      <BodyShort size="small" className="mt-2 text-blue-600 text-[11px]">
+                        💾 Lagrer...
+                      </BodyShort>
+                    )}
+                  </>
                 ) : (
                   <div>
                     <BodyShort size="small" className="mb-2 text-slate-600">
