@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { BodyShort, Tag, Button, Heading, Textarea } from "@navikt/ds-react";
 
 type ContactType = "kontakt1" | "kontakt2" | "kontakt3" | "kontakt4" | "kontakt5";
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<"kontakt" | "intervju">("kontakt");
   const [open, setOpen] = useState<Reminder | null>(null);
   const [note, setNote] = useState("");
@@ -86,8 +88,8 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       });
       if (res.ok) {
         setOpen(null);
-        // Reload page to refresh reminders
-        window.location.reload();
+        // Refresh server data to update reminders
+        router.refresh();
       } else {
         const data = await res.json().catch(() => ({}));
         setError(`Kunne ikke lagre: ${res.status} ${data.message || ""}`);

@@ -8,6 +8,10 @@ import { Heading, BodyShort, Panel, Button } from "@navikt/ds-react";
 import fs from "node:fs";
 import path from "node:path";
 
+// Force dynamic rendering to always get fresh data
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function DashboardPage() {
   const apps = loadApplications();
   const summary = summariseApplications(apps);
