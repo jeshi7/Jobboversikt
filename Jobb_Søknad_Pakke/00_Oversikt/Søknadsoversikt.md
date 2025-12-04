@@ -21,6 +21,7 @@ Her holder vi oversikt over prosessene. Flytt linjene nedover etter hvert som st
 | Bedrift | Stilling | Form | % | Sted | Frist | Kontaktperson | Tittel | Kontaktinfo | Notater | Lenke |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **E-Wheels Norge** | Content Creator | Fast | 100% | Drammen | Snarest | Frode Lund Nielsen | Group CPO | 48 11 88 11 | SEO, E-handel, AI | [Link](https://www.finn.no/job/ad/435413733) |
+| **Scoopr** | Digital markedsfører | Fast | 100% | Oslo | Snarest | Jannicke Østlie | Seniorrådgiver (Headon) | 95 25 25 65 | Konsepter, kampanjer, AI | [Link](https://www.finn.no/job/ad/440217170) |
 
 ## 🔴 Avsluttet / Arkivert
 
