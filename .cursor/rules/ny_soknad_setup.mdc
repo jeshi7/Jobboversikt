@@ -40,6 +40,15 @@ DU GJØR (alt samtidig):
 1.  Flytt rad i Søknadsoversikt fra "Under planlegging" → "Aktive Prosesser" med `📝 Under arbeid`
 2.  Slett filen fra `Planlagte_Søknader/` (utlysningen ligger allerede i `Alle selskaper/`)
 
+**Når BEGGE PDF-er legges til (KRITISK - ALLTID UTFØR):**
+Når en bedriftsmappe inneholder både CV-PDF og Søknadsbrev-PDF, **SKAL DU UMIDDELBART:**
+1.  Flytt raden fra "🟡 Under planlegging" → "🟢 Aktive Prosesser" i Søknadsoversikt.md
+2.  Sett status til `✉️ Sendt`
+3.  Fyll ut `Dato sendt` med dagens dato (format: DD.MM.YY)
+4.  Slett filen fra `Planlagte_Søknader/` hvis den finnes
+
+**ALDRI la en bedrift med begge PDF-er bli liggende i "Under planlegging"!**
+
 **Format for CV-profil (`CV-profile.md`):**
 - **MAKS 2 avsnitt** - kort og konsist
 - Avsnitt 1: Hva du gjør og hvordan (verktøy, metode, styrke)

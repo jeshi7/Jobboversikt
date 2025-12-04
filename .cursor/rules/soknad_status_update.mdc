@@ -52,18 +52,24 @@ Alle selskaper/Oda/
 ├── Søknadsbrev - Oda.pdf           ✅  ← Begge PDF = "Sendt"
 ```
 
-**Når status endres:**
+**Når status endres (KRITISK - ALLTID UTFØR):**
 
 1.  **Planlagt → Under arbeid:**
     *   Når første fil utover `Utlysning.md` legges til
-    *   Flytt fra "Under planlegging" til "Aktive Prosesser"
-    *   Slett filen fra `Planlagte_Søknader/` hvis den finnes der
+    *   **DU SKAL:** Flytt raden fra "🟡 Under planlegging" til "🟢 Aktive Prosesser" i Søknadsoversikt.md
+    *   **DU SKAL:** Slett filen fra `Planlagte_Søknader/` hvis den finnes der
     *   Status: `📝 Under arbeid`
 
-2.  **Under arbeid → Sendt:**
-    *   Når BEGGE PDF-er er på plass
-    *   Status: `✉️ Sendt`
-    *   Fyll ut `Dato sendt` med dagens dato
+2.  **Under arbeid → Sendt (VIKTIG!):**
+    *   Når BEGGE PDF-er er på plass i mappen:
+        - ✅ `CV - [Navn].pdf`
+        - ✅ `Søknadsbrev - [Bedrift].pdf`
+    *   **DU SKAL UMIDDELBART:**
+        1. Flytt raden fra "🟡 Under planlegging" til "🟢 Aktive Prosesser" i Søknadsoversikt.md
+        2. Sett status til `✉️ Sendt`
+        3. Fyll ut `Dato sendt` med dagens dato (format: DD.MM.YY)
+        4. Slett filen fra `Planlagte_Søknader/` hvis den finnes
+    *   **ALDRI** la en bedrift med begge PDF-er bli liggende i "Under planlegging"
 
 **"Notat / søknad"-kolonne i appen:**
 - **"Planlagt idé / notat"**: For selskaper i `Planlagte_Søknader/` eller mapper med bare `Utlysning.md`
