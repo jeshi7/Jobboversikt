@@ -40,16 +40,51 @@ DU GJØR (alt samtidig):
 1.  Flytt rad i Søknadsoversikt fra "Under planlegging" → "Aktive Prosesser" med `📝 Under arbeid`
 2.  Slett filen fra `Planlagte_Søknader/` (utlysningen ligger allerede i `Alle selskaper/`)
 
-**Format for CV-profil:**
+**Format for CV-profil (`CV-profile.md`):**
 - **MAKS 2 avsnitt** - kort og konsist
-- Fokuser på det viktigste for stillingen
+- Avsnitt 1: Hva du gjør og hvordan (verktøy, metode, styrke)
+- Avsnitt 2: Hva som skiller deg ut (bakgrunn, perspektiv, arbeidsform)
 - Bruk "Din vinkel" fra utlysningen som utgangspunkt
+- Ingen overskrifter eller lister - bare flytende tekst
 
-**Format for søknadsbrev:**
-- Personlig og direkte tone (følg Anti-AI reglene)
-- Åpne med interesse for stillingen/selskapet
-- Forklar hvorfor du passer (koble til utlysningen)
-- Avslutt med invitasjon til samtale
+**Format for søknadsbrev (`Søknadsbrev.md`):**
+```
+# Søknadsbrev - [Bedrift]
+
+**Stilling:** [Tittel]
+**Søker:** Jessie Macharia
+
+---
+
+Hei,
+
+Jeg søker stillingen som [tittel] hos [bedrift].
+
+[Åpning - hva som fanget oppmerksomheten din ved stillingen/selskapet]
+
+**Hvorfor meg?**
+
+[2-3 avsnitt om relevant erfaring, koble til utlysningen]
+
+**Hvorfor [Bedrift]?**
+
+[1 avsnitt om hvorfor akkurat dette selskapet]
+
+[Invitasjon til samtale - uformell CTA]
+
+Med vennlig hilsen,
+Jessie Macharia
+
+---
+
+**Vedlegg:** CV, portefølje
+```
+
+**Tone i søknadsbrev:**
+- Start rett på sak ("Jeg søker...")
+- Bruk "Tingen er at...", "Det som skiller meg..." osv.
+- Korte setninger blandet med lengre
+- Avslutt med uformell CTA ("Jeg tar gjerne en prat...")
 
 **Hvorfor?**
 Mappen i `Alle selskaper/` klargjøres umiddelbart slik at brukeren kan starte arbeid når som helst uten ekstra oppsett. `Planlagte_Søknader/` brukes kun som "huskeliste" for ideer.
