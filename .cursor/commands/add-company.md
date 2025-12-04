@@ -1,0 +1,1 @@
+lag denne stillingen som en planlagt søknad
