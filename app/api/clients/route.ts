@@ -1,14 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { getSession } from "../../../lib/auth";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-export async function GET(request: NextRequest) {
-  const session = await getSession(request);
+async function getSessionFromRequest(request: NextRequest) {
+  const sessionId = request.headers.get("x-session-id") || 
+    request.cookies.get("sessionId")?.value;
   
-  if (!session) {
+  if (!sessionId) return null;
+  
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  
+  const { data: session } = await supabase
+    .from("sessions")
+    .select("user_id, expires_at")
+    .eq("id", sessionId)
+    .single();
+  
+  if (!session || new Date(session.expires_at) < new Date()) {
+    return null;
+  }
+  
+  const { data: user } = await supabase
+    .from("users")
+    .select("id, organization_id, role")
+    .eq("id", session.user_id)
+    .single();
+  
+  return user;
+}
+
+export async function GET(request: NextRequest) {
+  const user = await getSessionFromRequest(request);
+  
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -16,7 +42,7 @@ export async function GET(request: NextRequest) {
   
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const organizationId = searchParams.get("organizationId") || session.organizationId;
+  const organizationId = searchParams.get("organizationId") || user.organization_id;
   
   if (id) {
     const { data, error } = await supabase
@@ -46,9 +72,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const session = await getSession(request);
+  const user = await getSessionFromRequest(request);
   
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -63,7 +89,7 @@ export async function POST(request: NextRequest) {
   const { data, error } = await supabase
     .from("clients")
     .insert({
-      organization_id: session.organizationId,
+      organization_id: user.organization_id,
       user_id: body.userId || null,
       name: body.name,
       email: body.email || null,

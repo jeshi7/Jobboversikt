@@ -2,384 +2,292 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Heading, BodyShort, Panel, Button, Alert, Select, Loader } from "@navikt/ds-react";
+import { Heading, BodyShort, Panel, Button, Alert, Loader } from "@navikt/ds-react";
 import { useCurrentUser } from "../../../lib/hooks/useCurrentUser";
-import { useToast } from "../../components/Toast";
 
-interface ScannedApplication {
-  company: string;
-  jobTitle: string;
-  status: string;
-  location?: string;
-  hasCV: boolean;
-  hasCoverLetter: boolean;
-  hasCvText: boolean;
-  hasCoverLetterText: boolean;
+interface MigrationPreview {
+  available: boolean;
+  reason?: string;
+  preview?: {
+    totalApplications: number;
+    hasCompetenceBank: boolean;
+    hasMasterCV: boolean;
+  };
 }
 
-interface ScanResult {
+interface MigrationResult {
   success: boolean;
-  applicationCount: number;
-  applications: ScannedApplication[];
-  hasCompetenceBank: boolean;
-  hasCvMasterText: boolean;
-  errors: string[];
-}
-
-interface Organization {
-  id: string;
-  name: string;
-}
-
-interface Client {
-  id: string;
-  name: string;
-  email?: string;
+  results: {
+    applications: {
+      success: number;
+      failed: number;
+      details: string[];
+    };
+    competenceBank: {
+      success: boolean;
+    };
+    errors: string[];
+  };
+  totalApplications: number;
 }
 
 export default function MigratePage() {
   const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
-  const { showToast } = useToast();
   
-  const [scanning, setScanning] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [selectedOrg, setSelectedOrg] = useState<string>("");
-  const [selectedClient, setSelectedClient] = useState<string>("");
-  const [importResult, setImportResult] = useState<{
-    success: boolean;
-    applicationsCreated: number;
-    competenceBankUpdated: boolean;
-    errors: string[];
-  } | null>(null);
-  
+  const [preview, setPreview] = useState<MigrationPreview | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [migrating, setMigrating] = useState(false);
+  const [result, setResult] = useState<MigrationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    if (!userLoading && (!user || user.role !== "admin")) {
-      router.push("/");
-    }
-  }, [user, userLoading, router]);
-  
-  useEffect(() => {
-    if (user?.role === "admin") {
-      fetchOrganizations();
-    }
-  }, [user]);
-  
-  useEffect(() => {
-    if (selectedOrg) {
-      fetchClients(selectedOrg);
-    }
-  }, [selectedOrg]);
-  
-  const fetchOrganizations = async () => {
+    fetchPreview();
+  }, []);
+
+  const fetchPreview = async () => {
     try {
-      const sessionId = localStorage.getItem("sessionId");
-      const res = await fetch("/api/organizations", {
-        headers: { "x-session-id": sessionId || "" },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setOrganizations(data);
-        if (data.length > 0) {
-          setSelectedOrg(data[0].id);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch organizations:", err);
-    }
-  };
-  
-  const fetchClients = async (orgId: string) => {
-    try {
-      const sessionId = localStorage.getItem("sessionId");
-      const res = await fetch(`/api/clients?organizationId=${orgId}`, {
-        headers: { "x-session-id": sessionId || "" },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setClients(data);
-        if (data.length > 0) {
-          setSelectedClient(data[0].id);
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch clients:", err);
-    }
-  };
-  
-  const handleScan = async () => {
-    setScanning(true);
-    setScanResult(null);
-    
-    try {
-      const sessionId = localStorage.getItem("sessionId");
-      const res = await fetch("/api/migrate/scan", {
-        headers: { "x-session-id": sessionId || "" },
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setScanResult(data);
-        showToast(`Fant ${data.applicationCount} søknader`, "success");
-      } else {
-        const error = await res.json();
-        showToast(error.error || "Kunne ikke skanne data", "error");
-      }
-    } catch (err) {
-      showToast("Feil ved skanning av data", "error");
+      const res = await fetch("/api/migrate");
+      const data = await res.json();
+      setPreview(data);
+    } catch (e) {
+      setError("Kunne ikke hente migreringsinfo");
     } finally {
-      setScanning(false);
+      setLoading(false);
     }
   };
-  
-  const handleImport = async () => {
-    if (!selectedOrg || !selectedClient) {
-      showToast("Velg organisasjon og klient først", "error");
-      return;
-    }
+
+  const handleMigrate = async () => {
+    if (!user) return;
     
-    setImporting(true);
-    setImportResult(null);
-    
+    setMigrating(true);
+    setError(null);
+    setResult(null);
+
     try {
-      const sessionId = localStorage.getItem("sessionId");
-      const res = await fetch("/api/migrate/import", {
+      // First, we need to get/create a client for this user
+      const clientRes = await fetch("/api/clients");
+      const clients = await clientRes.json();
+      
+      let clientId: string;
+      
+      if (clients && clients.length > 0) {
+        clientId = clients[0].id;
+      } else {
+        // Create a client for this user
+        const createRes = await fetch("/api/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: user.name,
+            email: user.email,
+            userId: user.id
+          })
+        });
+        
+        if (!createRes.ok) {
+          throw new Error("Kunne ikke opprette klient");
+        }
+        
+        const newClient = await createRes.json();
+        clientId = newClient.id;
+      }
+
+      // Now run the migration
+      const res = await fetch("/api/migrate", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-session-id": sessionId || "",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          organizationId: selectedOrg,
-          clientId: selectedClient,
-        }),
+          userId: user.id,
+          organizationId: user.organizationId,
+          clientId
+        })
       });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setImportResult(data);
-        showToast(`Importerte ${data.applicationsCreated} søknader`, "success");
-      } else {
-        const error = await res.json();
-        showToast(error.error || "Kunne ikke importere data", "error");
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Migrering feilet");
       }
-    } catch (err) {
-      showToast("Feil ved import av data", "error");
+
+      setResult(data);
+    } catch (e) {
+      setError(String(e));
     } finally {
-      setImporting(false);
+      setMigrating(false);
     }
   };
-  
-  if (userLoading) {
+
+  if (userLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader size="xlarge" />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader size="3xlarge" title="Laster..." />
       </div>
     );
   }
-  
+
   if (!user || user.role !== "admin") {
-    return null;
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <Alert variant="error">
+          Du har ikke tilgang til denne siden. Bare administratorer kan kjøre migrering.
+        </Alert>
+      </div>
+    );
   }
-  
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-8">
-      <Heading level="1" size="large" className="mb-2">
-        Migrer Data fra Lokal Mappe
-      </Heading>
-      <BodyShort className="text-slate-600 mb-8">
-        Importer eksisterende jobbsøknader fra Jobb_Søknad_Pakke til Supabase
-      </BodyShort>
-      
-      <div className="space-y-6">
-        {/* Step 1: Scan */}
-        <Panel border>
-          <Heading level="2" size="small" className="mb-4">
-            Steg 1: Skann Lokal Data
-          </Heading>
-          <BodyShort size="small" className="text-slate-600 mb-4">
-            Skann Jobb_Søknad_Pakke-mappen for å se hvilke søknader som kan importeres.
-          </BodyShort>
-          
-          <Button 
-            variant="secondary" 
-            onClick={handleScan} 
-            loading={scanning}
-            disabled={scanning}
-          >
-            {scanning ? "Skanner..." : "Skann Lokal Mappe"}
-          </Button>
-          
-          {scanResult && (
-            <div className="mt-4 space-y-4">
-              {scanResult.success ? (
-                <Alert variant="success">
-                  Fant {scanResult.applicationCount} søknader
-                  {scanResult.hasCompetenceBank && " + Kompetansebank"}
-                  {scanResult.hasCvMasterText && " + CV Master"}
-                </Alert>
-              ) : (
-                <Alert variant="warning">
-                  Ingen søknader funnet. Sjekk at Jobb_Søknad_Pakke-mappen eksisterer.
-                </Alert>
-              )}
-              
-              {scanResult.errors.length > 0 && (
-                <Alert variant="error">
-                  <div className="space-y-1">
-                    {scanResult.errors.map((err, i) => (
-                      <div key={i}>{err}</div>
-                    ))}
-                  </div>
-                </Alert>
-              )}
-              
-              {scanResult.applications.length > 0 && (
-                <div className="max-h-64 overflow-y-auto border rounded-lg">
-                  <table className="w-full text-sm">
-                    <thead className="bg-slate-50 sticky top-0">
-                      <tr>
-                        <th className="text-left p-2 font-medium">Bedrift</th>
-                        <th className="text-left p-2 font-medium">Stilling</th>
-                        <th className="text-left p-2 font-medium">Status</th>
-                        <th className="text-center p-2 font-medium">CV</th>
-                        <th className="text-center p-2 font-medium">Søknad</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {scanResult.applications.map((app, i) => (
-                        <tr key={i} className="border-t">
-                          <td className="p-2 font-medium">{app.company}</td>
-                          <td className="p-2 text-slate-600">{app.jobTitle}</td>
-                          <td className="p-2">
-                            <span className={`px-2 py-0.5 rounded text-xs ${
-                              app.status === "sendt" ? "bg-blue-100 text-blue-800" :
-                              app.status === "intervju" ? "bg-green-100 text-green-800" :
-                              app.status === "avslått" ? "bg-red-100 text-red-800" :
-                              "bg-slate-100 text-slate-800"
-                            }`}>
-                              {app.status}
-                            </span>
-                          </td>
-                          <td className="p-2 text-center">
-                            {app.hasCvText ? "📝" : app.hasCV ? "📄" : "-"}
-                          </td>
-                          <td className="p-2 text-center">
-                            {app.hasCoverLetterText ? "📝" : app.hasCoverLetter ? "📄" : "-"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
+    <div className="mx-auto max-w-4xl px-6 py-8 space-y-6">
+      <div>
+        <Heading level="1" size="large">Migrer eksisterende data</Heading>
+        <BodyShort className="text-slate-600 mt-2">
+          Importer jobbsøknader fra Jobb_Søknad_Pakke-mappen til Supabase
+        </BodyShort>
+      </div>
+
+      {error && (
+        <Alert variant="error">
+          {error}
+        </Alert>
+      )}
+
+      {!preview?.available ? (
+        <Panel border className="p-6">
+          <Alert variant="warning">
+            <Heading level="2" size="small" className="mb-2">Migrering ikke tilgjengelig</Heading>
+            <BodyShort>
+              {preview?.reason || "Jobb_Søknad_Pakke-mappen ble ikke funnet, eller du kjører i produksjonsmiljø."}
+            </BodyShort>
+            <BodyShort className="mt-2 text-sm text-slate-600">
+              Migrering kan bare kjøres lokalt (development mode) der filsystemet er tilgjengelig.
+            </BodyShort>
+          </Alert>
         </Panel>
-        
-        {/* Step 2: Select Target */}
-        {scanResult?.success && (
-          <Panel border>
-            <Heading level="2" size="small" className="mb-4">
-              Steg 2: Velg Destinasjon
+      ) : result ? (
+        <Panel border className="p-6 space-y-4">
+          <Alert variant={result.results.errors.length === 0 ? "success" : "warning"}>
+            <Heading level="2" size="small" className="mb-2">
+              Migrering fullført!
             </Heading>
-            <BodyShort size="small" className="text-slate-600 mb-4">
-              Velg hvilken organisasjon og klient dataene skal importeres til.
-            </BodyShort>
-            
-            <div className="grid gap-4 md:grid-cols-2">
-              <Select
-                label="Organisasjon"
-                value={selectedOrg}
-                onChange={(e) => setSelectedOrg(e.target.value)}
-              >
-                {organizations.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </Select>
-              
-              <Select
-                label="Klient"
-                value={selectedClient}
-                onChange={(e) => setSelectedClient(e.target.value)}
-              >
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </Select>
+          </Alert>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="text-3xl font-bold text-green-700">
+                {result.results.applications.success}
+              </div>
+              <BodyShort className="text-green-600">Søknader importert</BodyShort>
             </div>
-          </Panel>
-        )}
-        
-        {/* Step 3: Import */}
-        {scanResult?.success && selectedOrg && selectedClient && (
-          <Panel border>
-            <Heading level="2" size="small" className="mb-4">
-              Steg 3: Importer Data
-            </Heading>
-            <BodyShort size="small" className="text-slate-600 mb-4">
-              Importer søknadene til Supabase. Eksisterende søknader vil bli oppdatert.
-            </BodyShort>
             
-            <Button 
-              variant="primary" 
-              onClick={handleImport} 
-              loading={importing}
-              disabled={importing}
-            >
-              {importing ? "Importerer..." : `Importer ${scanResult.applicationCount} Søknader`}
-            </Button>
-            
-            {importResult && (
-              <div className="mt-4">
-                {importResult.success ? (
-                  <Alert variant="success">
-                    <div className="space-y-1">
-                      <div>✓ Importerte {importResult.applicationsCreated} søknader</div>
-                      {importResult.competenceBankUpdated && <div>✓ Oppdaterte kompetansebank</div>}
-                    </div>
-                  </Alert>
-                ) : (
-                  <Alert variant="error">Import feilet</Alert>
-                )}
-                
-                {importResult.errors.length > 0 && (
-                  <Alert variant="warning" className="mt-2">
-                    <div className="space-y-1">
-                      <div className="font-medium">Noen feil oppstod:</div>
-                      {importResult.errors.slice(0, 5).map((err, i) => (
-                        <div key={i} className="text-sm">{err}</div>
-                      ))}
-                      {importResult.errors.length > 5 && (
-                        <div className="text-sm">...og {importResult.errors.length - 5} flere</div>
-                      )}
-                    </div>
-                  </Alert>
-                )}
+            {result.results.applications.failed > 0 && (
+              <div className="bg-red-50 p-4 rounded-lg">
+                <div className="text-3xl font-bold text-red-700">
+                  {result.results.applications.failed}
+                </div>
+                <BodyShort className="text-red-600">Feilet</BodyShort>
               </div>
             )}
-          </Panel>
-        )}
-        
-        {/* Back button */}
-        <div className="flex gap-4">
-          <Button variant="tertiary" onClick={() => router.push("/admin")}>
-            ← Tilbake til Admin
-          </Button>
-          {importResult?.success && (
-            <Button variant="secondary" onClick={() => router.push("/")}>
-              Gå til Oversikt →
-            </Button>
+          </div>
+
+          {result.results.competenceBank.success && (
+            <Alert variant="success" size="small">
+              Kompetansebank importert
+            </Alert>
           )}
-        </div>
-      </div>
+
+          {result.results.applications.details.length > 0 && (
+            <div className="mt-4">
+              <Heading level="3" size="xsmall" className="mb-2">Importerte søknader:</Heading>
+              <div className="max-h-60 overflow-y-auto bg-slate-50 rounded-lg p-3 text-sm font-mono">
+                {result.results.applications.details.map((detail, i) => (
+                  <div key={i} className="py-0.5">{detail}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {result.results.errors.length > 0 && (
+            <div className="mt-4">
+              <Heading level="3" size="xsmall" className="mb-2 text-red-600">Feil:</Heading>
+              <div className="max-h-40 overflow-y-auto bg-red-50 rounded-lg p-3 text-sm">
+                {result.results.errors.map((err, i) => (
+                  <div key={i} className="py-0.5 text-red-700">{err}</div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-4">
+            <Button variant="primary" onClick={() => router.push("/")}>
+              Gå til oversikten
+            </Button>
+            <Button variant="secondary" onClick={() => router.push("/applications")}>
+              Se søknader
+            </Button>
+          </div>
+        </Panel>
+      ) : (
+        <Panel border className="p-6 space-y-4">
+          <Heading level="2" size="small">Forhåndsvisning</Heading>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg text-center">
+              <div className="text-3xl font-bold text-blue-700">
+                {preview.preview?.totalApplications || 0}
+              </div>
+              <BodyShort className="text-blue-600">Søknader funnet</BodyShort>
+            </div>
+            
+            <div className={`p-4 rounded-lg text-center ${preview.preview?.hasCompetenceBank ? "bg-green-50" : "bg-slate-50"}`}>
+              <div className="text-2xl mb-1">
+                {preview.preview?.hasCompetenceBank ? "✓" : "✗"}
+              </div>
+              <BodyShort className={preview.preview?.hasCompetenceBank ? "text-green-600" : "text-slate-400"}>
+                Kompetansebank
+              </BodyShort>
+            </div>
+            
+            <div className={`p-4 rounded-lg text-center ${preview.preview?.hasMasterCV ? "bg-green-50" : "bg-slate-50"}`}>
+              <div className="text-2xl mb-1">
+                {preview.preview?.hasMasterCV ? "✓" : "✗"}
+              </div>
+              <BodyShort className={preview.preview?.hasMasterCV ? "text-green-600" : "text-slate-400"}>
+                Master CV
+              </BodyShort>
+            </div>
+          </div>
+
+          <Alert variant="info" size="small">
+            <BodyShort size="small">
+              Migreringen vil importere alle søknader, CV-tekster, søknadsbrev og kompetansebank til Supabase-databasen.
+              Eksisterende data i mappen vil ikke bli endret.
+            </BodyShort>
+          </Alert>
+
+          <div className="pt-4">
+            <Button 
+              variant="primary" 
+              onClick={handleMigrate}
+              loading={migrating}
+              disabled={migrating}
+            >
+              {migrating ? "Migrerer..." : "Start migrering"}
+            </Button>
+          </div>
+        </Panel>
+      )}
+
+      <Panel border className="p-6">
+        <Heading level="2" size="small" className="mb-3">Hva skjer under migrering?</Heading>
+        <ul className="space-y-2 text-sm text-slate-600">
+          <li>• Leser Søknadsoversikt.md for å få status på hver søknad</li>
+          <li>• Går gjennom alle mapper i 02_Søknader/</li>
+          <li>• Henter CV-profil og søknadsbrev fra hver bedriftsmappe</li>
+          <li>• Importerer kompetansebank fra 01_Ressurser/Kompetansebank.md</li>
+          <li>• Kobler alt til din bruker i Supabase</li>
+        </ul>
+      </Panel>
     </div>
   );
 }
+
