@@ -17,6 +17,26 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      // Skip auth for public pages
+      if (pathname === "/login" || pathname === "/setup") {
+        setAuthorized(true);
+        setLoading(false);
+        return;
+      }
+
+      // Check if setup is needed
+      try {
+        const setupRes = await fetch("/api/setup/check");
+        const setupData = await setupRes.json();
+        
+        if (setupData.needsSetup) {
+          router.push("/setup");
+          return;
+        }
+      } catch {
+        // If setup check fails, continue with auth check
+      }
+
       const sessionId = localStorage.getItem("sessionId");
       
       if (!sessionId) {
@@ -25,14 +45,17 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
       }
 
       try {
-        const res = await fetch(`/api/auth/login?sessionId=${sessionId}`);
+        const res = await fetch(`/api/auth/me?sessionId=${sessionId}`);
+        
         if (res.ok) {
           const data = await res.json();
           
-          if (!data.authenticated) {
-            localStorage.removeItem("sessionId");
-            localStorage.removeItem("user");
-            router.push("/login");
+          // Store user in localStorage for quick access
+          localStorage.setItem("user", JSON.stringify(data.user));
+
+          // Check if user must change password
+          if (data.user.mustChangePassword && pathname !== "/settings") {
+            router.push("/settings");
             return;
           }
 
@@ -63,34 +86,20 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
       }
     };
 
-    // Skip auth check for login page
-    if (pathname === "/login") {
-      setAuthorized(true);
-      setLoading(false);
-      return;
-    }
-
     checkAuth();
   }, [router, pathname, requiredRole]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <BodyShort size="small">Laster...</BodyShort>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <BodyShort size="small" className="text-slate-500">Laster...</BodyShort>
       </div>
     );
   }
 
-  if (!authorized && pathname !== "/login") {
+  if (!authorized && pathname !== "/login" && pathname !== "/setup") {
     return null;
   }
 
   return <>{children}</>;
 }
-
-
-
-
-
-
-

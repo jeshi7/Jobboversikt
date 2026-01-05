@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import { getSession, getAuthUser } from "../../../../../lib/auth";
 import {
+  getSession,
+  getUser,
   getApplication,
-  addDocumentToApplication,
-  removeDocumentFromApplication,
-  getUploadPath,
-} from "../../../../../lib/app-applications";
+  createDocument,
+  deleteDocument,
+  uploadFile,
+} from "../../../../../lib/supabase-db";
 
 /**
  * POST /api/app-applications/[id]/documents - Upload document
@@ -16,38 +16,37 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value;
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
+    const user = await getUser(session.user_id);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const app = getApplication(params.id);
+    const app = await getApplication(params.id);
     if (!app) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
     // Check access
-    if (user.role === "client") {
-      if (app.userId !== user.id && app.clientId !== user.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+    if (user.role === "client" && app.user_id !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const docType = formData.get("type") as "cv" | "cover_letter" | "job_listing" | "other" | null;
+    const docType = (formData.get("type") as string) || "other";
     const docName = formData.get("name") as string | null;
 
     if (!file) {
@@ -80,33 +79,33 @@ export async function POST(
       );
     }
 
-    // Generate unique filename
-    const ext = file.name.split(".").pop() || "pdf";
-    const filename = `${params.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${ext}`;
-
-    // Save file
+    // Upload file to Supabase Storage
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(getUploadPath(filename), buffer);
+    const storagePath = await uploadFile(buffer, file.name, file.type);
 
-    // Add document to application
-    const updatedApp = addDocumentToApplication(params.id, {
+    // Create document record
+    const document = await createDocument({
+      application_id: params.id,
       name: docName || file.name.replace(/\.[^/.]+$/, ""),
-      type: docType || "other",
-      filename,
-      originalName: file.name,
-      mimeType: file.type,
+      type: docType,
+      storage_path: storagePath,
+      original_name: file.name,
+      mime_type: file.type,
       size: file.size,
     });
 
-    return NextResponse.json({ 
+    // Get updated application
+    const updatedApp = await getApplication(params.id);
+
+    return NextResponse.json({
       application: updatedApp,
-      document: updatedApp?.documents.find(d => d.filename === filename)
+      document,
     });
   } catch (error) {
-    console.error("Error uploading document:", error);
+    console.error("Upload document error:", error);
     return NextResponse.json(
-      { error: "Failed to upload document" },
+      { error: error instanceof Error ? error.message : "Failed to upload document" },
       { status: 500 }
     );
   }
@@ -120,33 +119,32 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value;
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
+    const user = await getUser(session.user_id);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const app = getApplication(params.id);
+    const app = await getApplication(params.id);
     if (!app) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
     // Check access
-    if (user.role === "client") {
-      if (app.userId !== user.id && app.clientId !== user.id) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+    if (user.role === "client" && app.user_id !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const docId = new URL(request.url).searchParams.get("docId");
@@ -154,15 +152,20 @@ export async function DELETE(
       return NextResponse.json({ error: "Document ID required" }, { status: 400 });
     }
 
-    const updatedApp = removeDocumentFromApplication(params.id, docId);
+    const deletedDoc = await deleteDocument(docId);
+    if (!deletedDoc) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    }
+
+    // Get updated application
+    const updatedApp = await getApplication(params.id);
 
     return NextResponse.json({ application: updatedApp });
   } catch (error) {
-    console.error("Error removing document:", error);
+    console.error("Delete document error:", error);
     return NextResponse.json(
-      { error: "Failed to remove document" },
+      { error: "Failed to delete document" },
       { status: 500 }
     );
   }
 }
-

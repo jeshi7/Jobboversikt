@@ -1,70 +1,94 @@
-import { NextResponse } from "next/server";
-import { 
-  saveOrganization, 
-  getOrganization, 
-  getOrganizationBySlug,
+import { NextRequest, NextResponse } from "next/server";
+import {
+  getSession,
+  getUser,
   listOrganizations,
-  type Organization 
-} from "../../../lib/db";
+  createOrganization,
+} from "../../../lib/supabase-db";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  const slug = searchParams.get("slug");
-  
-  if (id) {
-    const org = getOrganization(id);
-    if (!org) {
-      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+/**
+ * GET /api/organizations - List organizations
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value ||
+      new URL(request.url).searchParams.get("sessionId");
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json(org);
-  }
-  
-  if (slug) {
-    const org = getOrganizationBySlug(slug);
-    if (!org) {
-      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+
+    const session = await getSession(sessionId);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    return NextResponse.json(org);
+
+    const user = await getUser(session.user_id);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Only admin can see all organizations
+    if (user.role !== "admin") {
+      // Return only user's organization
+      const { getOrganization } = await import("../../../lib/supabase-db");
+      const org = await getOrganization(user.organization_id);
+      return NextResponse.json(org ? [org] : []);
+    }
+
+    const organizations = await listOrganizations();
+    return NextResponse.json(organizations);
+  } catch (error) {
+    console.error("List organizations error:", error);
+    return NextResponse.json(
+      { error: "Failed to list organizations" },
+      { status: 500 }
+    );
   }
-  
-  // List all organizations (for admin)
-  const orgs = listOrganizations();
-  return NextResponse.json(orgs);
 }
 
-export async function POST(request: Request) {
-  const body = await request.json() as Partial<Organization>;
-  
-  if (!body.name || !body.slug) {
-    return NextResponse.json({ error: "Name and slug required" }, { status: 400 });
-  }
-  
-  // Check if slug exists
-  const existing = getOrganizationBySlug(body.slug);
-  if (existing) {
-    return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
-  }
-  
-  const org: Organization = {
-    id: body.id || `org-${Date.now()}`,
-    name: body.name,
-    slug: body.slug,
-    createdAt: body.createdAt || new Date().toISOString(),
-    settings: {
-      autoGenerateCV: body.settings?.autoGenerateCV ?? true,
-      autoGenerateCoverLetter: body.settings?.autoGenerateCoverLetter ?? true,
-      autoCreateFolders: body.settings?.autoCreateFolders ?? true,
+/**
+ * POST /api/organizations - Create organization (admin only)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
+    if (!sessionId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-  };
-  
-  saveOrganization(org);
-  return NextResponse.json(org);
+
+    const session = await getSession(sessionId);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = await getUser(session.user_id);
+    if (!user || user.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { name } = body;
+
+    if (!name) {
+      return NextResponse.json(
+        { error: "Name is required" },
+        { status: 400 }
+      );
+    }
+
+    const org = await createOrganization(name);
+    return NextResponse.json(org);
+  } catch (error) {
+    console.error("Create organization error:", error);
+    return NextResponse.json(
+      { error: "Failed to create organization" },
+      { status: 500 }
+    );
+  }
 }
-
-
-
-
-
-
-

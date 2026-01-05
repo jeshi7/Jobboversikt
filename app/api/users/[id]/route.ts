@@ -1,63 +1,58 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getAuthUser } from "../../../../lib/auth";
-import { deleteUser, getUser } from "../../../../lib/db";
+import {
+  getSession,
+  getUser,
+  deleteUser,
+} from "../../../../lib/supabase-db";
 
 /**
- * DELETE /api/users/[id] - Delete a user (admin only)
+ * DELETE /api/users/[id] - Delete user (admin only)
  */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value;
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
-    if (!user || user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 });
+    const currentUser = await getUser(session.user_id);
+    if (!currentUser || currentUser.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const userId = params.id;
-    
-    // Get user to verify it exists
-    const userToDelete = getUser(userId);
-    if (!userToDelete) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Prevent deleting yourself
-    if (userToDelete.id === user.id) {
+    // Can't delete yourself
+    if (params.id === currentUser.id) {
       return NextResponse.json(
-        { error: "Cannot delete your own account" },
+        { error: "Du kan ikke slette din egen bruker" },
         { status: 400 }
       );
     }
 
-    deleteUser(userId);
+    const success = await deleteUser(params.id);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Kunne ikke slette bruker" },
+        { status: 500 }
+      );
+    }
 
-    return NextResponse.json({ success: true, message: "User deleted successfully" });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting user:", error);
+    console.error("Delete user error:", error);
     return NextResponse.json(
-      { error: "Failed to delete user" },
+      { error: "Kunne ikke slette bruker" },
       { status: 500 }
     );
   }
 }
-
-
-
-
-
-
-

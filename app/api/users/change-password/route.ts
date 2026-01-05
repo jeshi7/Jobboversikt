@@ -1,94 +1,79 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getAuthUser } from "../../../../lib/auth";
-import { getUser, saveUser } from "../../../../lib/db";
-import { hashPassword, verifyPassword } from "../../../../lib/password";
+import {
+  getSession,
+  getUser,
+  verifyPassword,
+  updateUserPassword,
+} from "../../../../lib/supabase-db";
 
-/**
- * POST /api/users/change-password - Change password (users can change their own)
- */
 export async function POST(request: NextRequest) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value;
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
+    const user = await getUser(session.user_id);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json() as {
-      currentPassword?: string; // Required if user has password, optional if first time setting password
-      newPassword: string;
-    };
+    const body = await request.json();
+    const { currentPassword, newPassword } = body;
 
-    if (!body.newPassword || body.newPassword.length < 8) {
+    if (!newPassword) {
       return NextResponse.json(
-        { error: "New password must be at least 8 characters long" },
+        { error: "Nytt passord er påkrevd" },
         { status: 400 }
       );
     }
 
-    // Get full user data (including password hash)
-    const fullUser = getUser(user.id);
-    if (!fullUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    if (newPassword.length < 8) {
+      return NextResponse.json(
+        { error: "Passordet må være minst 8 tegn" },
+        { status: 400 }
+      );
     }
 
-    // If user has a password, verify current password
-    if (fullUser.passwordHash) {
-      if (!body.currentPassword) {
+    // If user must change password, don't require current password
+    if (!user.must_change_password) {
+      if (!currentPassword) {
         return NextResponse.json(
-          { error: "Current password is required" },
+          { error: "Nåværende passord er påkrevd" },
           { status: 400 }
         );
       }
 
-      if (!verifyPassword(body.currentPassword, fullUser.passwordHash)) {
+      if (!user.password_hash || !verifyPassword(currentPassword, user.password_hash)) {
         return NextResponse.json(
-          { error: "Current password is incorrect" },
+          { error: "Nåværende passord er feil" },
           { status: 401 }
         );
       }
     }
-    // If user doesn't have password (first time setup), allow setting without current password
 
-    // Hash new password
-    const { hash } = hashPassword(body.newPassword);
+    const success = await updateUserPassword(user.id, newPassword);
+    if (!success) {
+      return NextResponse.json(
+        { error: "Kunne ikke oppdatere passord" },
+        { status: 500 }
+      );
+    }
 
-    // Update user
-    const updatedUser = {
-      ...fullUser,
-      passwordHash: hash,
-      mustChangePassword: false // Clear the flag when password is changed
-    };
-
-    saveUser(updatedUser);
-
-    return NextResponse.json({
-      success: true,
-      message: "Password changed successfully"
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error changing password:", error);
+    console.error("Change password error:", error);
     return NextResponse.json(
-      { error: "Failed to change password" },
+      { error: "Kunne ikke endre passord" },
       { status: 500 }
     );
   }
 }
-
-
-
-
-
-
-

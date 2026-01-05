@@ -1,49 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readFile } from "fs/promises";
-import { existsSync } from "fs";
-import { getUploadPath } from "../../../../lib/app-applications";
-
-const MIME_TYPES: Record<string, string> = {
-  pdf: "application/pdf",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  png: "image/png",
-  webp: "image/webp",
-  doc: "application/msword",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-};
+import { getSignedFileUrl } from "../../../../lib/supabase-db";
 
 /**
- * GET /api/uploads/[filename] - Serve uploaded file
+ * GET /api/uploads/[filename] - Get signed URL for file
+ * The filename here is actually the storage path
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: { filename: string } }
 ) {
   try {
-    const filePath = getUploadPath(params.filename);
+    // The filename might be URL encoded, so decode it
+    const storagePath = decodeURIComponent(params.filename);
     
-    if (!existsSync(filePath)) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
-    }
+    // If it doesn't include the uploads/ prefix, add it
+    const fullPath = storagePath.startsWith("uploads/") 
+      ? storagePath 
+      : `uploads/${storagePath}`;
 
-    const buffer = await readFile(filePath);
-    const ext = params.filename.split(".").pop()?.toLowerCase() || "pdf";
-    const contentType = MIME_TYPES[ext] || "application/octet-stream";
+    const signedUrl = await getSignedFileUrl(fullPath);
 
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": contentType,
-        "Content-Disposition": `inline; filename="${params.filename}"`,
-        "Cache-Control": "public, max-age=31536000",
-      },
-    });
+    // Redirect to the signed URL
+    return NextResponse.redirect(signedUrl);
   } catch (error) {
-    console.error("Error serving file:", error);
+    console.error("Get file error:", error);
     return NextResponse.json(
-      { error: "Failed to serve file" },
-      { status: 500 }
+      { error: "File not found" },
+      { status: 404 }
     );
   }
 }
-

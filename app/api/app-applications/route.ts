@@ -1,56 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getAuthUser } from "../../../lib/auth";
 import {
-  listApplicationsForUser,
+  getSession,
+  getUser,
+  listApplications,
   createApplication,
   getApplicationsSummary,
-  type ApplicationStatus,
-} from "../../../lib/app-applications";
+  listClients,
+} from "../../../lib/supabase-db";
 
 /**
  * GET /api/app-applications - List applications
  */
 export async function GET(request: NextRequest) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value ||
-                     new URL(request.url).searchParams.get("sessionId");
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value ||
+      new URL(request.url).searchParams.get("sessionId");
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
+    const user = await getUser(session.user_id);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get client ID if user is a client
-    let clientId: string | undefined;
-    if (user.role === "client") {
-      const { getClientsByOrganization } = await import("../../../lib/db");
-      const clients = getClientsByOrganization(user.organizationId);
-      const client = clients.find(c => c.email === user.email);
-      clientId = client?.id;
+    // Build filter options based on user role
+    let options: {
+      userId?: string;
+      clientId?: string;
+      organizationId?: string;
+    } = {};
+
+    if (user.role === "admin") {
+      // Admin sees all
+    } else if (user.role === "consultant") {
+      // Consultant sees all in their organization
+      options.organizationId = user.organization_id;
+    } else {
+      // Client sees only their own
+      options.userId = user.id;
     }
 
-    const apps = listApplicationsForUser(
-      user.id,
-      clientId,
-      user.organizationId,
-      user.role
+    const applications = await listApplications(options);
+    const summary = await getApplicationsSummary(
+      user.role === "admin" ? undefined : user.organization_id
     );
 
-    const summary = getApplicationsSummary(apps);
-
-    return NextResponse.json({ applications: apps, summary });
+    return NextResponse.json({ applications, summary });
   } catch (error) {
-    console.error("Error listing applications:", error);
+    console.error("List applications error:", error);
     return NextResponse.json(
       { error: "Failed to list applications" },
       { status: 500 }
@@ -63,38 +69,25 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value;
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
+    const user = await getUser(session.user_id);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json() as {
-      company: string;
-      jobTitle: string;
-      status?: ApplicationStatus;
-      deadline?: string;
-      location?: string;
-      employmentType?: string;
-      salary?: string;
-      listingUrl?: string;
-      angle?: string;
-      notes?: string;
-      contactName?: string;
-      contactEmail?: string;
-      contactPhone?: string;
-    };
+    const body = await request.json();
 
     if (!body.company || !body.jobTitle) {
       return NextResponse.json(
@@ -106,38 +99,36 @@ export async function POST(request: NextRequest) {
     // Get client ID if user is a client
     let clientId: string | undefined;
     if (user.role === "client") {
-      const { getClientsByOrganization } = await import("../../../lib/db");
-      const clients = getClientsByOrganization(user.organizationId);
-      const client = clients.find(c => c.email === user.email);
+      const clients = await listClients(user.organization_id);
+      const client = clients.find((c) => c.email === user.email || c.user_id === user.id);
       clientId = client?.id;
     }
 
-    const app = createApplication({
+    const application = await createApplication({
+      user_id: user.id,
+      client_id: clientId,
+      organization_id: user.organization_id,
       company: body.company,
-      jobTitle: body.jobTitle,
+      job_title: body.jobTitle,
       status: body.status || "planlagt",
       deadline: body.deadline,
       location: body.location,
-      employmentType: body.employmentType,
+      employment_type: body.employmentType,
       salary: body.salary,
-      listingUrl: body.listingUrl,
+      listing_url: body.listingUrl,
       angle: body.angle,
       notes: body.notes,
-      contactName: body.contactName,
-      contactEmail: body.contactEmail,
-      contactPhone: body.contactPhone,
-      userId: user.id,
-      clientId: clientId,
-      organizationId: user.organizationId,
+      contact_name: body.contactName,
+      contact_email: body.contactEmail,
+      contact_phone: body.contactPhone,
     });
 
-    return NextResponse.json({ application: app });
+    return NextResponse.json({ application });
   } catch (error) {
-    console.error("Error creating application:", error);
+    console.error("Create application error:", error);
     return NextResponse.json(
       { error: "Failed to create application" },
       { status: 500 }
     );
   }
 }
-

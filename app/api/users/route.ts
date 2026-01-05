@@ -1,151 +1,112 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getAuthUser } from "../../../lib/auth";
-import { saveUser, getUsersByOrganization } from "../../../lib/db";
-import { hashPassword, generateTemporaryPassword } from "../../../lib/password";
+import {
+  getSession,
+  getUser,
+  listUsers,
+  createUser,
+} from "../../../lib/supabase-db";
 
 /**
- * GET /api/users - List users (admin only, filtered by organization)
+ * GET /api/users - List users
  */
 export async function GET(request: NextRequest) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value ||
-                     new URL(request.url).searchParams.get("sessionId");
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value ||
+      new URL(request.url).searchParams.get("sessionId");
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
-    if (!user || (user.role !== "admin" && user.role !== "consultant")) {
+    const user = await getUser(session.user_id);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Only admin and consultant can list users
+    if (user.role !== "admin" && user.role !== "consultant") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const organizationId = new URL(request.url).searchParams.get("organizationId");
     
-    if (organizationId) {
-      // Get users for specific organization
-      const users = getUsersByOrganization(organizationId);
-      // Remove password hashes before sending
-      const safeUsers = users.map(({ passwordHash, ...rest }) => rest);
-      return NextResponse.json(safeUsers);
-    }
+    // Consultants can only see users in their own organization
+    const orgId = user.role === "consultant" ? user.organization_id : (organizationId || undefined);
+    
+    const users = await listUsers(orgId);
 
-    // Admin can see all users (or we could limit to their org)
-    // For now, return users from all organizations
-    const { listOrganizations } = await import("../../../lib/db");
-    const orgs = listOrganizations();
-    const allUsers: any[] = [];
-    
-    for (const org of orgs) {
-      const users = getUsersByOrganization(org.id);
-      const safeUsers = users.map(({ passwordHash, ...rest }) => rest);
-      allUsers.push(...safeUsers);
-    }
-    
-    return NextResponse.json(allUsers);
+    // Remove password hashes from response
+    const safeUsers = users.map(({ password_hash, ...rest }) => rest);
+
+    return NextResponse.json(safeUsers);
   } catch (error) {
-    console.error("Error fetching users:", error);
+    console.error("List users error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch users" },
+      { error: "Failed to list users" },
       { status: 500 }
     );
   }
 }
 
 /**
- * POST /api/users - Create new user (admin only)
+ * POST /api/users - Create user (admin only)
  */
 export async function POST(request: NextRequest) {
   try {
-    const sessionId = request.headers.get("x-session-id") || 
-                     request.cookies.get("sessionId")?.value;
-    
+    const sessionId =
+      request.headers.get("x-session-id") ||
+      request.cookies.get("sessionId")?.value;
+
     if (!sessionId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = getSession(sessionId);
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = getAuthUser(session.userId);
-    if (!user || user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden - Admin only" }, { status: 403 });
+    const currentUser = await getUser(session.user_id);
+    if (!currentUser || currentUser.role !== "admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await request.json() as {
-      email: string;
-      name: string;
-      role: "admin" | "consultant" | "client";
-      organizationId: string;
-      generatePassword?: boolean; // If true, generate temp password
-    };
+    const body = await request.json();
+    const { email, name, role, organizationId } = body;
 
-    if (!body.email || !body.name || !body.role || !body.organizationId) {
+    if (!email || !name || !role) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Email, name, and role are required" },
         { status: 400 }
       );
     }
 
-    // Check if user already exists
-    const existingUsers = getUsersByOrganization(body.organizationId);
-    if (existingUsers.some(u => u.email === body.email)) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 }
-      );
-    }
+    const { user, temporaryPassword } = await createUser({
+      organization_id: organizationId || currentUser.organization_id,
+      email,
+      name,
+      role,
+    });
 
-    // Generate temporary password or use provided one
-    let passwordHash: string | undefined;
-    let temporaryPassword: string | undefined;
-    let mustChangePassword = false;
+    // Remove password hash from response
+    const { password_hash, ...safeUser } = user;
 
-    if (body.generatePassword !== false) {
-      // Generate temporary password by default
-      temporaryPassword = generateTemporaryPassword();
-      const { hash } = hashPassword(temporaryPassword);
-      passwordHash = hash;
-      mustChangePassword = true;
-    }
-
-    // Create new user
-    const newUser = {
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      organizationId: body.organizationId,
-      email: body.email,
-      name: body.name,
-      role: body.role,
-      passwordHash,
-      mustChangePassword,
-      createdAt: new Date().toISOString()
-    };
-
-    saveUser(newUser);
-
-    // Return user info (without password hash) and temporary password if generated
-    const { passwordHash: _, ...safeUser } = newUser;
     return NextResponse.json({
       user: safeUser,
-      temporaryPassword: temporaryPassword ? temporaryPassword : undefined,
-      message: temporaryPassword 
-        ? "User created. Temporary password has been generated."
-        : "User created."
+      temporaryPassword,
     });
   } catch (error) {
-    console.error("Error creating user:", error);
+    console.error("Create user error:", error);
     return NextResponse.json(
-      { error: "Failed to create user" },
+      { error: error instanceof Error ? error.message : "Failed to create user" },
       { status: 500 }
     );
   }
 }
-
