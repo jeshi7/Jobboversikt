@@ -1,6 +1,6 @@
 // Migration utilities for importing existing job application data from Jobb_Søknad_Pakke/
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { getSupabaseAdmin } from "./supabase";
 
 export interface ParsedApplication {
   company: string;
@@ -239,7 +239,7 @@ export async function importToSupabase(
   clientId: string,
   cvMasterText: string
 ) {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseAdmin();
   const results = {
     applications: { success: 0, failed: 0 },
     competenceBank: { success: false },
