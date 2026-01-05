@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useCurrentUser } from "../../lib/hooks/useCurrentUser";
 import { Heading, BodyShort, Panel, Button } from "@navikt/ds-react";
 import { PipelineBoard } from "./PipelineBoard";
@@ -9,6 +10,7 @@ import { GoalsTracker } from "./GoalsTracker";
 import { MotivationQuote } from "./MotivationQuote";
 import { TodayActions } from "./TodayActions";
 import { ProgressStreak } from "./ProgressStreak";
+import { NewApplicationForm } from "./NewApplicationForm";
 import type { Application } from "../../lib/applications";
 
 interface DashboardContentProps {
@@ -37,6 +39,7 @@ export function DashboardContent({
   groupedDreams
 }: DashboardContentProps) {
   const { user } = useCurrentUser();
+  const [showNewAppForm, setShowNewAppForm] = useState(false);
 
   const getTitle = () => {
     if (user?.role === "admin" || user?.role === "consultant") {
@@ -71,10 +74,9 @@ export function DashboardContent({
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
-            as="a"
-            href="/applications?action=new"
             size="small"
             variant="primary"
+            onClick={() => setShowNewAppForm(true)}
           >
             + Ny søknad
           </Button>
@@ -199,6 +201,17 @@ export function DashboardContent({
             <DreamList companies={dreamCompanies} grouped={groupedDreams} />
           </Panel>
         </section>
+      )}
+
+      {/* New application form modal */}
+      {showNewAppForm && (
+        <NewApplicationForm 
+          onClose={() => setShowNewAppForm(false)}
+          onSuccess={() => {
+            // Refresh data
+            window.location.reload();
+          }}
+        />
       )}
     </div>
   );
