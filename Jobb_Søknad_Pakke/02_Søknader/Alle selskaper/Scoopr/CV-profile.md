@@ -12,3 +12,12 @@ Min bakgrunn fra service (hotell, NAV) har gitt meg en innebygd forståelse for 
 
 
 
+
+
+
+
+
+
+
+
+

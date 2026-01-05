@@ -32,6 +32,10 @@ export interface Application {
   applyTo?: string;
   listingUrl?: string;
   angle?: string;
+  // Multi-tenant fields
+  clientId?: string;
+  organizationId?: string;
+  userId?: string; // User who created/owns this application
 }
 
 const ROOT = process.cwd();
@@ -45,10 +49,18 @@ function safeReadDir(dir: string): string[] {
   }
 }
 
-export function loadApplications(): Application[] {
+interface LoadApplicationsOptions {
+  userRole?: "admin" | "consultant" | "client";
+  userOrganizationId?: string;
+  userId?: string;
+  selectedClientId?: string | null;
+}
+
+export function loadApplications(options?: LoadApplicationsOptions): Application[] {
   const all: Application[] = [];
 
   const alleSelskaperDir = path.join(BASE_DIR, "Alle selskaper");
+  const avslagDir = path.join(BASE_DIR, "avslag");
   const planlagteDir = path.join(BASE_DIR, "Planlagte_Søknader");
 
   // Actual applications
@@ -240,6 +252,150 @@ export function loadApplications(): Application[] {
     });
   }
 
+  // Applications from avslag folder (rejected applications)
+  for (const companyFolder of safeReadDir(avslagDir)) {
+    if (companyFolder.startsWith(".")) continue;
+
+    const full = path.join(avslagDir, companyFolder);
+    const stat = fs.existsSync(full) ? fs.statSync(full) : null;
+    if (!stat || !stat.isDirectory()) continue;
+
+    const files = safeReadDir(full);
+    const resources: ApplicationResource[] = files.map((file) => ({
+      name: file,
+      relativePath: path
+        .join("Jobb_Søknad_Pakke", "02_Søknader", "avslag", companyFolder, file)
+        .replace(/\\/g, "/")
+    }));
+
+    // Parse Utlysning.md if it exists (same logic as above)
+    let jobSnippet: string | undefined;
+    let jobTitle: string | undefined;
+    let deadline: string | undefined;
+    let employmentType: string | undefined;
+    let location: string | undefined;
+    let contact: string | undefined;
+    let applyTo: string | undefined;
+    let listingUrl: string | undefined;
+    let angle: string | undefined;
+    const postingPath = path.join(full, "Utlysning.md");
+    if (fs.existsSync(postingPath)) {
+      try {
+        const raw = fs.readFileSync(postingPath, "utf8");
+        const lines = raw.split(/\r?\n/);
+
+        const titleLine = lines.find((l) => l.startsWith("# "));
+        if (titleLine) {
+          jobTitle = titleLine.replace(/^#\s*/, "").trim();
+        }
+
+        for (const line of lines) {
+          const clean = line.replace(/[*`]/g, "").trim();
+          const lower = clean.toLowerCase();
+
+          const getValueAfterColon = () => {
+            const idx = clean.indexOf(":");
+            return idx >= 0 ? clean.slice(idx + 1).trim() : "";
+          };
+
+          if (lower.startsWith("frist:")) {
+            deadline = getValueAfterColon();
+          } else if (lower.startsWith("ansettelsesform:")) {
+            employmentType = getValueAfterColon();
+          } else if (lower.startsWith("sted:")) {
+            location = getValueAfterColon();
+          } else if (lower.startsWith("kontakt:")) {
+            contact = getValueAfterColon();
+          } else if (lower.startsWith("søknad sendes:")) {
+            applyTo = getValueAfterColon();
+          } else if (lower.startsWith("link:")) {
+            listingUrl = getValueAfterColon();
+          }
+        }
+
+        const lowerLines = lines.map((l) => l.trim().toLowerCase());
+        const omIdx = lowerLines.findIndex((l) =>
+          l.startsWith("## om stillingen")
+        );
+
+        const snippetParts: string[] = [];
+        if (omIdx !== -1) {
+          for (let i = omIdx + 1; i < lines.length; i++) {
+            const rawLine = lines[i];
+            const trimmed = rawLine.trim();
+            if (!trimmed) continue;
+            if (trimmed.startsWith("## ")) break;
+            if (trimmed.startsWith("**") && trimmed.endsWith("**")) break;
+            if (trimmed.startsWith("*")) continue;
+
+            snippetParts.push(
+              trimmed
+                .replace(/[*`]/g, "")
+                .replace(/\s+/g, " ")
+                .trim()
+            );
+
+            if (snippetParts.join(" ").length > 400) break;
+          }
+        }
+
+        if (snippetParts.length > 0) {
+          jobSnippet = snippetParts.join("\n\n");
+        } else {
+          const firstParagraph = lines
+            .slice(1)
+            .map((l) => l.trim())
+            .filter((l) => l && !l.startsWith("*") && !l.startsWith("## "))[0];
+          jobSnippet = firstParagraph
+            ? firstParagraph.replace(/[*`]/g, "").trim()
+            : undefined;
+        }
+
+        const angleIdx = lowerLines.findIndex((l) =>
+          l.includes("din vinkel")
+        );
+        if (angleIdx !== -1) {
+          const angleParts: string[] = [];
+          const startIdx = lowerLines[angleIdx].includes("**") ? angleIdx + 1 : angleIdx + 1;
+          for (let i = startIdx; i < lines.length; i++) {
+            const rawLine = lines[i];
+            const trimmed = rawLine.trim();
+            if (!trimmed) continue;
+            if (trimmed.startsWith("## ")) break;
+            if (trimmed.startsWith("Link:")) break;
+            angleParts.push(trimmed);
+          }
+          if (angleParts.length > 0) {
+            angle = angleParts.join("\n").trim();
+          }
+        }
+      } catch {
+        jobSnippet = undefined;
+        angle = undefined;
+      }
+    }
+
+    // All applications in avslag folder are marked as "avslått"
+    all.push({
+      id: `avslag-${companyFolder}`,
+      company: companyFolder,
+      folder: path.relative(ROOT, full).replace(/\\/g, "/"),
+      status: "avslått",
+      type: "søknad",
+      resources,
+      sentAt: undefined,
+      jobSnippet,
+      jobTitle,
+      deadline,
+      employmentType,
+      location,
+      contact,
+      applyTo,
+      listingUrl,
+      angle
+    });
+  }
+
   // Planned applications (only if NOT already in Alle selskaper)
   const existingCompanies = new Set(all.map((a) => a.company));
 
@@ -408,12 +564,37 @@ export function loadApplications(): Application[] {
     }
   });
 
-  return all.sort((a, b) => a.company.localeCompare(b.company, "nb"));
+  // Enrich with metadata
+  const metadataModule = require("./applications-metadata");
+  const { enrichApplicationsWithMetadata, filterApplicationsByAccess } = metadataModule;
+  let enriched = enrichApplicationsWithMetadata(all);
+
+  // Apply filtering based on user access if options provided
+  if (options && (options.userRole || options.userId || options.userOrganizationId)) {
+    enriched = filterApplicationsByAccess(
+      enriched,
+      options.userRole || "client",
+      options.userOrganizationId,
+      options.userId,
+      options.selectedClientId
+    );
+  }
+
+  return enriched.sort((a, b) => a.company.localeCompare(b.company, "nb"));
 }
 
 export function summariseApplications(apps: Application[]) {
   const total = apps.length;
-  const sent = apps.filter((a) => a.status === "sendt").length;
+  // Count all applications that have been sent (regardless of current status)
+  // This includes: sendt, intervju, avslått, ansatt (all represent applications that were sent)
+  const sent = apps.filter((a) => 
+    a.status === "sendt" || 
+    a.status === "intervju" || 
+    a.status === "avslått" || 
+    a.status === "ansatt" ||
+    a.sentAt !== undefined ||
+    a.type === "søknad"
+  ).length;
   const interview = apps.filter((a) => a.status === "intervju").length;
   const planned = apps.filter((a) => a.type === "planlagt").length;
 

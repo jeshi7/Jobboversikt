@@ -1,163 +1,115 @@
 import { loadApplications, summariseApplications } from "../../lib/applications";
-import { Heading, BodyShort, Panel, Tag } from "@navikt/ds-react";
+import { loadOverviewRows } from "../../lib/overview";
+import { StatsContent } from "../components/StatsContent";
+import { getCurrentUserServer } from "../../lib/get-current-user-server";
+import { getClientsByOrganization } from "../../lib/db";
 
-export default function StatsPage() {
-  const apps = loadApplications();
-  const summary = summariseApplications(apps);
-
-  const sentRatio =
-    summary.total > 0 ? Math.round((summary.sent / summary.total) * 100) : 0;
-  const interviewRatio =
-    summary.total > 0
-      ? Math.round((summary.interview / summary.total) * 100)
-      : 0;
-
-  return (
-    <div className="space-y-6">
-      <header className="space-y-1">
-        <BodyShort
-          size="small"
-          className="text-xs uppercase tracking-[0.25em] text-slate-500"
-        >
-          Tall
-        </BodyShort>
-        <Heading level="1" size="medium">
-          Mønstre i søknadsarbeidet ditt
-        </Heading>
-        <BodyShort size="small" className="max-w-2xl text-slate-600">
-          En enkel, rolig oversikt over volum og fremdrift.
-        </BodyShort>
-      </header>
-
-      <section className="grid gap-4 md:grid-cols-4">
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Totalt selskaper
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {summary.total}
-          </Heading>
-        </Panel>
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Sendt-andel
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {sentRatio}%
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            av registrerte selskaper har fått søknad.
-          </BodyShort>
-        </Panel>
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Intervju-andel
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {interviewRatio}%
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            har ledet til en dypere samtale.
-          </BodyShort>
-        </Panel>
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Planlagte søknader
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {summary.planned}
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            potensielle neste steg i mappen din.
-          </BodyShort>
-        </Panel>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        <Panel border className="space-y-4">
-          <div>
-            <Heading level="2" size="small">
-              Fordeling per status
-            </Heading>
-            <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-              En enkel stolpediagram, laget med ren layout.
-            </BodyShort>
-          </div>
-          <StatusBar
-            label="Planlagt"
-            value={summary.planned}
-            total={summary.total}
-            tone="muted"
-          />
-          <StatusBar
-            label="Sendt"
-            value={summary.sent}
-            total={summary.total}
-            tone="positive"
-          />
-          <StatusBar
-            label="Intervju"
-            value={summary.interview}
-            total={summary.total}
-            tone="warning"
-          />
-        </Panel>
-
-        <Panel border className="space-y-3 text-sm text-slate-600">
-          <Heading level="2" size="small" className="text-slate-900">
-            Mykere tolkning av tallene
-          </Heading>
-          <BodyShort size="small">
-            I stedet for å jage KPI-er, kan du bruke denne siden til å se om
-            innsatsen din er jevn over tid, og om du følger opp gode spor.
-          </BodyShort>
-          <BodyShort size="small">
-            Hver mappe og hvert dokument i{" "}
-            <span className="font-medium">Jobb_Søknad_Pakke</span> representerer
-            faktisk arbeid du har lagt ned.
-          </BodyShort>
-        </Panel>
-      </section>
-    </div>
-  );
-}
-
-function StatusBar({
-  label,
-  value,
-  total,
-  tone
+export default async function StatsPage({
+  searchParams
 }: {
-  label: string;
-  value: number;
-  total: number;
-  tone: "muted" | "positive" | "warning";
+  searchParams?: { clientId?: string };
 }) {
-  const ratio = total > 0 ? value / total : 0;
-  const width = `${Math.max(6, Math.round(ratio * 100))}%`;
+  const user = await getCurrentUserServer();
+  
+  // Get clientId for filtering
+  let clientId: string | undefined;
+  
+  if (user?.role === "client" && user?.email) {
+    // Client sees only their own statistics
+    const clients = getClientsByOrganization(user.organizationId);
+    const client = clients.find(c => c.email === user.email);
+    clientId = client?.id;
+  } else if ((user?.role === "consultant" || user?.role === "admin") && searchParams?.clientId) {
+    // Consultant/Admin can filter by selected client
+    clientId = searchParams.clientId;
+  }
+  
+  const apps = loadApplications({
+    userRole: user?.role,
+    userOrganizationId: user?.organizationId,
+    userId: user?.id,
+    selectedClientId: clientId || undefined
+  });
+  const summary = summariseApplications(apps);
+  const overviewRows = loadOverviewRows();
 
-  const toneClass =
-    tone === "positive"
-      ? "bg-emerald-500/60"
-      : tone === "warning"
-        ? "bg-amber-500/70"
-        : "bg-slate-400/70";
+  // Calculate success rate
+  const successRate = (() => {
+    const withResponse = apps.filter(
+      (a) => a.status === "intervju" || a.status === "ansatt" || a.status === "avslått"
+    ).length;
+    const sent = apps.filter((a) => a.status === "sendt" || a.status === "forberedes" || a.status === "intervju" || a.status === "ansatt" || a.status === "avslått").length;
+    
+    if (sent === 0) return 0;
+    return Math.round((withResponse / sent) * 100);
+  })();
+
+  // Calculate average time to response
+  const avgResponseTime = (() => {
+    const rowsWithInterviews = overviewRows.filter(
+      (r) => r.sentDate && (r.intervju1 || r.status.includes("Avslått") || r.status.includes("Ansatt"))
+    );
+
+    if (rowsWithInterviews.length === 0) return null;
+
+    const times: number[] = [];
+
+    rowsWithInterviews.forEach((row) => {
+      if (!row.sentDate) return;
+
+      const sentDate = parseDate(row.sentDate);
+      if (!sentDate) return;
+
+      // Find first response (interview or rejection/acceptance)
+      let responseDate: Date | null = null;
+
+      if (row.intervju1) {
+        responseDate = parseDate(row.intervju1);
+      } else if (row.status.includes("Avslått") || row.status.includes("Ansatt")) {
+        // Approximate based on when status was set
+        responseDate = new Date(); // This is approximate
+      }
+
+      if (responseDate) {
+        const diffTime = Math.abs(responseDate.getTime() - sentDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays > 0 && diffDays < 365) {
+          // Sanity check
+          times.push(diffDays);
+        }
+      }
+    });
+
+    if (times.length === 0) return null;
+    const avg = times.reduce((a, b) => a + b, 0) / times.length;
+    return Math.round(avg);
+  })();
+
+  function parseDate(dateStr: string): Date | null {
+    if (!dateStr || dateStr.trim() === "" || dateStr === "-" || dateStr === "–") {
+      return null;
+    }
+    const parts = dateStr.trim().split(/[.\-]/);
+    if (parts.length >= 2) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parts[2] ? parseInt(parts[2], 10) : new Date().getFullYear();
+      const fullYear = year < 100 ? 2000 + year : year;
+      const date = new Date(fullYear, month, day);
+      if (!isNaN(date.getTime())) {
+        return date;
+      }
+    }
+    return null;
+  }
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-baseline justify-between text-xs">
-        <span className="font-medium text-slate-700">{label}</span>
-        <span className="text-slate-500">
-          {value} / {total}
-        </span>
-      </div>
-      <div className="h-2 rounded-full bg-slate-100">
-        <div
-          className={`h-2 rounded-full ${toneClass} transition-all`}
-          style={{ width }}
-        />
-      </div>
-    </div>
+    <StatsContent
+      apps={apps}
+      summary={summary}
+      overviewRows={overviewRows}
+      successRate={successRate}
+      avgResponseTime={avgResponseTime}
+    />
   );
 }
-

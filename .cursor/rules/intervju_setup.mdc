@@ -1,49 +1,45 @@
 ---
-description: Automatisk opprettelse av intervju-notater ved statusendring
-globs: 00_Oversikt/Søknadsoversikt.md
+description: Automatisk opprettelse av grundig intervjuforberedelsesdokument ved intervju
+globs: 02_Søknader/Alle selskaper/**/*
 alwaysApply: false
 ---
 
 # Intervju Setup Automation
 
-Når brukeren ber om å endre status til "Intervju" for et selskap i `00_Oversikt/Søknadsoversikt.md`, eller når du selv oppdaterer denne statusen:
+Når brukeren sier de har intervju med et selskap, eller når de ber om å forberede seg til intervju:
 
 **Dine instruksjoner:**
 
 1.  **Identifiser selskapet:** Finn riktig mappe i `02_Søknader/Alle selskaper/[Selskapsnavn]`.
-2.  **Opprett fil:** Lag en ny fil i den mappen som heter `Intervju_Notater.md`.
-3.  **Fyll filen med innhold:**
-    -   Bruk malen nedenfor.
-    -   Hent "Vinkel" fra `01_Ressurser/Drømmeliste_og_Nettverk.md` (hvis den finnes der) eller generer en ny basert på `Utlysning.md`.
-    -   Generer 3-5 kritiske spørsmål de vil stille (basert på svakheter i CV vs Utlysning).
-    -   Generer 3 smarte spørsmål brukeren bør stille dem.
+2.  **Les relevante filer:**
+    -   `Utlysning.md` - For å forstå stillingen og krav
+    -   `Søknadsbrev.md` - For å se hva som ble fremhevet i søknaden
+    -   `CV-profile.md` - For å se CV-profilen som ble sendt
+    -   `01_Ressurser/Kompetansebank.md` - For relevante kompetansetekster
+    -   `01_Ressurser/Prosjektbeskrivelser.md` - For konkrete STAR-eksempler
+    -   `01_Ressurser/Intervju_Forberedelser.md` - For generelle intervjuråd
+3.  **Opprett fil:** Lag en ny fil i den mappen som heter `Intervjuforberedelser.md`.
+4.  **Fyll filen med grundig innhold:**
+    -   Intervjuoversikt (stilling, selskap, sted, kontakt)
+    -   Strategisk vinkel (one-liner og mitt bidrag basert på søknadsbrev)
+    -   Om selskapet og stillingen (basert på Utlysning.md)
+    -   Din match: Styrker vs. krav (konkrete eksempler fra Prosjektbeskrivelser.md)
+    -   Opening statement (45-60 sekunder)
+    -   Kritiske spørsmål de vil stille (5+ spørsmål med svar-strategier)
+    -   Mine spørsmål til dem (8-10 spørsmål, strategiske, kulturelle og praktiske)
+    -   STAR-eksempler: "Fortell om en gang du..." (minst 4 eksempler)
+    -   Fagspesifikke spørsmål (design, produksjon, prosess)
+    -   Relevante kompetanser fra Kompetansebank.md (tilpasset til stillingen)
+    -   Key talking points
+    -   Closing statement
+    -   Preparation checklist (pre, under, post)
+    -   Success factors
+    -   Notater-seksjon for under intervjuet
 
----
-**Mal for Intervju_Notater.md:**
-
-# Intervjuforberedelser: [Selskapsnavn]
-
-## 🎯 Min Strategiske Vinkel
-*[Sett inn "one-liner" vinkelen her]*
-*[Sett inn "mitt bidrag" her]*
-
-## 🕵️‍♂️ Hvem møter jeg?
-*   Navn:
-*   Rolle:
-*   Notater (sjekk LinkedIn):
-
-## 🔥 De kritiske spørsmålene (Djevelens advokat)
-*De kommer til å lure på dette. Ha svarene klare.*
-1.  [Spørsmål basert på manglende erfaring/hull/skifte av bransje]
-    *   *Svar-strategi:* ...
-2.  ...
-
-## 🧠 Mine spørsmål til dem
-*Vis at du har gjort hjemmeleksen.*
-1.  [Spørsmål om kultur/arbeidsmetodikk]
-2.  [Spørsmål om en spesifikk utfordring de har nevnt]
-3.  [Strategisk spørsmål om fremtiden]
-
-## ✅ Praktisk
-- [ ] Les gjennom `01_Ressurser/Intervju_Forberedelser.md`
-- [ ] Sjekk nettsiden deres en siste gang
+**Viktig:**
+- Dokumentet skal være grundig og tilpasset akkurat denne stillingen
+- Bruk informasjon fra alle relevante filer i selskapets mappe
+- Tilpass kompetansetekster fra Kompetansebank.md til stillingen
+- Inkluder konkrete eksempler fra Prosjektbeskrivelser.md
+- Svar-strategiene skal være praktiske og basert på brukerens faktiske erfaring
+- Hold tonen menneskelig og autentisk (følg anti-AI reglene)

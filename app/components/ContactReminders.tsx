@@ -67,16 +67,68 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     history: HistoryItem[];
   } | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [progressPopup, setProgressPopup] = useState<{
+    company: string;
+    currentType: ReminderType;
+  } | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [companyIntervjuCounts, setCompanyIntervjuCounts] = useState<Record<string, number>>({});
+  const [searchQuery, setSearchQuery] = useState("");
   
   const skipFetchRef = useRef(false);
   const hasUnsavedChanges = note !== originalNote;
 
+  // Fetch intervju counts for companies when component mounts or reminders change
+  useEffect(() => {
+    const fetchIntervjuCounts = async () => {
+      const counts: Record<string, number> = {};
+      const allReminders = [...reminders, ...intervjuReminders];
+      const companies = [...new Set(allReminders.map(r => r.company))];
+      
+      for (const company of companies) {
+        let highestIntervju = 0;
+        for (let i = 1; i <= 4; i++) {
+          const type = `intervju${i}` as IntervjuType;
+          try {
+            const params = new URLSearchParams({ company, type });
+            const res = await fetch(`/api/contact-notes?${params.toString()}`);
+            if (res.ok) {
+              const data = await res.json();
+              if (data.text && data.text.trim()) {
+                highestIntervju = i;
+              }
+            }
+          } catch {
+            // Ignore errors
+          }
+        }
+        counts[company] = highestIntervju;
+      }
+      
+      setCompanyIntervjuCounts(counts);
+    };
+    
+    if (reminders.length > 0 || intervjuReminders.length > 0) {
+      fetchIntervjuCounts();
+    }
+  }, [reminders, intervjuReminders]);
+
   // Sort reminders: overdue first (negative daysLeft), then by daysLeft ascending
-  const sortedReminders = [...(viewMode === "kontakt" ? reminders : intervjuReminders)].sort((a, b) => {
+  const allReminders = viewMode === "kontakt" ? reminders : intervjuReminders;
+  let sortedReminders = [...allReminders].sort((a, b) => {
     const aDays = a.daysLeft ?? 999;
     const bDays = b.daysLeft ?? 999;
     return aDays - bDays;
   });
+
+  // Filter by search query
+  const filteredReminders = searchQuery.trim() 
+    ? sortedReminders.filter((r) => {
+        const query = searchQuery.toLowerCase();
+        return r.company.toLowerCase().includes(query) || 
+               r.label.toLowerCase().includes(query);
+      })
+    : sortedReminders;
 
   useEffect(() => {
     if (!open) {
@@ -203,6 +255,45 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
     }
   };
 
+  const handleProgress = async (company: string, action: "mark-intervju" | "mark-ansatt" | "mark-avslått", intervjuNum?: number) => {
+    setUpdatingStatus(true);
+    setError(null);
+    
+    try {
+      const sessionId = localStorage.getItem("sessionId");
+      const res = await fetch("/api/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company,
+          action,
+          intervjuNum,
+          sessionId
+        })
+      });
+      
+      const data = await res.json().catch(() => ({}));
+      
+      if (res.ok && data.ok !== false) {
+        if (progressPopup) {
+          setProgressPopup(null);
+        }
+        // Refresh the page to show updated state
+        router.refresh();
+      } else {
+        const errorMsg = data.message || `Status: ${res.status}`;
+        setError(`Kunne ikke oppdatere status: ${errorMsg}`);
+        console.error("Status update failed:", { company, action, intervjuNum, error: errorMsg });
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Ukjent feil";
+      setError(`Nettverksfeil: ${errorMsg}`);
+      console.error("Error in handleProgress:", err);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   if (sortedReminders.length === 0) {
     return (
       <>
@@ -231,108 +322,279 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
 
   return (
     <>
-      <div className="mb-4 flex gap-2">
-        <Button
-          size="xsmall"
-          variant={viewMode === "kontakt" ? "primary" : "secondary"}
-          onClick={() => setViewMode("kontakt")}
-        >
-          Kontakt
-        </Button>
-        <Button
-          size="xsmall"
-          variant={viewMode === "intervju" ? "primary" : "secondary"}
-          onClick={() => setViewMode("intervju")}
-        >
-          Intervju
-        </Button>
+      <div className="mb-4 space-y-3">
+        <div className="flex gap-2">
+          <Button
+            size="xsmall"
+            variant={viewMode === "kontakt" ? "primary" : "secondary"}
+            onClick={() => setViewMode("kontakt")}
+          >
+            Kontakt
+          </Button>
+          <Button
+            size="xsmall"
+            variant={viewMode === "intervju" ? "primary" : "secondary"}
+            onClick={() => setViewMode("intervju")}
+          >
+            Intervju
+          </Button>
+        </div>
+        {(allReminders.length > 3 || searchQuery.trim()) && (
+          <input
+            type="text"
+            placeholder="Søk etter selskap..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          />
+        )}
       </div>
 
-      <ul className="space-y-2 text-sm">
-        {sortedReminders.map((reminder) => {
+      <ul className="space-y-3">
+        {filteredReminders.map((reminder) => {
           const isIntervju = reminder.type.startsWith("intervju");
           const num = parseInt(reminder.type.replace(/^(kontakt|intervju)/, ""), 10);
           const urgency = getUrgencyColor(reminder.daysLeft);
+          const isOverdue = reminder.daysLeft !== undefined && reminder.daysLeft < 0;
           
           return (
             <li
               key={reminder.id}
-              className={`flex items-center justify-between rounded-xl border ${urgency.border} ${urgency.bg} px-3 py-2 transition-colors`}
+              className={`rounded-lg border-2 ${urgency.border} ${urgency.bg} p-4 transition-all hover:shadow-sm`}
             >
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="font-medium text-slate-900 navds-body-short navds-body-short--small hover:underline text-left"
-                    onClick={() => fetchHistory(reminder.company)}
-                  >
-                    {reminder.company}
-                  </button>
-                  {reminder.daysLeft !== undefined && reminder.daysLeft < 0 && (
-                    <span className="text-[10px] text-red-600 font-medium">⚠️ Forfalt</span>
-                  )}
-                </div>
-                <p className="text-slate-500 text-[11px] navds-body-short navds-body-short--small">
-                  {isIntervju ? `Intervju ${num}` : `Kontakt ${num}`} · {getUrgencyLabel(reminder.daysLeft)}
-                </p>
-                <div className="mt-1 flex flex-wrap gap-2">
-                  {/* Show links to previous notes */}
-                  {!isIntervju && num > 1 && [1, 2, 3, 4, 5].slice(0, num - 1).map((prevNum) => (
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
                     <button
-                      key={prevNum}
                       type="button"
-                      className="text-[11px] text-accent underline underline-offset-2"
-                      onClick={async () => {
-                        const prevType = `kontakt${prevNum}` as ContactType;
-                        try {
-                          const params = new URLSearchParams({ company: reminder.company, type: prevType });
-                          const res = await fetch(`/api/contact-notes?${params.toString()}`);
-                          if (res.ok) {
-                            const data = await res.json();
-                            setViewingNote({ company: reminder.company, noteType: prevType, note: data.text ?? "" });
-                          }
-                        } catch { /* Silent */ }
-                      }}
+                      className="text-base font-semibold text-slate-900 hover:text-blue-600 hover:underline truncate"
+                      onClick={() => fetchHistory(reminder.company)}
                     >
-                      K{prevNum}
+                      {reminder.company}
                     </button>
-                  ))}
-                  {isIntervju && num > 1 && [1, 2, 3, 4].slice(0, num - 1).map((prevNum) => (
+                    {isOverdue && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 border border-red-200">
+                        ⚠️ Forfalt
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mb-3">
+                    <Tag size="small" variant={urgency.tag} className="shrink-0">
+                      {isIntervju ? `Intervju ${num}` : `Kontakt ${num}`}
+                    </Tag>
+                    {reminder.daysLeft !== undefined && (
+                      <span className="text-xs text-slate-500">
+                        {getUrgencyLabel(reminder.daysLeft)}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {/* Previous notes */}
+                    {!isIntervju && num > 1 && [1, 2, 3, 4, 5].slice(0, num - 1).map((prevNum) => (
+                      <button
+                        key={prevNum}
+                        type="button"
+                        className="px-2 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                        onClick={async () => {
+                          const prevType = `kontakt${prevNum}` as ContactType;
+                          try {
+                            const params = new URLSearchParams({ company: reminder.company, type: prevType });
+                            const res = await fetch(`/api/contact-notes?${params.toString()}`);
+                            if (res.ok) {
+                              const data = await res.json();
+                              setViewingNote({ company: reminder.company, noteType: prevType, note: data.text ?? "" });
+                            }
+                          } catch { /* Silent */ }
+                        }}
+                      >
+                        K{prevNum}
+                      </button>
+                    ))}
+                    {isIntervju && num > 1 && [1, 2, 3, 4].slice(0, num - 1).map((prevNum) => (
+                      <button
+                        key={prevNum}
+                        type="button"
+                        className="px-2 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                        onClick={async () => {
+                          const prevType = `intervju${prevNum}` as IntervjuType;
+                          try {
+                            const params = new URLSearchParams({ company: reminder.company, type: prevType });
+                            const res = await fetch(`/api/contact-notes?${params.toString()}`);
+                            if (res.ok) {
+                              const data = await res.json();
+                              setViewingNote({ company: reminder.company, noteType: prevType, note: data.text ?? "" });
+                            }
+                          } catch { /* Silent */ }
+                        }}
+                      >
+                        I{prevNum}
+                      </button>
+                    ))}
+                    
+                    {/* Action buttons */}
                     <button
-                      key={prevNum}
                       type="button"
-                      className="text-[11px] text-accent underline underline-offset-2"
-                      onClick={async () => {
-                        const prevType = `intervju${prevNum}` as IntervjuType;
-                        try {
-                          const params = new URLSearchParams({ company: reminder.company, type: prevType });
-                          const res = await fetch(`/api/contact-notes?${params.toString()}`);
-                          if (res.ok) {
-                            const data = await res.json();
-                            setViewingNote({ company: reminder.company, noteType: prevType, note: data.text ?? "" });
-                          }
-                        } catch { /* Silent */ }
-                      }}
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+                      onClick={() => setOpen(reminder)}
                     >
-                      I{prevNum}
+                      + Notat
                     </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="text-[11px] text-accent underline underline-offset-2"
-                    onClick={() => setOpen(reminder)}
-                  >
-                    + Notat
-                  </button>
+                    
+                    {!isIntervju && (
+                      <>
+                        {/* Intervju button - shows next intervju number */}
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition-colors flex items-center gap-1"
+                          onClick={() => {
+                            const nextIntervju = (companyIntervjuCounts[reminder.company] || 0) + 1;
+                            handleProgress(reminder.company, "mark-intervju", nextIntervju);
+                          }}
+                          disabled={updatingStatus}
+                        >
+                          Intervju {companyIntervjuCounts[reminder.company] ? companyIntervjuCounts[reminder.company] + 1 : 1}
+                        </button>
+                        
+                        {/* Ansatt button */}
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                          onClick={() => handleProgress(reminder.company, "mark-ansatt")}
+                          disabled={updatingStatus}
+                        >
+                          Ansatt
+                        </button>
+                        
+                        {/* Avslag button */}
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition-colors flex items-center gap-1"
+                          onClick={() => handleProgress(reminder.company, "mark-avslått")}
+                          disabled={updatingStatus}
+                        >
+                          Avslag
+                        </button>
+                      </>
+                    )}
+                    {isIntervju && (
+                      <>
+                        {/* Ansatt button for intervju reminders */}
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 rounded hover:bg-purple-700 transition-colors flex items-center gap-1"
+                          onClick={() => handleProgress(reminder.company, "mark-ansatt")}
+                          disabled={updatingStatus}
+                        >
+                          Ansatt
+                        </button>
+                        
+                        {/* Avslag button for intervju reminders */}
+                        <button
+                          type="button"
+                          className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700 transition-colors flex items-center gap-1"
+                          onClick={() => handleProgress(reminder.company, "mark-avslått")}
+                          disabled={updatingStatus}
+                        >
+                          Avslag
+                        </button>
+                        
+                        {/* Next intervju button (if not last) */}
+                        {num < 4 && (
+                          <button
+                            type="button"
+                            className="px-3 py-1.5 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700 transition-colors flex items-center gap-1"
+                            onClick={() => handleProgress(reminder.company, "mark-intervju", num + 1)}
+                            disabled={updatingStatus}
+                          >
+                            Intervju {num + 1}
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <Tag size="small" variant={urgency.tag}>
-                {isIntervju ? `I${num}` : `K${num}`}
-              </Tag>
             </li>
           );
         })}
       </ul>
+
+      {/* Progress Popup */}
+      {progressPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-5 shadow-subtle">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Heading level="2" size="small">
+                  Fremdrift: {progressPopup.company}
+                </Heading>
+                <BodyShort size="small" className="mt-1 text-slate-600 text-[11px]">
+                  {progressPopup.currentType.startsWith("intervju") 
+                    ? "Hva er resultatet av intervjuet?"
+                    : "Har du fått intervju?"}
+                </BodyShort>
+              </div>
+              <Button size="xsmall" variant="tertiary" onClick={() => setProgressPopup(null)}>
+                Lukk
+              </Button>
+            </div>
+            
+            <div className="mt-4 space-y-3">
+              {progressPopup.currentType.startsWith("kontakt") ? (
+                <>
+                  <Button
+                    size="small"
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => {
+                      const nextIntervju = (companyIntervjuCounts[progressPopup.company] || 0) + 1;
+                      handleProgress(progressPopup.company, "mark-intervju", nextIntervju);
+                    }}
+                    disabled={updatingStatus}
+                  >
+                    {updatingStatus ? "Oppdaterer..." : "Ja, jeg har fått intervju"}
+                  </Button>
+                  <BodyShort size="small" className="text-slate-500 text-[11px] text-center">
+                    Dette oppdaterer status til "Intervju" og legger til Intervju 1-dato
+                  </BodyShort>
+                </>
+              ) : (
+                <>
+                  <Button
+                    size="small"
+                    variant="primary"
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    onClick={() => handleProgress(progressPopup.company, "mark-ansatt")}
+                    disabled={updatingStatus}
+                  >
+                    {updatingStatus ? "Oppdaterer..." : "✅ Jeg fikk jobben!"}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    className="w-full border-red-300 text-red-700 hover:bg-red-50"
+                    onClick={() => handleProgress(progressPopup.company, "mark-avslått")}
+                    disabled={updatingStatus}
+                  >
+                    {updatingStatus ? "Oppdaterer..." : "❌ Jeg fikk avslag"}
+                  </Button>
+                  <BodyShort size="small" className="text-slate-500 text-[11px] text-center">
+                    Dette oppdaterer status og flytter søknaden til riktig kategori
+                  </BodyShort>
+                </>
+              )}
+              
+              {error && (
+                <div className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* History Timeline Popup */}
       {historyPopup && (

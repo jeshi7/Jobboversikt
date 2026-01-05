@@ -1,9 +1,35 @@
-import { loadApplications, type Application } from "../../lib/applications";
-import { Heading, BodyShort, Panel } from "@navikt/ds-react";
-import { ResourceCard } from "../components/ResourceCard";
+import { loadApplications } from "../../lib/applications";
+import { Heading, BodyShort } from "@navikt/ds-react";
+import { ResourcesList } from "../components/ResourcesList";
+import { getCurrentUserServer } from "../../lib/get-current-user-server";
+import { getClientsByOrganization } from "../../lib/db";
 
-export default function ResourcesPage() {
-  const apps = loadApplications();
+export default async function ResourcesPage({
+  searchParams
+}: {
+  searchParams?: { clientId?: string };
+}) {
+  const user = await getCurrentUserServer();
+  
+  // Get clientId for filtering
+  let clientId: string | undefined;
+  
+  if (user?.role === "client" && user?.email) {
+    // Client sees only their own resources
+    const clients = getClientsByOrganization(user.organizationId);
+    const client = clients.find(c => c.email === user.email);
+    clientId = client?.id;
+  } else if ((user?.role === "consultant" || user?.role === "admin") && searchParams?.clientId) {
+    // Consultant/Admin can filter by selected client
+    clientId = searchParams.clientId;
+  }
+  
+  const apps = loadApplications({
+    userRole: user?.role,
+    userOrganizationId: user?.organizationId,
+    userId: user?.id,
+    selectedClientId: clientId || undefined
+  });
 
   return (
     <div className="space-y-6">
@@ -15,25 +41,15 @@ export default function ResourcesPage() {
           Ressurser
         </BodyShort>
         <Heading level="1" size="medium">
-          Alt innholdet du har laget, samlet på ett rolig sted
+          Alt innholdet samlet på ett rolig sted
         </Heading>
         <BodyShort size="small" className="max-w-2xl text-slate-600">
-          CV-er, søknadsbrev, utlysninger og notater, organisert etter selskap
-          og hentet direkte fra mappene dine.
+          CV-er, søknadsbrev, utlysninger og notater, organisert etter selskap og hentet direkte fra mappene.
         </BodyShort>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {apps.map((app) => (
-          <ResourceCard key={app.id} app={app} />
-        ))}
-        {apps.length === 0 && (
-          <Panel border className="text-xs text-slate-500">
-            Ingen ressurser funnet ennå. Når du fyller mappene under{" "}
-            <span className="font-medium">Jobb_Søknad_Pakke</span>, vil
-            innholdet listes her automatisk.
-          </Panel>
-        )}
+      <section>
+        <ResourcesList apps={apps} />
       </section>
     </div>
   );

@@ -1,10 +1,9 @@
 import { loadApplications, summariseApplications } from "../lib/applications";
 import { loadOverviewRows } from "../lib/overview";
 import { loadDreamlist, groupByCategory } from "../lib/dreamlist";
-import { PipelineBoard } from "./components/PipelineBoard";
-import { ContactReminders } from "./components/ContactReminders";
-import { DreamList } from "./components/DreamList";
-import { Heading, BodyShort, Panel, Button } from "@navikt/ds-react";
+import { DashboardContent } from "./components/DashboardContent";
+import { getCurrentUserServer } from "../lib/get-current-user-server";
+import { getClientsByOrganization } from "../lib/db";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -12,8 +11,24 @@ import path from "node:path";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export default function DashboardPage() {
-  const apps = loadApplications();
+export default async function DashboardPage() {
+  const user = await getCurrentUserServer();
+  
+  // Get selected client ID from cookies/localStorage (we'll handle this on client side)
+  // For now, if user is a client, find their clientId
+  let clientId: string | undefined;
+  if (user?.role === "client" && user?.email) {
+    const clients = getClientsByOrganization(user.organizationId);
+    const client = clients.find(c => c.email === user.email);
+    clientId = client?.id;
+  }
+  
+  const apps = loadApplications({
+    userRole: user?.role,
+    userOrganizationId: user?.organizationId,
+    userId: user?.id,
+    selectedClientId: clientId || undefined
+  });
   const summary = summariseApplications(apps);
   const dreamCompanies = loadDreamlist();
   const groupedDreams = groupByCategory(dreamCompanies);
@@ -21,138 +36,23 @@ export default function DashboardPage() {
   const sentApps = apps.filter((a) => a.status === "sendt" || a.status === "forberedes");
   const interviewApps = apps.filter((a) => a.status === "intervju");
   const plannedApps = apps.filter((a) => a.type === "planlagt");
+  const avslåttApps = apps.filter((a) => a.status === "avslått");
   const contactReminders = buildContactReminders(apps);
   const intervjuReminders = buildIntervjuReminders(apps);
 
   return (
-    <div className="space-y-8">
-      <section className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div>
-          <BodyShort
-            size="small"
-            className="text-xs uppercase tracking-[0.25em] text-slate-500"
-          >
-            Din jobbreise
-          </BodyShort>
-          <Heading level="1" size="large" className="mt-2">
-            En rolig oversikt over alle søknadene dine
-          </Heading>
-          <BodyShort size="small" className="mt-2 max-w-xl text-slate-600">
-            Se hvor du er i prosessen, hva som er sendt, og hvilke muligheter
-            som ligger foran deg.
-          </BodyShort>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            as="a"
-            href="/applications"
-            size="small"
-            variant="secondary"
-          >
-            Åpne søknader
-          </Button>
-          <Button as="a" href="/resources" size="small">
-            Se ressurser
-          </Button>
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-4">
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Totalt
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {summary.total}
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            registrerte selskaper i systemet
-          </BodyShort>
-        </Panel>
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Sendte søknader
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {summary.sent}
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            med tilpasset CV og søknadsbrev
-          </BodyShort>
-        </Panel>
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Intervjuer
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {summary.interview}
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            selskaper du har kommet videre hos
-          </BodyShort>
-        </Panel>
-        <Panel border>
-          <BodyShort size="small" className="text-slate-500">
-            Planlagte søknader
-          </BodyShort>
-          <Heading level="2" size="large" className="mt-1">
-            {summary.planned}
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-            ideer du vurderer å sende
-          </BodyShort>
-        </Panel>
-      </section>
-
-      <section className="grid gap-6 md:grid-cols-3">
-        <Panel border className="md:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <Heading level="2" size="small">
-                Flyt gjennom søknadsprosessen
-              </Heading>
-              <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-                En enkel pipeline fra idé til intervju.
-              </BodyShort>
-            </div>
-          </div>
-          <PipelineBoard
-            planned={plannedApps}
-            sent={sentApps}
-            interview={interviewApps}
-          />
-        </Panel>
-
-        <Panel border className="space-y-4">
-          <div>
-            <Heading level="2" size="small">
-              Hva du kan gjøre nå
-            </Heading>
-            <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-              Et forslag til hvilke selskaper som kan være fint å jobbe videre
-              med nå.
-            </BodyShort>
-          </div>
-          <ContactReminders reminders={contactReminders} intervjuReminders={intervjuReminders} />
-        </Panel>
-      </section>
-
-      {/* Dream list section */}
-      <section>
-        <Panel border>
-          <div className="mb-4">
-            <Heading level="2" size="small">
-              Drømmelista
-            </Heading>
-            <BodyShort size="small" className="mt-1 text-slate-500 text-[11px]">
-              Selskaper du drømmer om å jobbe hos. Klikk på et selskap for å se
-              din vinkel og tips.
-            </BodyShort>
-          </div>
-          <DreamList companies={dreamCompanies} grouped={groupedDreams} />
-        </Panel>
-      </section>
-    </div>
+    <DashboardContent
+      apps={apps}
+      summary={summary}
+      sentApps={sentApps}
+      interviewApps={interviewApps}
+      plannedApps={plannedApps}
+      avslåttApps={avslåttApps}
+      contactReminders={contactReminders}
+      intervjuReminders={intervjuReminders}
+      dreamCompanies={dreamCompanies}
+      groupedDreams={groupedDreams}
+    />
   );
 }
 

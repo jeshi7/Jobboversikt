@@ -3,14 +3,17 @@
 import type { Application } from "../../lib/applications";
 import { useState } from "react";
 import { Heading, BodyShort, Tag, Button } from "@navikt/ds-react";
+import { TagsManager } from "./TagsManager";
+import { TimelineView } from "./TimelineView";
 
 interface PipelineBoardProps {
   planned: Application[];
   sent: Application[];
   interview: Application[];
+  avslått?: Application[];
 }
 
-export function PipelineBoard({ planned, sent, interview }: PipelineBoardProps) {
+export function PipelineBoard({ planned, sent, interview, avslått = [] }: PipelineBoardProps) {
   const [open, setOpen] = useState<{
     app: Application;
   } | null>(null);
@@ -18,12 +21,13 @@ export function PipelineBoard({ planned, sent, interview }: PipelineBoardProps) 
   const columns: { title: string; items: Application[] }[] = [
     { title: "Planlagt", items: planned },
     { title: "Sendt", items: sent },
-    { title: "Intervju", items: interview }
+    { title: "Intervju", items: interview },
+    { title: "Avslag", items: avslått }
   ];
 
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         {columns.map((col) => (
           <div key={col.title} className="space-y-3">
             <div className="flex items-baseline justify-between">
@@ -145,9 +149,28 @@ export function PipelineBoard({ planned, sent, interview }: PipelineBoardProps) 
                       <li>Søknad sendes: {open.app.applyTo}</li>
                     )}
                     {open.app.contact && <li>Kontakt: {open.app.contact}</li>}
+                    {open.app.status === "intervju" && (
+                      <li>
+                        <a
+                          href={`/api/calendar?company=${encodeURIComponent(open.app.company)}`}
+                          className="text-accent underline underline-offset-2"
+                        >
+                          📅 Last ned til kalender (.ics)
+                        </a>
+                      </li>
+                    )}
                   </ul>
                 </div>
               )}
+
+              <TimelineView app={open.app} />
+
+              <div className="space-y-1">
+                <Heading level="3" size="xsmall">
+                  Tags
+                </Heading>
+                <TagsManager company={open.app.company} />
+              </div>
 
               {open.app.resources && open.app.resources.length > 0 && (
                 <div className="space-y-1">

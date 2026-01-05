@@ -5,19 +5,40 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode, useEffect } from "react";
 import { Heading, BodyShort } from "@navikt/ds-react";
+import { useKeyboardShortcuts } from "./components/KeyboardShortcuts";
+import { AuthGuard } from "./components/AuthGuard";
+import { UserHeader } from "./components/UserHeader";
+import { ClientSwitcher } from "./components/ClientSwitcher";
+import { useCurrentUser } from "../lib/hooks/useCurrentUser";
 
-const navItems = [
-  { href: "/", label: "Oversikt" },
-  { href: "/applications", label: "Søknader" },
-  { href: "/resources", label: "Ressurser" },
-  { href: "/kompetanse", label: "Kompetanse" },
-  { href: "/tips", label: "Tips" },
-  { href: "/stats", label: "Tall" }
-];
+function getNavItems(userRole?: "admin" | "consultant" | "client") {
+  const baseItems = [
+    { href: "/", label: "Oversikt" },
+    { href: "/applications", label: "Søknader" },
+    { href: "/resources", label: "Ressurser" },
+    { href: "/kompetanse", label: "Kompetanse" },
+    { href: "/tips", label: "Tips" },
+    { href: "/stats", label: "Tall" },
+    { href: "/settings", label: "Innstillinger" }
+  ];
+
+  // Admin and consultant see admin panel and clients
+  if (userRole === "admin" || userRole === "consultant") {
+    return [
+      ...baseItems,
+      { href: "/admin", label: "Admin" },
+      { href: "/clients", label: "Klienter" }
+    ];
+  }
+
+  return baseItems;
+}
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user } = useCurrentUser();
+  useKeyboardShortcuts();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -37,9 +58,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [mobileMenuOpen]);
 
+  const navItems = getNavItems(user?.role);
+
   return (
     <html lang="no">
       <body className="min-h-screen bg-background text-slate-900">
+        <AuthGuard>
         <div className="flex min-h-screen flex-col">
           <header className="border-b border-borderSoft bg-surface">
             <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3 md:py-4">
@@ -86,6 +110,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   );
                 })}
               </nav>
+
+              <div className="flex items-center gap-3 lg:gap-4">
+                {/* Client Switcher for Admin/Consultant - Desktop */}
+                <div className="hidden lg:block">
+                  {(user?.role === "admin" || user?.role === "consultant") && (
+                    <ClientSwitcher />
+                  )}
+                </div>
+                
+                {/* User Info and Logout */}
+                <UserHeader />
+              </div>
 
               {/* Mobile Burger Button */}
               <button
@@ -159,9 +195,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </footer>
         </div>
+        </AuthGuard>
       </body>
     </html>
   );
 }
-
-

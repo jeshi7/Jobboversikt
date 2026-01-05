@@ -31,3 +31,12 @@ Jeg tar gjerne en kaffe (eller et Teams-møte) og viser dere hvordan jeg jobber.
 
 
 
+
+
+
+
+
+
+
+
+
