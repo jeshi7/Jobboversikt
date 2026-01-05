@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { BodyShort, Tag, Button, Heading, Textarea } from "@navikt/ds-react";
+import { useToast } from "./Toast";
 
 type ContactType = "kontakt1" | "kontakt2" | "kontakt3" | "kontakt4" | "kontakt5";
 type IntervjuType = "intervju1" | "intervju2" | "intervju3" | "intervju4";
@@ -50,6 +51,7 @@ function getUrgencyLabel(daysLeft: number | undefined): string {
 
 export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [viewMode, setViewMode] = useState<"kontakt" | "intervju">("kontakt");
   const [open, setOpen] = useState<Reminder | null>(null);
   const [note, setNote] = useState("");
@@ -183,10 +185,12 @@ export function ContactReminders({ reminders, intervjuReminders = [] }: Props) {
       });
       if (res.ok) {
         setOpen(null);
+        showToast(`Notat lagret for ${open.company}`, "success");
         router.refresh();
       } else {
         const data = await res.json().catch(() => ({}));
         setError(`Kunne ikke lagre: ${res.status} ${data.message || ""}`);
+        showToast("Kunne ikke lagre notat", "error");
       }
     } catch (err) {
       setError(`Nettverksfeil: ${err instanceof Error ? err.message : "Ukjent feil"}`);

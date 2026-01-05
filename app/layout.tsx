@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode, useEffect } from "react";
 import { Heading, BodyShort } from "@navikt/ds-react";
-import { useKeyboardShortcuts } from "./components/KeyboardShortcuts";
+import { useKeyboardShortcuts, KeyboardShortcutsHelp } from "./components/KeyboardShortcuts";
+import { OnboardingGuide } from "./components/OnboardingGuide";
 import { AuthGuard } from "./components/AuthGuard";
 import { UserHeader } from "./components/UserHeader";
 import { ClientSwitcher } from "./components/ClientSwitcher";
 import { useCurrentUser } from "../lib/hooks/useCurrentUser";
+import { ToastProvider } from "./components/Toast";
 
 function getNavItems(userRole?: "admin" | "consultant" | "client") {
   const baseItems = [
@@ -63,6 +65,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="no">
       <body className="min-h-screen bg-background text-slate-900">
+        <ToastProvider>
         <AuthGuard>
         <div className="flex min-h-screen flex-col">
           <header className="border-b border-borderSoft bg-surface">
@@ -156,6 +159,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 aria-label="Hovednavigasjon mobil"
               >
                 <div className="mx-auto max-w-6xl px-6 py-4 space-y-1">
+                  {/* Client Switcher for mobile */}
+                  {(user?.role === "admin" || user?.role === "consultant") && (
+                    <div className="pb-3 mb-3 border-b border-borderSoft">
+                      <ClientSwitcher />
+                    </div>
+                  )}
+                  
                   {navItems.map((item) => {
                     const active =
                       item.href === "/"
@@ -166,7 +176,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         key={item.href}
                         href={item.href}
                         className={[
-                          "block rounded-lg px-4 py-2.5 text-sm transition-colors",
+                          "block rounded-lg px-4 py-3 text-sm transition-colors touch-target",
                           active
                             ? "bg-accent/10 text-accent font-medium"
                             : "text-slate-700 hover:bg-slate-100"
@@ -195,7 +205,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </footer>
         </div>
+        <KeyboardShortcutsHelp />
+        <OnboardingGuide />
         </AuthGuard>
+        </ToastProvider>
       </body>
     </html>
   );

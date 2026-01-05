@@ -7,6 +7,8 @@ import { ContactReminders } from "./ContactReminders";
 import { DreamList } from "./DreamList";
 import { GoalsTracker } from "./GoalsTracker";
 import { MotivationQuote } from "./MotivationQuote";
+import { TodayActions } from "./TodayActions";
+import { ProgressStreak } from "./ProgressStreak";
 import type { Application } from "../../lib/applications";
 
 interface DashboardContentProps {
@@ -67,7 +69,15 @@ export function DashboardContent({
             {getDescription()}
           </BodyShort>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            as="a"
+            href="/applications?action=new"
+            size="small"
+            variant="primary"
+          >
+            + Ny søknad
+          </Button>
           <Button
             as="a"
             href="/applications"
@@ -76,11 +86,20 @@ export function DashboardContent({
           >
             Åpne søknader
           </Button>
-          <Button as="a" href="/resources" size="small">
+          <Button as="a" href="/resources" size="small" variant="tertiary">
             Se ressurser
           </Button>
         </div>
       </section>
+
+      {/* Today's actions - only for clients */}
+      {user?.role === "client" && (
+        <TodayActions 
+          reminders={contactReminders} 
+          intervjuReminders={intervjuReminders}
+          plannedCount={summary.planned}
+        />
+      )}
 
       {/* Stats panels */}
       <section className="grid gap-4 md:grid-cols-4">
@@ -142,6 +161,11 @@ export function DashboardContent({
         </div>
 
         <div className="space-y-6">
+          {/* Progress streak for clients */}
+          {user?.role === "client" && (
+            <ProgressStreak sentCount={summary.sent} interviewCount={summary.interview} />
+          )}
+
           <Panel border className="space-y-4">
             <div>
               <Heading level="2" size="small">

@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Heading, BodyShort, Panel, Button, Tag } from "@navikt/ds-react";
 import { useCurrentUser } from "../../lib/hooks/useCurrentUser";
+import { useToast } from "../components/Toast";
 import type { Organization, Client } from "../../lib/db";
 
 export default function AdminPage() {
   const { user, loading: userLoading } = useCurrentUser();
   const router = useRouter();
+  const { showToast } = useToast();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [clients, setClients] = useState<Record<string, Client[]>>({});
   const [users, setUsers] = useState<Record<string, any[]>>({});
@@ -116,14 +118,16 @@ export default function AdminPage() {
         
         // Show temporary password to admin
         if (data.temporaryPassword) {
-          alert(`Bruker opprettet!\n\nMidlertidig passord: ${data.temporaryPassword}\n\nDel dette med brukeren. De må endre passordet ved første innlogging.`);
+          showToast(`Bruker opprettet! Midlertidig passord: ${data.temporaryPassword}`, "success");
+        } else {
+          showToast("Bruker opprettet!", "success");
         }
       } else {
-        alert(`Feil: ${data.error || "Kunne ikke opprette bruker"}`);
+        showToast(data.error || "Kunne ikke opprette bruker", "error");
       }
     } catch (error) {
       console.error("Error creating user:", error);
-      alert("Kunne ikke opprette bruker");
+      showToast("Kunne ikke opprette bruker", "error");
     }
   };
 
@@ -141,13 +145,14 @@ export default function AdminPage() {
 
       if (res.ok) {
         setDeleteConfirm(null);
+        showToast("Bruker slettet", "success");
         fetchOrganizations();
       } else {
-        alert(`Feil: ${data.error || "Kunne ikke slette bruker"}`);
+        showToast(data.error || "Kunne ikke slette bruker", "error");
       }
     } catch (error) {
       console.error("Error deleting user:", error);
-      alert("Kunne ikke slette bruker");
+      showToast("Kunne ikke slette bruker", "error");
     }
   };
 
@@ -165,13 +170,14 @@ export default function AdminPage() {
 
       if (res.ok) {
         setDeleteConfirm(null);
+        showToast("Organisasjon slettet", "success");
         fetchOrganizations();
       } else {
-        alert(`Feil: ${data.error || "Kunne ikke slette organisasjon"}`);
+        showToast(data.error || "Kunne ikke slette organisasjon", "error");
       }
     } catch (error) {
       console.error("Error deleting organization:", error);
-      alert("Kunne ikke slette organisasjon");
+      showToast("Kunne ikke slette organisasjon", "error");
     }
   };
 
