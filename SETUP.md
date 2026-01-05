@@ -55,22 +55,45 @@ Denne guiden forklarer hvordan du setter opp Jobboversikt for produksjon.
 3. Opprett din organisasjon og admin-bruker
 4. Du er klar!
 
-## 7. Migrer eksisterende data (valgfritt)
+## Flere organisasjoner
 
-Hvis du har eksisterende jobbsøknadsdata i `Jobb_Søknad_Pakke/`-mappen, kan du importere dem:
+Hver organisasjon i Jobboversikt er helt uavhengig med fullstendig dataseparasjon:
+- Brukere ser kun data fra sin egen organisasjon
+- Admins kan bare administrere brukere i sin organisasjon
+- Data deles aldri mellom organisasjoner
 
-1. Kjør appen lokalt (`npm run dev`)
-2. Logg inn som admin
-3. Gå til `/admin/migrate`
-4. Klikk "Start migrering"
+### Opprette ny organisasjon
 
-**Merk:** Migrering kan bare kjøres lokalt fordi den trenger tilgang til filsystemet.
+For å opprette en ny, uavhengig organisasjon:
 
-### Hva migreres?
-- Alle søknader fra `02_Søknader/`
-- CV-profiler og søknadsbrev fra hver bedriftsmappe
-- Status fra `Søknadsoversikt.md`
-- Kompetansebank fra `01_Ressurser/Kompetansebank.md`
+1. Gå til **Supabase Dashboard** > **SQL Editor**
+2. Kjør denne SQL-kommandoen:
+
+```sql
+-- Opprett ny organisasjon
+INSERT INTO organizations (name) VALUES ('Organisasjonsnavn');
+
+-- Finn ID-en til den nye organisasjonen
+SELECT id FROM organizations WHERE name = 'Organisasjonsnavn';
+```
+
+3. Kopier ID-en og opprett en admin-bruker:
+
+```sql
+-- Opprett admin-bruker (bytt ut verdiene)
+INSERT INTO users (organization_id, email, name, role, password_hash, must_change_password)
+VALUES (
+  'ORGANISASJONS-ID-HER',
+  'admin@eksempel.no',
+  'Admin Navn',
+  'admin',
+  -- SHA256 hash av passordet (bruk en online hasher)
+  'SHA256_HASH_AV_PASSORD',
+  true
+);
+```
+
+4. Den nye admin-brukeren kan nå logge inn og opprette flere brukere via admin-panelet.
 
 ## Lokal utvikling
 

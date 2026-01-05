@@ -1,107 +1,56 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
+import { 
+  saveClient, 
+  getClient, 
+  getClientsByOrganization,
+  type Client 
+} from "../../../lib/db";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-async function getSessionFromRequest(request: NextRequest) {
-  const sessionId = request.headers.get("x-session-id") || 
-    request.cookies.get("sessionId")?.value;
-  
-  if (!sessionId) return null;
-  
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  
-  const { data: session } = await supabase
-    .from("sessions")
-    .select("user_id, expires_at")
-    .eq("id", sessionId)
-    .single();
-  
-  if (!session || new Date(session.expires_at) < new Date()) {
-    return null;
-  }
-  
-  const { data: user } = await supabase
-    .from("users")
-    .select("id, organization_id, role")
-    .eq("id", session.user_id)
-    .single();
-  
-  return user;
-}
-
-export async function GET(request: NextRequest) {
-  const user = await getSessionFromRequest(request);
-  
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  const organizationId = searchParams.get("organizationId") || user.organization_id;
+  const organizationId = searchParams.get("organizationId");
   
   if (id) {
-    const { data, error } = await supabase
-      .from("clients")
-      .select("*")
-      .eq("id", id)
-      .single();
-    
-    if (error || !data) {
+    const client = getClient(id);
+    if (!client) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
-    return NextResponse.json(data);
+    return NextResponse.json(client);
   }
   
-  // Get clients for organization
-  const { data, error } = await supabase
-    .from("clients")
-    .select("*")
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false });
-  
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (organizationId) {
+    const clients = getClientsByOrganization(organizationId);
+    return NextResponse.json(clients);
   }
   
-  return NextResponse.json(data || []);
+  return NextResponse.json({ error: "id or organizationId required" }, { status: 400 });
 }
 
-export async function POST(request: NextRequest) {
-  const user = await getSessionFromRequest(request);
+export async function POST(request: Request) {
+  const body = await request.json() as Partial<Client>;
   
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!body.name || !body.organizationId) {
+    return NextResponse.json({ error: "Name and organizationId required" }, { status: 400 });
   }
-
-  const body = await request.json();
   
-  if (!body.name) {
-    return NextResponse.json({ error: "Name required" }, { status: 400 });
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const client: Client = {
+    id: body.id || `client-${Date.now()}`,
+    organizationId: body.organizationId,
+    name: body.name,
+    email: body.email,
+    phone: body.phone,
+    competenceBankId: body.competenceBankId,
+    createdAt: body.createdAt || new Date().toISOString(),
+  };
   
-  const { data, error } = await supabase
-    .from("clients")
-    .insert({
-      organization_id: user.organization_id,
-      user_id: body.userId || null,
-      name: body.name,
-      email: body.email || null,
-      phone: body.phone || null,
-      notes: body.notes || null
-    })
-    .select()
-    .single();
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json(data);
+  saveClient(client);
+  return NextResponse.json(client);
 }
+
+
+
+
+
+
+

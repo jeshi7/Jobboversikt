@@ -33,26 +33,25 @@ export async function GET(request: NextRequest) {
     }
 
     // Build filter options based on user role
+    // All roles are filtered by organization for data isolation
     let options: {
       userId?: string;
       clientId?: string;
       organizationId?: string;
-    } = {};
+    } = {
+      organizationId: user.organization_id, // Always filter by organization
+    };
 
-    if (user.role === "admin") {
-      // Admin sees all
-    } else if (user.role === "consultant") {
-      // Consultant sees all in their organization
-      options.organizationId = user.organization_id;
+    if (user.role === "admin" || user.role === "consultant") {
+      // Admin and consultant see all in their organization
+      // (organizationId is already set above)
     } else {
-      // Client sees only their own
+      // Client sees only their own applications
       options.userId = user.id;
     }
 
     const applications = await listApplications(options);
-    const summary = await getApplicationsSummary(
-      user.role === "admin" ? undefined : user.organization_id
-    );
+    const summary = await getApplicationsSummary(user.organization_id);
 
     return NextResponse.json({ applications, summary });
   } catch (error) {

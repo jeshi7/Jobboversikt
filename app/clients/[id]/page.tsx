@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Heading, BodyShort, Panel, Button, Tag, Textarea } from "@navikt/ds-react";
-import type { Client, CompetenceBank } from "../../../lib/db";
+import type { Client, CompetenceBank } from "../../../../lib/db";
 
 export default function ClientPage() {
   const params = useParams();

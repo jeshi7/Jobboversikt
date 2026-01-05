@@ -35,12 +35,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const organizationId = new URL(request.url).searchParams.get("organizationId");
-    
-    // Consultants can only see users in their own organization
-    const orgId = user.role === "consultant" ? user.organization_id : (organizationId || undefined);
-    
-    const users = await listUsers(orgId);
+    // All users only see users in their own organization (data isolation)
+    const users = await listUsers(user.organization_id);
 
     // Remove password hashes from response
     const safeUsers = users.map(({ password_hash, ...rest }) => rest);
@@ -79,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { email, name, role, organizationId } = body;
+    const { email, name, role } = body;
 
     if (!email || !name || !role) {
       return NextResponse.json(
@@ -88,8 +84,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Users are always created in the admin's own organization (data isolation)
     const { user, temporaryPassword } = await createUser({
-      organization_id: organizationId || currentUser.organization_id,
+      organization_id: currentUser.organization_id,
       email,
       name,
       role,

@@ -5,90 +5,65 @@ import { useRouter } from "next/navigation";
 import { Heading, BodyShort, Panel, Button, Tag } from "@navikt/ds-react";
 import { useCurrentUser } from "../../lib/hooks/useCurrentUser";
 import { useToast } from "../components/Toast";
-import type { Organization, Client } from "../../lib/db";
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "consultant" | "client";
+  organization_id: string;
+  created_at: string;
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  created_at: string;
+}
 
 export default function AdminPage() {
   const { user, loading: userLoading } = useCurrentUser();
   const router = useRouter();
   const { showToast } = useToast();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [clients, setClients] = useState<Record<string, Client[]>>({});
-  const [users, setUsers] = useState<Record<string, any[]>>({});
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showNewOrgForm, setShowNewOrgForm] = useState(false);
   const [showNewUserForm, setShowNewUserForm] = useState(false);
-  const [selectedOrgId, setSelectedOrgId] = useState<string>("");
   const [deleteConfirm, setDeleteConfirm] = useState<{
-    type: "user" | "organization";
-    id: string;
-    name: string;
+    userId: string;
+    userName: string;
   } | null>(null);
 
   useEffect(() => {
     if (!userLoading && user && (user.role === "admin" || user.role === "consultant")) {
-      fetchOrganizations();
+      fetchData();
     } else if (!userLoading && user?.role === "client") {
       router.push("/");
     }
   }, [user, userLoading, router]);
 
-  const fetchOrganizations = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch("/api/organizations");
-      const orgs = await res.json();
-      setOrganizations(orgs);
+      const sessionId = localStorage.getItem("sessionId");
       
-      // Fetch clients and users for each org
-      const clientsMap: Record<string, Client[]> = {};
-      const usersMap: Record<string, any[]> = {};
-      for (const org of orgs) {
-        const clientsRes = await fetch(`/api/clients?organizationId=${org.id}`);
-        const orgClients = await clientsRes.json();
-        clientsMap[org.id] = orgClients;
-        
-        const usersRes = await fetch(`/api/users?organizationId=${org.id}&sessionId=${localStorage.getItem("sessionId")}`);
-        const orgUsers = await usersRes.json();
-        // Ensure orgUsers is an array (API might return error object)
-        usersMap[org.id] = Array.isArray(orgUsers) ? orgUsers : [];
+      // Fetch organization
+      const orgRes = await fetch(`/api/organizations?sessionId=${sessionId}`);
+      const orgs = await orgRes.json();
+      if (orgs && orgs.length > 0) {
+        setOrganization(orgs[0]);
       }
-      setClients(clientsMap);
-      setUsers(usersMap);
+      
+      // Fetch users
+      const usersRes = await fetch(`/api/users?sessionId=${sessionId}`);
+      const usersData = await usersRes.json();
+      setUsers(Array.isArray(usersData) ? usersData : []);
     } catch (error) {
-      console.error("Error fetching organizations:", error);
+      console.error("Error fetching data:", error);
+      showToast("Kunne ikke laste data", "error");
     } finally {
       setLoading(false);
     }
   };
-
-  const handleCreateOrganization = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-
-    try {
-      const res = await fetch("/api/organizations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, slug })
-      });
-
-      if (res.ok) {
-        setShowNewOrgForm(false);
-        fetchOrganizations();
-      }
-    } catch (error) {
-      console.error("Error creating organization:", error);
-    }
-  };
-
-  if (userLoading || loading) {
-    return <div>Laster...</div>;
-  }
-
-  if (user?.role !== "admin" && user?.role !== "consultant") {
-    return <div>Ingen tilgang</div>;
-  }
 
   const handleCreateUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -96,7 +71,6 @@ export default function AdminPage() {
     const email = formData.get("email") as string;
     const name = formData.get("name") as string;
     const role = formData.get("role") as "admin" | "consultant" | "client";
-    const organizationId = formData.get("organizationId") as string;
 
     try {
       const sessionId = localStorage.getItem("sessionId");
@@ -106,17 +80,15 @@ export default function AdminPage() {
           "Content-Type": "application/json",
           "x-session-id": sessionId || ""
         },
-        body: JSON.stringify({ email, name, role, organizationId, generatePassword: true })
+        body: JSON.stringify({ email, name, role })
       });
 
       const data = await res.json();
 
       if (res.ok) {
         setShowNewUserForm(false);
-        setSelectedOrgId("");
-        fetchOrganizations();
+        fetchData();
         
-        // Show temporary password to admin
         if (data.temporaryPassword) {
           showToast(`Bruker opprettet! Midlertidig passord: ${data.temporaryPassword}`, "success");
         } else {
@@ -131,10 +103,12 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteUser = async (userId: string, userName: string) => {
+  const handleDeleteUser = async () => {
+    if (!deleteConfirm) return;
+    
     try {
       const sessionId = localStorage.getItem("sessionId");
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${deleteConfirm.userId}`, {
         method: "DELETE",
         headers: {
           "x-session-id": sessionId || ""
@@ -146,7 +120,7 @@ export default function AdminPage() {
       if (res.ok) {
         setDeleteConfirm(null);
         showToast("Bruker slettet", "success");
-        fetchOrganizations();
+        fetchData();
       } else {
         showToast(data.error || "Kunne ikke slette bruker", "error");
       }
@@ -156,300 +130,214 @@ export default function AdminPage() {
     }
   };
 
-  const handleDeleteOrganization = async (orgId: string, orgName: string) => {
-    try {
-      const sessionId = localStorage.getItem("sessionId");
-      const res = await fetch(`/api/organizations/${orgId}`, {
-        method: "DELETE",
-        headers: {
-          "x-session-id": sessionId || ""
-        }
-      });
+  if (userLoading || loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <BodyShort>Laster...</BodyShort>
+      </div>
+    );
+  }
 
-      const data = await res.json();
+  if (user?.role !== "admin" && user?.role !== "consultant") {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <BodyShort>Ingen tilgang</BodyShort>
+      </div>
+    );
+  }
 
-      if (res.ok) {
-        setDeleteConfirm(null);
-        showToast("Organisasjon slettet", "success");
-        fetchOrganizations();
-      } else {
-        showToast(data.error || "Kunne ikke slette organisasjon", "error");
-      }
-    } catch (error) {
-      console.error("Error deleting organization:", error);
-      showToast("Kunne ikke slette organisasjon", "error");
-    }
+  const roleLabels: Record<string, { text: string; variant: "info" | "success" | "warning" }> = {
+    admin: { text: "Admin", variant: "warning" },
+    consultant: { text: "Konsulent", variant: "info" },
+    client: { text: "Klient", variant: "success" },
   };
 
   return (
     <div className="space-y-6">
-      <header className="flex items-start justify-between">
-        <div>
-          <Heading level="1" size="medium">
-            Administrasjon
-          </Heading>
-          <BodyShort size="small" className="mt-1 text-slate-600">
-            {user?.role === "admin" 
-              ? "Administrer organisasjoner, klienter og innstillinger"
-              : "Oversikt over klienter og organisasjon"}
-          </BodyShort>
-        </div>
-        {user?.role === "admin" && (
-          <Button 
-            variant="secondary" 
-            size="small"
-            onClick={() => router.push("/admin/migrate")}
-          >
-            📥 Migrer data
-          </Button>
-        )}
+      <header>
+        <Heading level="1" size="medium">
+          Administrasjon
+        </Heading>
+        <BodyShort size="small" className="mt-1 text-slate-600">
+          Administrer brukere i din organisasjon
+        </BodyShort>
       </header>
 
-      <section>
-        <Panel border>
-          <div className="mb-4 flex items-center justify-between">
-            <Heading level="2" size="small">
-              Organisasjoner
-            </Heading>
-            {user?.role === "admin" && (
-              <Button size="small" variant="primary" onClick={() => setShowNewOrgForm(true)}>
-                + Ny organisasjon
-              </Button>
-            )}
+      {/* Organization info */}
+      <Panel border>
+        <Heading level="2" size="small" className="mb-4">
+          Din organisasjon
+        </Heading>
+        {organization ? (
+          <div className="flex items-center justify-between">
+            <div>
+              <BodyShort className="font-medium">{organization.name}</BodyShort>
+              <BodyShort size="small" className="text-slate-500">
+                {users.length} brukere • Opprettet {new Date(organization.created_at).toLocaleDateString("nb-NO")}
+              </BodyShort>
+            </div>
           </div>
+        ) : (
+          <BodyShort className="text-slate-500">Ingen organisasjon funnet</BodyShort>
+        )}
+      </Panel>
 
-          {showNewOrgForm && user?.role === "admin" && (
-            <form onSubmit={handleCreateOrganization} className="mb-4 space-y-3 p-4 bg-slate-50 rounded-lg">
+      {/* Users */}
+      <Panel border>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <Heading level="2" size="small">
+              Brukere
+            </Heading>
+            <BodyShort size="small" className="text-slate-500 mt-1">
+              Administrer brukere i organisasjonen
+            </BodyShort>
+          </div>
+          {user?.role === "admin" && (
+            <Button size="small" variant="primary" onClick={() => setShowNewUserForm(true)}>
+              + Ny bruker
+            </Button>
+          )}
+        </div>
+
+        {/* New user form */}
+        {showNewUserForm && user?.role === "admin" && (
+          <form onSubmit={handleCreateUser} className="mb-6 space-y-4 p-4 bg-slate-50 rounded-lg">
+            <Heading level="3" size="xsmall">Opprett ny bruker</Heading>
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium mb-1">Navn</label>
                 <input
                   type="text"
                   name="name"
                   required
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  placeholder="Fullt navn"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Slug (URL-vennlig)</label>
+                <label className="block text-sm font-medium mb-1">E-post</label>
                 <input
-                  type="text"
-                  name="slug"
+                  type="email"
+                  name="email"
                   required
-                  pattern="[a-z0-9-]+"
-                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                  placeholder="bruker@eksempel.no"
                 />
               </div>
-              <div className="flex gap-2">
-                <Button size="small" type="submit">Opprett</Button>
-                <Button size="small" variant="secondary" onClick={() => setShowNewOrgForm(false)}>
-                  Avbryt
-                </Button>
-              </div>
-            </form>
-          )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Rolle</label>
+              <select
+                name="role"
+                required
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              >
+                <option value="client">Klient (jobbsøker)</option>
+                <option value="consultant">Konsulent</option>
+                <option value="admin">Admin</option>
+              </select>
+              <BodyShort size="small" className="text-slate-500 mt-1 text-xs">
+                Klient: Kan se og administrere egne søknader. Konsulent: Kan se alle klienters søknader. Admin: Full tilgang.
+              </BodyShort>
+            </div>
+            <div className="flex gap-2">
+              <Button size="small" type="submit">Opprett bruker</Button>
+              <Button size="small" variant="secondary" onClick={() => setShowNewUserForm(false)}>
+                Avbryt
+              </Button>
+            </div>
+            <BodyShort size="small" className="text-slate-500">
+              Et midlertidig passord vil bli generert automatisk. Del dette med brukeren.
+            </BodyShort>
+          </form>
+        )}
 
-          <div className="space-y-4">
-            {organizations.map((org) => (
-              <div key={org.id} className="border border-slate-200 rounded-lg p-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <Heading level="3" size="xsmall" className="text-slate-900">
-                      {org.name}
-                    </Heading>
-                    <BodyShort size="small" className="text-slate-500 text-[11px] mt-1">
-                      Slug: {org.slug} • {clients[org.id]?.length || 0} klienter • {users[org.id]?.length || 0} brukere
-                    </BodyShort>
-                    
-                    {/* Show users for this organization */}
-                    {users[org.id] && users[org.id].length > 0 && (
-                      <div className="mt-3 space-y-1">
-                        <BodyShort size="small" className="font-medium text-slate-700">Brukere:</BodyShort>
-                        {users[org.id].map((u) => (
-                          <div key={u.id} className="text-xs text-slate-600 ml-2">
-                            {u.name} ({u.email}) - {u.role}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+        {/* Users list */}
+        {users.length === 0 ? (
+          <div className="text-center py-8 text-slate-400">
+            <BodyShort>Ingen brukere ennå</BodyShort>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {users.map((u) => (
+              <div
+                key={u.id}
+                className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-medium">
+                    {u.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Tag size="small" variant="neutral">
-                      {org.settings.autoGenerateCV ? "Auto CV" : "Manual"}
-                    </Tag>
-                    <Tag size="small" variant="neutral">
-                      {org.settings.autoGenerateCoverLetter ? "Auto Søknad" : "Manual"}
-                    </Tag>
-                    {user?.role === "admin" && (
-                      <Button
-                        size="xsmall"
-                        variant="danger"
-                        onClick={() => setDeleteConfirm({ type: "organization", id: org.id, name: org.name })}
-                      >
-                        Slett
-                      </Button>
-                    )}
+                  <div>
+                    <BodyShort className="font-medium">{u.name}</BodyShort>
+                    <BodyShort size="small" className="text-slate-500">{u.email}</BodyShort>
                   </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Tag variant={roleLabels[u.role]?.variant || "info"} size="small">
+                    {roleLabels[u.role]?.text || u.role}
+                  </Tag>
+                  {user?.role === "admin" && u.id !== user.id && (
+                    <Button
+                      variant="tertiary"
+                      size="xsmall"
+                      onClick={() => setDeleteConfirm({ userId: u.id, userName: u.name })}
+                    >
+                      Slett
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
-            {organizations.length === 0 && (
-              <BodyShort size="small" className="text-slate-500 text-center py-8">
-                Ingen organisasjoner ennå. Opprett din første organisasjon for å komme i gang.
-              </BodyShort>
-            )}
           </div>
-        </Panel>
-      </section>
+        )}
+      </Panel>
 
-      {/* Users section - Admin only */}
-      {user?.role === "admin" && (
-        <section>
-          <Panel border>
-            <div className="mb-4 flex items-center justify-between">
-              <Heading level="2" size="small">
-                Brukere
-              </Heading>
-              <Button size="small" variant="primary" onClick={() => setShowNewUserForm(true)}>
-                + Ny bruker
-              </Button>
-            </div>
+      {/* Role guide */}
+      <Panel border>
+        <Heading level="2" size="small" className="mb-4">
+          Roller og tilganger
+        </Heading>
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <Tag variant="success" size="small">Klient</Tag>
+            <BodyShort size="small" className="text-slate-600">
+              Jobbsøkere. Kan opprette og administrere sine egne søknader, laste opp CV og søknadsbrev.
+            </BodyShort>
+          </div>
+          <div className="flex items-start gap-3">
+            <Tag variant="info" size="small">Konsulent</Tag>
+            <BodyShort size="small" className="text-slate-600">
+              Kan se og hjelpe alle klienter i organisasjonen. Kan ikke opprette nye brukere.
+            </BodyShort>
+          </div>
+          <div className="flex items-start gap-3">
+            <Tag variant="warning" size="small">Admin</Tag>
+            <BodyShort size="small" className="text-slate-600">
+              Full tilgang. Kan opprette og slette brukere, samt alt konsulenter og klienter kan gjøre.
+            </BodyShort>
+          </div>
+        </div>
+      </Panel>
 
-            {showNewUserForm && (
-              <form onSubmit={handleCreateUser} className="mb-4 space-y-3 p-4 bg-slate-50 rounded-lg">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Organisasjon</label>
-                  <select
-                    name="organizationId"
-                    required
-                    value={selectedOrgId}
-                    onChange={(e) => setSelectedOrgId(e.target.value)}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  >
-                    <option value="">Velg organisasjon</option>
-                    {organizations.map(org => (
-                      <option key={org.id} value={org.id}>{org.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">E-post</label>
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Navn</label>
-                  <input
-                    type="text"
-                    name="name"
-                    required
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Rolle</label>
-                  <select
-                    name="role"
-                    required
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  >
-                    <option value="client">Client</option>
-                    <option value="consultant">Consultant</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-                <div className="rounded-lg bg-blue-50 border border-blue-200 p-2 text-xs text-blue-700">
-                  Et midlertidig passord vil bli generert automatisk. Brukeren må endre passordet ved første innlogging.
-                </div>
-                <div className="flex gap-2">
-                  <Button size="small" type="submit">Opprett</Button>
-                  <Button size="small" variant="secondary" onClick={() => {
-                    setShowNewUserForm(false);
-                    setSelectedOrgId("");
-                  }}>
-                    Avbryt
-                  </Button>
-                </div>
-              </form>
-            )}
-
-            <div className="space-y-2">
-              {Object.entries(users).flatMap(([orgId, orgUsers]) => 
-                (Array.isArray(orgUsers) ? orgUsers : []).map(u => (
-                  <div key={u.id} className="border border-slate-200 rounded-lg p-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="font-medium">{u.name}</span>
-                        <span className="text-slate-500 ml-2">({u.email})</span>
-                        <Tag size="small" variant="neutral" className="ml-2">{u.role}</Tag>
-                        {u.mustChangePassword && (
-                          <Tag size="small" variant="warning" className="ml-1">Må endre passord</Tag>
-                        )}
-                      </div>
-                      <Button
-                        size="xsmall"
-                        variant="secondary"
-                        className="text-red-600 hover:bg-red-50 border-red-300"
-                        onClick={() => setDeleteConfirm({ type: "user", id: u.id, name: u.name })}
-                      >
-                        Slett
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              )}
-              {Object.values(users).flat().length === 0 && (
-                <BodyShort size="small" className="text-slate-500 text-center py-4">
-                  Ingen brukere ennå. Opprett din første bruker for å komme i gang.
-                </BodyShort>
-              )}
-            </div>
-          </Panel>
-        </section>
-      )}
-
-      {/* Delete Confirmation Modal */}
+      {/* Delete confirmation modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <Panel border className="w-full max-w-md p-6">
-            <Heading level="2" size="small" className="mb-2">
+            <Heading level="2" size="small" className="mb-4">
               Bekreft sletting
             </Heading>
-            <BodyShort size="small" className="mb-4 text-slate-600">
-              Er du sikker på at du vil slette {deleteConfirm.type === "user" ? "brukeren" : "organisasjonen"} <strong>{deleteConfirm.name}</strong>?
-              {deleteConfirm.type === "organization" && (
-                <>
-                  <br /><br />
-                  Dette vil også slette alle tilknyttede brukere og klienter.
-                </>
-              )}
-              <br /><br />
-              Denne handlingen kan ikke angres.
+            <BodyShort className="mb-6">
+              Er du sikker på at du vil slette brukeren <strong>{deleteConfirm.userName}</strong>? 
+              Dette kan ikke angres.
             </BodyShort>
-            <div className="flex gap-2">
-              <Button
-                size="small"
-                variant="secondary"
-                className="bg-red-600 hover:bg-red-700 text-white border-red-700"
-                onClick={() => {
-                  if (deleteConfirm.type === "user") {
-                    handleDeleteUser(deleteConfirm.id, deleteConfirm.name);
-                  } else {
-                    handleDeleteOrganization(deleteConfirm.id, deleteConfirm.name);
-                  }
-                }}
-              >
-                Ja, slett
-              </Button>
-              <Button
-                size="small"
-                variant="secondary"
-                onClick={() => setDeleteConfirm(null)}
-              >
+            <div className="flex gap-3 justify-end">
+              <Button variant="secondary" onClick={() => setDeleteConfirm(null)}>
                 Avbryt
+              </Button>
+              <Button variant="danger" onClick={handleDeleteUser}>
+                Slett bruker
               </Button>
             </div>
           </Panel>
@@ -458,4 +346,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

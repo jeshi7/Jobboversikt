@@ -30,16 +30,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only admin can see all organizations
-    if (user.role !== "admin") {
-      // Return only user's organization
-      const { getOrganization } = await import("../../../lib/supabase-db");
-      const org = await getOrganization(user.organization_id);
-      return NextResponse.json(org ? [org] : []);
-    }
-
-    const organizations = await listOrganizations();
-    return NextResponse.json(organizations);
+    // All users only see their own organization
+    // (Each organization is independent and isolated)
+    const { getOrganization } = await import("../../../lib/supabase-db");
+    const org = await getOrganization(user.organization_id);
+    return NextResponse.json(org ? [org] : []);
   } catch (error) {
     console.error("List organizations error:", error);
     return NextResponse.json(
@@ -50,45 +45,21 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/organizations - Create organization (admin only)
+ * POST /api/organizations - Create organization
+ * 
+ * For independent organizations (Option C), new organizations are created
+ * via the /setup page when the database is empty. This endpoint is disabled
+ * to maintain data isolation between organizations.
+ * 
+ * To add a new organization, you need to:
+ * 1. Create it directly in the database (Supabase dashboard)
+ * 2. Or use the setup flow if starting fresh
  */
 export async function POST(request: NextRequest) {
-  try {
-    const sessionId =
-      request.headers.get("x-session-id") ||
-      request.cookies.get("sessionId")?.value;
-
-    if (!sessionId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const session = await getSession(sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await getUser(session.user_id);
-    if (!user || user.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { name } = body;
-
-    if (!name) {
-      return NextResponse.json(
-        { error: "Name is required" },
-        { status: 400 }
-      );
-    }
-
-    const org = await createOrganization(name);
-    return NextResponse.json(org);
-  } catch (error) {
-    console.error("Create organization error:", error);
-    return NextResponse.json(
-      { error: "Failed to create organization" },
-      { status: 500 }
-    );
-  }
+  // Disabled for data isolation - new organizations must be created
+  // directly in the database or via initial setup
+  return NextResponse.json(
+    { error: "Nye organisasjoner må opprettes via oppsett eller direkte i databasen" },
+    { status: 403 }
+  );
 }

@@ -3,7 +3,6 @@
 import type { Application } from "../../lib/applications";
 import { Heading, Panel, BodyShort, Tag } from "@navikt/ds-react";
 import { useState, useMemo } from "react";
-import { useCurrentUser } from "../../lib/hooks/useCurrentUser";
 
 interface ApplicationsListProps {
   apps: Application[];
