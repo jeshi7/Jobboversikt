@@ -265,11 +265,15 @@ export default function ApplicationDetailPage() {
     return <div className="p-8 text-center text-slate-500">Søknad ikke funnet</div>;
   }
 
+  const hasCvContent = app.cv_text || app.documents?.some(d => d.type === "cv");
+  const hasCoverLetterContent = app.cover_letter_text || app.documents?.some(d => d.type === "cover_letter");
+  const hasOtherDocuments = app.documents?.filter(d => d.type !== "cv" && d.type !== "cover_letter").length || 0;
+
   const tabs: { id: TabType; label: string; icon: string; badge?: boolean }[] = [
     { id: "info", label: "Info", icon: "📋" },
-    { id: "cv", label: "CV", icon: "📄", badge: !!app.cv_text },
-    { id: "coverLetter", label: "Søknadsbrev", icon: "✉️", badge: !!app.cover_letter_text },
-    { id: "documents", label: "Dokumenter", icon: "📎", badge: (app.documents?.length || 0) > 0 },
+    { id: "cv", label: "CV", icon: "📄", badge: !!hasCvContent },
+    { id: "coverLetter", label: "Søknadsbrev", icon: "✉️", badge: !!hasCoverLetterContent },
+    { id: "documents", label: "Dokumenter", icon: "📎", badge: hasOtherDocuments > 0 },
   ];
 
   return (
@@ -396,17 +400,71 @@ export default function ApplicationDetailPage() {
             <Panel border>
               <div className="flex items-center justify-between mb-4">
                 <Heading level="2" size="small">
-                  CV-tekst
+                  CV
                 </Heading>
-                {!editingCv && (
-                  <Button variant="secondary" size="small" onClick={() => setEditingCv(true)}>
-                    Rediger
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => handleFileUpload(e, "cv")}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded-md transition-colors">
+                      📎 Last opp fil
+                    </span>
+                  </label>
+                  {!editingCv && (
+                    <Button variant="secondary" size="small" onClick={() => setEditingCv(true)}>
+                      ✏️ Rediger tekst
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {/* Show uploaded CV files */}
+              {app.documents && app.documents.filter(d => d.type === "cv").length > 0 && (
+                <div className="mb-4 space-y-2">
+                  <BodyShort size="small" className="font-medium text-slate-700">Opplastede CV-filer:</BodyShort>
+                  {app.documents.filter(d => d.type === "cv").map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">📄</span>
+                        <div>
+                          <a
+                            href={`/api/uploads/${encodeURIComponent(doc.storage_path)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-accent hover:underline"
+                          >
+                            {doc.name}
+                          </a>
+                          <BodyShort size="small" className="text-slate-500">
+                            {(doc.size / 1024).toFixed(1)} KB
+                          </BodyShort>
+                        </div>
+                      </div>
+                      <Button
+                        variant="tertiary"
+                        size="xsmall"
+                        onClick={() => handleDeleteDocument(doc.id, doc.name)}
+                      >
+                        Slett
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {editingCv ? (
                 <div className="space-y-4">
+                  <BodyShort size="small" className="text-slate-500">
+                    CV-tekst (kopier/lim inn eller skriv direkte):
+                  </BodyShort>
                   <Textarea
                     value={editForm.cv_text || ""}
                     onChange={(e) => setEditForm(prev => ({ ...prev, cv_text: e.target.value }))}
@@ -421,7 +479,7 @@ export default function ApplicationDetailPage() {
                       onClick={() => handleSave(editForm)}
                       disabled={saving}
                     >
-                      {saving ? "Lagrer..." : "Lagre CV"}
+                      {saving ? "Lagrer..." : "Lagre CV-tekst"}
                     </Button>
                     <Button 
                       variant="secondary" 
@@ -436,18 +494,21 @@ export default function ApplicationDetailPage() {
                   </div>
                 </div>
               ) : app.cv_text ? (
-                <pre className="whitespace-pre-wrap font-mono text-sm bg-slate-50 p-4 rounded-lg max-h-[500px] overflow-y-auto">
-                  {app.cv_text}
-                </pre>
-              ) : (
+                <div>
+                  <BodyShort size="small" className="text-slate-500 mb-2">CV-tekst:</BodyShort>
+                  <pre className="whitespace-pre-wrap font-mono text-sm bg-slate-50 p-4 rounded-lg max-h-[500px] overflow-y-auto">
+                    {app.cv_text}
+                  </pre>
+                </div>
+              ) : !app.documents?.some(d => d.type === "cv") ? (
                 <div className="text-center py-12 text-slate-400 border border-dashed rounded-lg">
                   <div className="text-4xl mb-2">📄</div>
-                  <BodyShort>Ingen CV-tekst lagt til</BodyShort>
+                  <BodyShort>Ingen CV lagt til</BodyShort>
                   <BodyShort size="small" className="mt-1">
-                    Klikk "Rediger" for å legge til CV-teksten din
+                    Last opp en fil eller skriv tekst
                   </BodyShort>
                 </div>
-              )}
+              ) : null}
             </Panel>
           )}
 
@@ -457,15 +518,69 @@ export default function ApplicationDetailPage() {
                 <Heading level="2" size="small">
                   Søknadsbrev
                 </Heading>
-                {!editingCoverLetter && (
-                  <Button variant="secondary" size="small" onClick={() => setEditingCoverLetter(true)}>
-                    Rediger
-                  </Button>
-                )}
+                <div className="flex gap-2">
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => handleFileUpload(e, "cover_letter")}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-slate-100 hover:bg-slate-200 rounded-md transition-colors">
+                      📎 Last opp fil
+                    </span>
+                  </label>
+                  {!editingCoverLetter && (
+                    <Button variant="secondary" size="small" onClick={() => setEditingCoverLetter(true)}>
+                      ✏️ Rediger tekst
+                    </Button>
+                  )}
+                </div>
               </div>
+
+              {/* Show uploaded cover letter files */}
+              {app.documents && app.documents.filter(d => d.type === "cover_letter").length > 0 && (
+                <div className="mb-4 space-y-2">
+                  <BodyShort size="small" className="font-medium text-slate-700">Opplastede søknadsbrev:</BodyShort>
+                  {app.documents.filter(d => d.type === "cover_letter").map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">✉️</span>
+                        <div>
+                          <a
+                            href={`/api/uploads/${encodeURIComponent(doc.storage_path)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-accent hover:underline"
+                          >
+                            {doc.name}
+                          </a>
+                          <BodyShort size="small" className="text-slate-500">
+                            {(doc.size / 1024).toFixed(1)} KB
+                          </BodyShort>
+                        </div>
+                      </div>
+                      <Button
+                        variant="tertiary"
+                        size="xsmall"
+                        onClick={() => handleDeleteDocument(doc.id, doc.name)}
+                      >
+                        Slett
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {editingCoverLetter ? (
                 <div className="space-y-4">
+                  <BodyShort size="small" className="text-slate-500">
+                    Søknadsbrev-tekst (kopier/lim inn eller skriv direkte):
+                  </BodyShort>
                   <Textarea
                     value={editForm.cover_letter_text || ""}
                     onChange={(e) => setEditForm(prev => ({ ...prev, cover_letter_text: e.target.value }))}
@@ -479,7 +594,7 @@ export default function ApplicationDetailPage() {
                       onClick={() => handleSave(editForm)}
                       disabled={saving}
                     >
-                      {saving ? "Lagrer..." : "Lagre søknadsbrev"}
+                      {saving ? "Lagrer..." : "Lagre søknadsbrev-tekst"}
                     </Button>
                     <Button 
                       variant="secondary" 
@@ -494,18 +609,21 @@ export default function ApplicationDetailPage() {
                   </div>
                 </div>
               ) : app.cover_letter_text ? (
-                <div className="whitespace-pre-wrap text-sm bg-slate-50 p-4 rounded-lg max-h-[500px] overflow-y-auto">
-                  {app.cover_letter_text}
+                <div>
+                  <BodyShort size="small" className="text-slate-500 mb-2">Søknadsbrev-tekst:</BodyShort>
+                  <div className="whitespace-pre-wrap text-sm bg-slate-50 p-4 rounded-lg max-h-[500px] overflow-y-auto">
+                    {app.cover_letter_text}
+                  </div>
                 </div>
-              ) : (
+              ) : !app.documents?.some(d => d.type === "cover_letter") ? (
                 <div className="text-center py-12 text-slate-400 border border-dashed rounded-lg">
                   <div className="text-4xl mb-2">✉️</div>
                   <BodyShort>Ingen søknadsbrev lagt til</BodyShort>
                   <BodyShort size="small" className="mt-1">
-                    Klikk "Rediger" for å legge til søknadsbrevet ditt
+                    Last opp en fil eller skriv tekst
                   </BodyShort>
                 </div>
-              )}
+              ) : null}
             </Panel>
           )}
 
@@ -645,26 +763,49 @@ export default function ApplicationDetailPage() {
               Innhold
             </Heading>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <span className={app.cv_text ? "text-green-600" : "text-slate-400"}>
-                  {app.cv_text ? "✓" : "○"}
-                </span>
-                <span className={app.cv_text ? "" : "text-slate-400"}>CV-tekst</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={app.cover_letter_text ? "text-green-600" : "text-slate-400"}>
-                  {app.cover_letter_text ? "✓" : "○"}
-                </span>
-                <span className={app.cover_letter_text ? "" : "text-slate-400"}>Søknadsbrev</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={(app.documents?.length || 0) > 0 ? "text-green-600" : "text-slate-400"}>
-                  {(app.documents?.length || 0) > 0 ? "✓" : "○"}
-                </span>
-                <span className={(app.documents?.length || 0) > 0 ? "" : "text-slate-400"}>
-                  Dokumenter ({app.documents?.length || 0})
-                </span>
-              </div>
+              {(() => {
+                const hasCvFile = app.documents?.some(d => d.type === "cv");
+                const hasCvText = !!app.cv_text;
+                const hasCv = hasCvFile || hasCvText;
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className={hasCv ? "text-green-600" : "text-slate-400"}>
+                      {hasCv ? "✓" : "○"}
+                    </span>
+                    <span className={hasCv ? "" : "text-slate-400"}>
+                      CV {hasCvFile && hasCvText ? "(fil + tekst)" : hasCvFile ? "(fil)" : hasCvText ? "(tekst)" : ""}
+                    </span>
+                  </div>
+                );
+              })()}
+              {(() => {
+                const hasCoverLetterFile = app.documents?.some(d => d.type === "cover_letter");
+                const hasCoverLetterText = !!app.cover_letter_text;
+                const hasCoverLetter = hasCoverLetterFile || hasCoverLetterText;
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className={hasCoverLetter ? "text-green-600" : "text-slate-400"}>
+                      {hasCoverLetter ? "✓" : "○"}
+                    </span>
+                    <span className={hasCoverLetter ? "" : "text-slate-400"}>
+                      Søknadsbrev {hasCoverLetterFile && hasCoverLetterText ? "(fil + tekst)" : hasCoverLetterFile ? "(fil)" : hasCoverLetterText ? "(tekst)" : ""}
+                    </span>
+                  </div>
+                );
+              })()}
+              {(() => {
+                const otherDocs = app.documents?.filter(d => d.type !== "cv" && d.type !== "cover_letter") || [];
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className={otherDocs.length > 0 ? "text-green-600" : "text-slate-400"}>
+                      {otherDocs.length > 0 ? "✓" : "○"}
+                    </span>
+                    <span className={otherDocs.length > 0 ? "" : "text-slate-400"}>
+                      Andre dokumenter ({otherDocs.length})
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
           </Panel>
         </div>

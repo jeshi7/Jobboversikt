@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Heading, BodyShort, Panel, Button, Textarea } from "@navikt/ds-react";
 import { useToast } from "./Toast";
@@ -11,12 +11,19 @@ interface NewApplicationFormProps {
 }
 
 type TabType = "info" | "cv" | "coverLetter";
+type InputMode = "text" | "file";
 
 export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("info");
+  const [cvInputMode, setCvInputMode] = useState<InputMode>("text");
+  const [coverLetterInputMode, setCoverLetterInputMode] = useState<InputMode>("text");
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
+  const cvFileRef = useRef<HTMLInputElement>(null);
+  const coverLetterFileRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     company: "",
@@ -37,6 +44,22 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const uploadFile = async (applicationId: string, file: File, docType: string) => {
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+    formDataUpload.append("type", docType);
+    formDataUpload.append("name", file.name.replace(/\.[^/.]+$/, ""));
+
+    const sessionId = localStorage.getItem("sessionId");
+    await fetch(`/api/app-applications/${applicationId}/documents`, {
+      method: "POST",
+      headers: {
+        "x-session-id": sessionId || "",
+      },
+      body: formDataUpload,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,10 +86,22 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
 
       if (res.ok) {
         const data = await res.json();
+        const applicationId = data.application.id;
+
+        // Upload CV file if selected
+        if (cvFile) {
+          await uploadFile(applicationId, cvFile, "cv");
+        }
+
+        // Upload cover letter file if selected
+        if (coverLetterFile) {
+          await uploadFile(applicationId, coverLetterFile, "cover_letter");
+        }
+
         showToast(`Søknad opprettet for ${formData.company}`, "success");
         onSuccess?.();
         onClose();
-        router.push(`/applications/${data.application.id}`);
+        router.push(`/applications/${applicationId}`);
       } else {
         const data = await res.json();
         showToast(data.error || "Kunne ikke opprette søknad", "error");
@@ -77,6 +112,9 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
       setSaving(false);
     }
   };
+
+  const hasCvContent = cvFile || formData.cvText;
+  const hasCoverLetterContent = coverLetterFile || formData.coverLetterText;
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
     { id: "info", label: "Grunninfo", icon: "📋" },
@@ -128,10 +166,10 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
               >
                 <span>{tab.icon}</span>
                 {tab.label}
-                {tab.id === "cv" && formData.cvText && (
+                {tab.id === "cv" && hasCvContent && (
                   <span className="w-2 h-2 bg-green-500 rounded-full" />
                 )}
-                {tab.id === "coverLetter" && formData.coverLetterText && (
+                {tab.id === "coverLetter" && hasCoverLetterContent && (
                   <span className="w-2 h-2 bg-green-500 rounded-full" />
                 )}
               </button>
@@ -292,39 +330,120 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
 
           {activeTab === "cv" && (
             <div className="space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <BodyShort size="small" className="text-blue-800">
-                  <strong>Tips:</strong> Lim inn CV-teksten din her. Du kan også laste opp en PDF-fil etter at søknaden er opprettet.
-                </BodyShort>
+              {/* Input mode toggle */}
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+                <button
+                  type="button"
+                  onClick={() => setCvInputMode("file")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    cvInputMode === "file"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  📎 Last opp fil
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCvInputMode("text")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    cvInputMode === "text"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  ✏️ Skriv/lim inn
+                </button>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  CV-tekst
-                </label>
-                <BodyShort size="small" className="text-slate-500 mb-2 text-xs">
-                  Kopier og lim inn CV-en din her, eller skriv den direkte.
-                </BodyShort>
-                <Textarea
-                  value={formData.cvText}
-                  onChange={(e) => handleChange("cvText", e.target.value)}
-                  className="w-full font-mono text-sm"
-                  rows={15}
-                  placeholder={`NAVN
+
+              {cvInputMode === "file" ? (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <BodyShort size="small" className="text-blue-800">
+                      <strong>Tips:</strong> Last opp CV-en din som PDF eller Word-dokument.
+                    </BodyShort>
+                  </div>
+
+                  <input
+                    ref={cvFileRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => setCvFile(e.target.files?.[0] || null)}
+                    className="hidden"
+                  />
+
+                  {cvFile ? (
+                    <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">📄</span>
+                        <div>
+                          <BodyShort className="font-medium">{cvFile.name}</BodyShort>
+                          <BodyShort size="small" className="text-slate-500">
+                            {(cvFile.size / 1024).toFixed(1)} KB
+                          </BodyShort>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="tertiary"
+                          size="small"
+                          onClick={() => cvFileRef.current?.click()}
+                        >
+                          Bytt
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="tertiary"
+                          size="small"
+                          onClick={() => setCvFile(null)}
+                        >
+                          Fjern
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => cvFileRef.current?.click()}
+                      className="w-full p-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-accent hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">📄</div>
+                        <BodyShort className="font-medium">Klikk for å laste opp CV</BodyShort>
+                        <BodyShort size="small" className="text-slate-500 mt-1">
+                          PDF eller Word (maks 10 MB)
+                        </BodyShort>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <BodyShort size="small" className="text-blue-800">
+                      <strong>Tips:</strong> Kopier og lim inn CV-teksten din, eller skriv den direkte her.
+                    </BodyShort>
+                  </div>
+                  
+                  <Textarea
+                    value={formData.cvText}
+                    onChange={(e) => handleChange("cvText", e.target.value)}
+                    className="w-full font-mono text-sm"
+                    rows={15}
+                    placeholder={`NAVN
 Din Navn
 
 KONTAKTINFO
 Telefon: xxx xx xxx
 E-post: din@epost.no
-LinkedIn: linkedin.com/in/ditt-navn
 
 SAMMENDRAG
-Kort beskrivelse av deg selv og din bakgrunn...
+Kort beskrivelse av deg selv...
 
 ERFARING
 Stilling - Bedrift (År - År)
 • Ansvar og oppgaver
-• Resultater og prestasjoner
 
 UTDANNING
 Grad - Institusjon (År)
@@ -332,13 +451,37 @@ Grad - Institusjon (År)
 FERDIGHETER
 • Ferdighet 1
 • Ferdighet 2`}
-                />
-              </div>
+                  />
 
-              {formData.cvText && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <span>✓</span>
-                  <span>CV-tekst lagt til ({formData.cvText.length} tegn)</span>
+                  {formData.cvText && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <span>✓</span>
+                      <span>CV-tekst lagt til ({formData.cvText.length} tegn)</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Show summary of what's added */}
+              {(cvFile || formData.cvText) && (
+                <div className="pt-4 border-t border-slate-200">
+                  <BodyShort size="small" className="font-medium text-slate-700 mb-2">
+                    CV innhold:
+                  </BodyShort>
+                  <div className="space-y-1">
+                    {cvFile && (
+                      <div className="flex items-center gap-2 text-sm text-green-600">
+                        <span>✓</span>
+                        <span>Fil: {cvFile.name}</span>
+                      </div>
+                    )}
+                    {formData.cvText && (
+                      <div className="flex items-center gap-2 text-sm text-green-600">
+                        <span>✓</span>
+                        <span>Tekst: {formData.cvText.length} tegn</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -346,49 +489,154 @@ FERDIGHETER
 
           {activeTab === "coverLetter" && (
             <div className="space-y-4">
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <BodyShort size="small" className="text-amber-800">
-                  <strong>Tips:</strong> Tilpass søknadsbrevet til stillingen. Bruk informasjonen fra utlysningen og vis hvordan du matcher kravene.
-                </BodyShort>
+              {/* Input mode toggle */}
+              <div className="flex gap-2 p-1 bg-slate-100 rounded-lg w-fit">
+                <button
+                  type="button"
+                  onClick={() => setCoverLetterInputMode("file")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    coverLetterInputMode === "file"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  📎 Last opp fil
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCoverLetterInputMode("text")}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    coverLetterInputMode === "text"
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  ✏️ Skriv/lim inn
+                </button>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Søknadsbrev
-                </label>
-                <BodyShort size="small" className="text-slate-500 mb-2 text-xs">
-                  Skriv eller lim inn søknadsbrevet ditt her.
-                </BodyShort>
-                <Textarea
-                  value={formData.coverLetterText}
-                  onChange={(e) => handleChange("coverLetterText", e.target.value)}
-                  className="w-full"
-                  rows={15}
-                  placeholder={`Søknad på stilling som ${formData.jobTitle || "[stillingstittel]"} hos ${formData.company || "[bedrift]"}
+
+              {coverLetterInputMode === "file" ? (
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <BodyShort size="small" className="text-amber-800">
+                      <strong>Tips:</strong> Last opp søknadsbrevet ditt som PDF eller Word-dokument.
+                    </BodyShort>
+                  </div>
+
+                  <input
+                    ref={coverLetterFileRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => setCoverLetterFile(e.target.files?.[0] || null)}
+                    className="hidden"
+                  />
+
+                  {coverLetterFile ? (
+                    <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">✉️</span>
+                        <div>
+                          <BodyShort className="font-medium">{coverLetterFile.name}</BodyShort>
+                          <BodyShort size="small" className="text-slate-500">
+                            {(coverLetterFile.size / 1024).toFixed(1)} KB
+                          </BodyShort>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="tertiary"
+                          size="small"
+                          onClick={() => coverLetterFileRef.current?.click()}
+                        >
+                          Bytt
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="tertiary"
+                          size="small"
+                          onClick={() => setCoverLetterFile(null)}
+                        >
+                          Fjern
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => coverLetterFileRef.current?.click()}
+                      className="w-full p-8 border-2 border-dashed border-slate-300 rounded-lg hover:border-accent hover:bg-slate-50 transition-colors"
+                    >
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">✉️</div>
+                        <BodyShort className="font-medium">Klikk for å laste opp søknadsbrev</BodyShort>
+                        <BodyShort size="small" className="text-slate-500 mt-1">
+                          PDF eller Word (maks 10 MB)
+                        </BodyShort>
+                      </div>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <BodyShort size="small" className="text-amber-800">
+                      <strong>Tips:</strong> Tilpass søknadsbrevet til stillingen. Vis hvordan du matcher kravene.
+                    </BodyShort>
+                  </div>
+                  
+                  <Textarea
+                    value={formData.coverLetterText}
+                    onChange={(e) => handleChange("coverLetterText", e.target.value)}
+                    className="w-full"
+                    rows={15}
+                    placeholder={`Søknad på stilling som ${formData.jobTitle || "[stillingstittel]"} hos ${formData.company || "[bedrift]"}
 
 Kjære [kontaktperson/rekrutterer],
 
-Jeg skriver for å søke på stillingen som ${formData.jobTitle || "[stillingstittel]"} som ble utlyst på [hvor du så annonsen].
+Jeg skriver for å søke på stillingen som ${formData.jobTitle || "[stillingstittel]"}.
 
-[Første avsnitt: Hvorfor du er interessert i stillingen og bedriften]
+[Hvorfor du er interessert i stillingen og bedriften]
 
-[Andre avsnitt: Din relevante erfaring og kompetanse]
+[Din relevante erfaring og kompetanse]
 
-[Tredje avsnitt: Hva du kan bidra med]
+[Hva du kan bidra med]
 
 Jeg ser frem til å høre fra dere.
 
 Med vennlig hilsen,
-[Ditt navn]
-[Telefon]
-[E-post]`}
-                />
-              </div>
+[Ditt navn]`}
+                  />
 
-              {formData.coverLetterText && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <span>✓</span>
-                  <span>Søknadsbrev lagt til ({formData.coverLetterText.length} tegn)</span>
+                  {formData.coverLetterText && (
+                    <div className="flex items-center gap-2 text-sm text-green-600">
+                      <span>✓</span>
+                      <span>Søknadsbrev lagt til ({formData.coverLetterText.length} tegn)</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Show summary of what's added */}
+              {(coverLetterFile || formData.coverLetterText) && (
+                <div className="pt-4 border-t border-slate-200">
+                  <BodyShort size="small" className="font-medium text-slate-700 mb-2">
+                    Søknadsbrev innhold:
+                  </BodyShort>
+                  <div className="space-y-1">
+                    {coverLetterFile && (
+                      <div className="flex items-center gap-2 text-sm text-green-600">
+                        <span>✓</span>
+                        <span>Fil: {coverLetterFile.name}</span>
+                      </div>
+                    )}
+                    {formData.coverLetterText && (
+                      <div className="flex items-center gap-2 text-sm text-green-600">
+                        <span>✓</span>
+                        <span>Tekst: {formData.coverLetterText.length} tegn</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -397,8 +645,16 @@ Med vennlig hilsen,
           {/* Actions */}
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="flex items-center gap-4 text-xs text-slate-500">
-              {formData.cvText && <span className="flex items-center gap-1">📄 CV</span>}
-              {formData.coverLetterText && <span className="flex items-center gap-1">✉️ Søknadsbrev</span>}
+              {hasCvContent && (
+                <span className="flex items-center gap-1 text-green-600">
+                  ✓ CV {cvFile ? "(fil)" : "(tekst)"}
+                </span>
+              )}
+              {hasCoverLetterContent && (
+                <span className="flex items-center gap-1 text-green-600">
+                  ✓ Søknadsbrev {coverLetterFile ? "(fil)" : "(tekst)"}
+                </span>
+              )}
             </div>
             <div className="flex gap-3">
               <Button type="button" variant="secondary" onClick={onClose} disabled={saving}>
