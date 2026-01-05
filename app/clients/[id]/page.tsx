@@ -3,7 +3,17 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Heading, BodyShort, Panel, Button, Tag, Textarea } from "@navikt/ds-react";
-import type { Client, CompetenceBank } from "../../../../lib/db";
+import type { Client } from "../../../lib/supabase-db";
+
+interface CompetenceBank {
+  id: string;
+  client_id: string;
+  skills: string[];
+  experiences: Array<{ role: string; company: string; period: string; description: string }>;
+  education: Array<{ degree: string; institution: string; period: string; description?: string }>;
+  languages: Array<{ language: string; level: string }>;
+  certifications: string[];
+}
 
 export default function ClientPage() {
   const params = useParams();
