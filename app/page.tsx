@@ -1,6 +1,7 @@
 import { DashboardContent } from "./components/DashboardContent";
 import { getCurrentUserServer } from "../lib/get-current-user-server";
 import { listApplications, Application as SupabaseApp } from "../lib/supabase-db";
+import type { ApplicationStatus } from "../lib/applications";
 
 // Force dynamic rendering to always get fresh data
 export const dynamic = "force-dynamic";
@@ -12,8 +13,8 @@ interface DashboardApp {
   slug: string;
   company: string;
   jobTitle: string;
-  status: string;
-  type: string;
+  status: ApplicationStatus;
+  type: "planlagt" | "søknad";
   deadline?: string;
   location?: string;
   employmentType?: string;
@@ -34,13 +35,14 @@ interface DashboardApp {
 }
 
 function mapSupabaseApp(app: SupabaseApp): DashboardApp {
+  const status = (app.status || "planlagt") as ApplicationStatus;
   return {
     id: app.id,
     slug: app.company.toLowerCase().replace(/\s+/g, "-"),
     company: app.company,
     jobTitle: app.job_title,
-    status: app.status,
-    type: ["planlagt", "forberedes"].includes(app.status) ? "planlagt" : "aktiv",
+    status,
+    type: ["planlagt", "forberedes"].includes(status) ? "planlagt" : "søknad",
     deadline: app.deadline || undefined,
     location: app.location || undefined,
     employmentType: app.employment_type || undefined,
