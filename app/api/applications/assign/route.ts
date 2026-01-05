@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession, getAuthUser } from "../../../lib/auth";
-import { setApplicationMetadata } from "../../../lib/applications-metadata";
-import { getClient } from "../../../lib/db";
+import { getSession, getAuthUser } from "../../../../lib/auth";
+import { setApplicationMetadata } from "../../../../lib/applications-metadata";
+import { getClient } from "../../../../lib/db";
 
 /**
  * Assign an application to a client
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     
     if (!clientId && user.role === "client") {
       // If user is a client, find their clientId
-      const clients = await import("../../../lib/db").then(m => {
+      const clients = await import("../../../../lib/db").then(m => {
         return m.getClientsByOrganization(user.organizationId);
       });
       const client = clients.find(c => c.email === user.email);
