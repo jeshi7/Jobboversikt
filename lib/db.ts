@@ -148,6 +148,13 @@ export function deleteUser(userId: string): void {
   }
 }
 
+export function deleteOrganization(orgId: string): void {
+  const filePath = getFilePath("organizations", orgId);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+}
+
 export function getUser(id: string): User | null {
   const filePath = getFilePath("users", id);
   if (!fs.existsSync(filePath)) return null;

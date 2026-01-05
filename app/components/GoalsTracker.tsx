@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heading, BodyShort, Panel, Button, Progress } from "@navikt/ds-react";
+import { Heading, BodyShort, Panel, Button } from "@navikt/ds-react";
 
 interface Goal {
   id: string;
@@ -106,7 +106,12 @@ export function GoalsTracker({ currentCount, sentCount }: GoalsTrackerProps) {
                     Slett
                   </Button>
                 </div>
-                <Progress value={progress} />
+                <div className="h-2 w-full rounded-full bg-slate-200">
+                  <div
+                    className="h-2 rounded-full bg-accent transition-all"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
               </div>
             );
           })}
