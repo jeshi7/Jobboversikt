@@ -138,6 +138,8 @@ export interface Database {
           contact_name: string | null;
           contact_email: string | null;
           contact_phone: string | null;
+          cv_text: string | null;
+          cover_letter_text: string | null;
           sent_at: string | null;
           interview_dates: string[] | null;
           created_at: string;
@@ -161,6 +163,8 @@ export interface Database {
           contact_name?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
+          cv_text?: string | null;
+          cover_letter_text?: string | null;
           sent_at?: string | null;
           interview_dates?: string[] | null;
           created_at?: string;
@@ -184,6 +188,8 @@ export interface Database {
           contact_name?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
+          cv_text?: string | null;
+          cover_letter_text?: string | null;
           sent_at?: string | null;
           interview_dates?: string[] | null;
           created_at?: string;

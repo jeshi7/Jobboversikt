@@ -58,6 +58,8 @@ export interface Application {
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  cv_text: string | null;
+  cover_letter_text: string | null;
   sent_at: string | null;
   interview_dates: string[] | null;
   created_at: string;
@@ -365,6 +367,8 @@ export async function createApplication(appData: {
   contact_name?: string;
   contact_email?: string;
   contact_phone?: string;
+  cv_text?: string;
+  cover_letter_text?: string;
 }): Promise<Application> {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase

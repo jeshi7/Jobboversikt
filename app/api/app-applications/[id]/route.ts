@@ -112,6 +112,8 @@ export async function PUT(
       contact_name: body.contactName,
       contact_email: body.contactEmail,
       contact_phone: body.contactPhone,
+      cv_text: body.cvText,
+      cover_letter_text: body.coverLetterText,
       interview_dates: body.interviewDates,
     });
 

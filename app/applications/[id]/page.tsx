@@ -2,11 +2,45 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Heading, BodyShort, Panel, Button, Tag, Textarea } from "@navikt/ds-react";
+import { Heading, BodyShort, Panel, Button, Textarea } from "@navikt/ds-react";
 import { useToast } from "../../components/Toast";
-import type { AppApplication, ApplicationStatus } from "../../../lib/app-applications";
 
-const STATUS_OPTIONS: { value: ApplicationStatus; label: string; color: string }[] = [
+interface ApplicationDocument {
+  id: string;
+  name: string;
+  type: string;
+  storage_path: string;
+  original_name: string;
+  mime_type: string;
+  size: number;
+}
+
+interface Application {
+  id: string;
+  company: string;
+  job_title: string;
+  status: string;
+  deadline: string | null;
+  location: string | null;
+  employment_type: string | null;
+  salary: string | null;
+  listing_url: string | null;
+  angle: string | null;
+  notes: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  cv_text: string | null;
+  cover_letter_text: string | null;
+  sent_at: string | null;
+  created_at: string;
+  updated_at: string;
+  documents?: ApplicationDocument[];
+}
+
+type TabType = "info" | "cv" | "coverLetter" | "documents";
+
+const STATUS_OPTIONS = [
   { value: "planlagt", label: "Planlagt", color: "bg-slate-100 text-slate-700" },
   { value: "forberedes", label: "Forberedes", color: "bg-blue-100 text-blue-700" },
   { value: "sendt", label: "Sendt", color: "bg-amber-100 text-amber-700" },
@@ -27,12 +61,14 @@ export default function ApplicationDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { showToast } = useToast();
-  const [app, setApp] = useState<AppApplication | null>(null);
+  const [app, setApp] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState<Partial<AppApplication>>({});
+  const [activeTab, setActiveTab] = useState<TabType>("info");
+  const [editForm, setEditForm] = useState<Partial<Application>>({});
+  const [editingCv, setEditingCv] = useState(false);
+  const [editingCoverLetter, setEditingCoverLetter] = useState(false);
 
   const fetchApplication = useCallback(async () => {
     try {
@@ -60,7 +96,7 @@ export default function ApplicationDetailPage() {
     fetchApplication();
   }, [fetchApplication]);
 
-  const handleStatusChange = async (status: ApplicationStatus) => {
+  const handleStatusChange = async (status: string) => {
     if (!app) return;
     
     try {
@@ -86,25 +122,44 @@ export default function ApplicationDetailPage() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (fieldsToSave?: Partial<Application>) => {
     if (!app) return;
     setSaving(true);
 
     try {
       const sessionId = localStorage.getItem("sessionId");
+      const dataToSave = fieldsToSave || editForm;
+      
       const res = await fetch(`/api/app-applications/${app.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "x-session-id": sessionId || "",
         },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          company: dataToSave.company,
+          jobTitle: dataToSave.job_title,
+          deadline: dataToSave.deadline,
+          location: dataToSave.location,
+          employmentType: dataToSave.employment_type,
+          salary: dataToSave.salary,
+          listingUrl: dataToSave.listing_url,
+          angle: dataToSave.angle,
+          notes: dataToSave.notes,
+          contactName: dataToSave.contact_name,
+          contactEmail: dataToSave.contact_email,
+          contactPhone: dataToSave.contact_phone,
+          cvText: dataToSave.cv_text,
+          coverLetterText: dataToSave.cover_letter_text,
+        }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setApp(data.application);
-        setEditing(false);
+        setEditForm(data.application);
+        setEditingCv(false);
+        setEditingCoverLetter(false);
         showToast("Endringer lagret", "success");
       } else {
         showToast("Kunne ikke lagre", "error");
@@ -210,7 +265,12 @@ export default function ApplicationDetailPage() {
     return <div className="p-8 text-center text-slate-500">Søknad ikke funnet</div>;
   }
 
-  const currentStatus = STATUS_OPTIONS.find(s => s.value === app.status);
+  const tabs: { id: TabType; label: string; icon: string; badge?: boolean }[] = [
+    { id: "info", label: "Info", icon: "📋" },
+    { id: "cv", label: "CV", icon: "📄", badge: !!app.cv_text },
+    { id: "coverLetter", label: "Søknadsbrev", icon: "✉️", badge: !!app.cover_letter_text },
+    { id: "documents", label: "Dokumenter", icon: "📎", badge: (app.documents?.length || 0) > 0 },
+  ];
 
   return (
     <div className="space-y-6">
@@ -224,15 +284,12 @@ export default function ApplicationDetailPage() {
             {app.company}
           </Heading>
           <BodyShort size="small" className="text-slate-600 mt-1">
-            {app.jobTitle}
+            {app.job_title}
           </BodyShort>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="secondary" size="small" onClick={() => setEditing(!editing)}>
-            {editing ? "Avbryt redigering" : "Rediger"}
-          </Button>
           <Button variant="danger" size="small" onClick={handleDelete}>
-            Slett
+            Slett søknad
           </Button>
         </div>
       </div>
@@ -257,90 +314,36 @@ export default function ApplicationDetailPage() {
         </div>
       </Panel>
 
+      {/* Tabs */}
+      <div className="flex border-b border-slate-200">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "border-b-2 border-accent text-accent"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <span>{tab.icon}</span>
+            {tab.label}
+            {tab.badge && (
+              <span className="w-2 h-2 bg-green-500 rounded-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main info */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Details */}
-          <Panel border>
-            <Heading level="2" size="small" className="mb-4">
-              Stillingsdetaljer
-            </Heading>
-            
-            {editing ? (
-              <div className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Bedrift</label>
-                    <input
-                      type="text"
-                      value={editForm.company || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, company: e.target.value }))}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Stilling</label>
-                    <input
-                      type="text"
-                      value={editForm.jobTitle || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, jobTitle: e.target.value }))}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Frist</label>
-                    <input
-                      type="date"
-                      value={editForm.deadline || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, deadline: e.target.value }))}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Sted</label>
-                    <input
-                      type="text"
-                      value={editForm.location || ""}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
-                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Link til utlysning</label>
-                  <input
-                    type="url"
-                    value={editForm.listingUrl || ""}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, listingUrl: e.target.value }))}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Din vinkel</label>
-                  <Textarea
-                    value={editForm.angle || ""}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, angle: e.target.value }))}
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Notater</label>
-                  <Textarea
-                    value={editForm.notes || ""}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, notes: e.target.value }))}
-                    rows={2}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="primary" size="small" onClick={handleSave} disabled={saving}>
-                    {saving ? "Lagrer..." : "Lagre endringer"}
-                  </Button>
-                  <Button variant="secondary" size="small" onClick={() => setEditing(false)}>
-                    Avbryt
-                  </Button>
-                </div>
-              </div>
-            ) : (
+        <div className="lg:col-span-2">
+          {activeTab === "info" && (
+            <Panel border>
+              <Heading level="2" size="small" className="mb-4">
+                Stillingsdetaljer
+              </Heading>
               <div className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
@@ -353,23 +356,23 @@ export default function ApplicationDetailPage() {
                   </div>
                   <div>
                     <BodyShort size="small" className="text-slate-500">Ansettelsesform</BodyShort>
-                    <BodyShort>{app.employmentType || "Ikke spesifisert"}</BodyShort>
+                    <BodyShort>{app.employment_type || "Ikke spesifisert"}</BodyShort>
                   </div>
                   <div>
                     <BodyShort size="small" className="text-slate-500">Lønn</BodyShort>
                     <BodyShort>{app.salary || "Ikke spesifisert"}</BodyShort>
                   </div>
                 </div>
-                {app.listingUrl && (
+                {app.listing_url && (
                   <div>
                     <BodyShort size="small" className="text-slate-500">Utlysning</BodyShort>
                     <a 
-                      href={app.listingUrl} 
+                      href={app.listing_url} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-accent hover:underline text-sm"
                     >
-                      {app.listingUrl}
+                      {app.listing_url}
                     </a>
                   </div>
                 )}
@@ -386,86 +389,203 @@ export default function ApplicationDetailPage() {
                   </div>
                 )}
               </div>
-            )}
-          </Panel>
+            </Panel>
+          )}
 
-          {/* Documents */}
-          <Panel border>
-            <div className="flex items-center justify-between mb-4">
-              <Heading level="2" size="small">
-                Dokumenter
-              </Heading>
-            </div>
-
-            {/* Document upload buttons */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {DOC_TYPES.map((docType) => (
-                <label key={docType.value} className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
-                    onChange={(e) => handleFileUpload(e, docType.value)}
-                    disabled={uploading}
-                    className="hidden"
-                  />
-                  <span className="inline-flex items-center gap-1 px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
-                    + {docType.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-
-            {uploading && (
-              <BodyShort size="small" className="text-slate-500 mb-4">
-                Laster opp...
-              </BodyShort>
-            )}
-
-            {/* Document list */}
-            {app.documents.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 border border-dashed rounded-lg">
-                <BodyShort>Ingen dokumenter ennå</BodyShort>
-                <BodyShort size="small" className="mt-1">
-                  Last opp CV, søknadsbrev eller andre dokumenter
-                </BodyShort>
+          {activeTab === "cv" && (
+            <Panel border>
+              <div className="flex items-center justify-between mb-4">
+                <Heading level="2" size="small">
+                  CV-tekst
+                </Heading>
+                {!editingCv && (
+                  <Button variant="secondary" size="small" onClick={() => setEditingCv(true)}>
+                    Rediger
+                  </Button>
+                )}
               </div>
-            ) : (
-              <div className="space-y-2">
-                {app.documents.map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">
-                        {doc.mimeType.includes("pdf") ? "📄" : "🖼️"}
-                      </span>
-                      <div>
-                        <a
-                          href={`/api/uploads/${doc.filename}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="font-medium text-accent hover:underline"
-                        >
-                          {doc.name}
-                        </a>
-                        <BodyShort size="small" className="text-slate-500">
-                          {DOC_TYPES.find(t => t.value === doc.type)?.label} · {(doc.size / 1024).toFixed(1)} KB
-                        </BodyShort>
-                      </div>
-                    </div>
-                    <Button
-                      variant="tertiary"
-                      size="xsmall"
-                      onClick={() => handleDeleteDocument(doc.id, doc.name)}
+
+              {editingCv ? (
+                <div className="space-y-4">
+                  <Textarea
+                    value={editForm.cv_text || ""}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, cv_text: e.target.value }))}
+                    className="font-mono text-sm"
+                    rows={20}
+                    placeholder="Lim inn eller skriv CV-teksten din her..."
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="primary" 
+                      size="small" 
+                      onClick={() => handleSave(editForm)}
+                      disabled={saving}
                     >
-                      Slett
+                      {saving ? "Lagrer..." : "Lagre CV"}
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="small" 
+                      onClick={() => {
+                        setEditingCv(false);
+                        setEditForm(prev => ({ ...prev, cv_text: app.cv_text }));
+                      }}
+                    >
+                      Avbryt
                     </Button>
                   </div>
+                </div>
+              ) : app.cv_text ? (
+                <pre className="whitespace-pre-wrap font-mono text-sm bg-slate-50 p-4 rounded-lg max-h-[500px] overflow-y-auto">
+                  {app.cv_text}
+                </pre>
+              ) : (
+                <div className="text-center py-12 text-slate-400 border border-dashed rounded-lg">
+                  <div className="text-4xl mb-2">📄</div>
+                  <BodyShort>Ingen CV-tekst lagt til</BodyShort>
+                  <BodyShort size="small" className="mt-1">
+                    Klikk "Rediger" for å legge til CV-teksten din
+                  </BodyShort>
+                </div>
+              )}
+            </Panel>
+          )}
+
+          {activeTab === "coverLetter" && (
+            <Panel border>
+              <div className="flex items-center justify-between mb-4">
+                <Heading level="2" size="small">
+                  Søknadsbrev
+                </Heading>
+                {!editingCoverLetter && (
+                  <Button variant="secondary" size="small" onClick={() => setEditingCoverLetter(true)}>
+                    Rediger
+                  </Button>
+                )}
+              </div>
+
+              {editingCoverLetter ? (
+                <div className="space-y-4">
+                  <Textarea
+                    value={editForm.cover_letter_text || ""}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, cover_letter_text: e.target.value }))}
+                    rows={20}
+                    placeholder="Skriv eller lim inn søknadsbrevet ditt her..."
+                  />
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="primary" 
+                      size="small" 
+                      onClick={() => handleSave(editForm)}
+                      disabled={saving}
+                    >
+                      {saving ? "Lagrer..." : "Lagre søknadsbrev"}
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="small" 
+                      onClick={() => {
+                        setEditingCoverLetter(false);
+                        setEditForm(prev => ({ ...prev, cover_letter_text: app.cover_letter_text }));
+                      }}
+                    >
+                      Avbryt
+                    </Button>
+                  </div>
+                </div>
+              ) : app.cover_letter_text ? (
+                <div className="whitespace-pre-wrap text-sm bg-slate-50 p-4 rounded-lg max-h-[500px] overflow-y-auto">
+                  {app.cover_letter_text}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-slate-400 border border-dashed rounded-lg">
+                  <div className="text-4xl mb-2">✉️</div>
+                  <BodyShort>Ingen søknadsbrev lagt til</BodyShort>
+                  <BodyShort size="small" className="mt-1">
+                    Klikk "Rediger" for å legge til søknadsbrevet ditt
+                  </BodyShort>
+                </div>
+              )}
+            </Panel>
+          )}
+
+          {activeTab === "documents" && (
+            <Panel border>
+              <Heading level="2" size="small" className="mb-4">
+                Opplastede dokumenter
+              </Heading>
+
+              {/* Document upload buttons */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {DOC_TYPES.map((docType) => (
+                  <label key={docType.value} className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp"
+                      onChange={(e) => handleFileUpload(e, docType.value)}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                    <span className="inline-flex items-center gap-1 px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                      + {docType.label}
+                    </span>
+                  </label>
                 ))}
               </div>
-            )}
-          </Panel>
+
+              {uploading && (
+                <BodyShort size="small" className="text-slate-500 mb-4">
+                  Laster opp...
+                </BodyShort>
+              )}
+
+              {/* Document list */}
+              {!app.documents || app.documents.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 border border-dashed rounded-lg">
+                  <div className="text-4xl mb-2">📎</div>
+                  <BodyShort>Ingen dokumenter ennå</BodyShort>
+                  <BodyShort size="small" className="mt-1">
+                    Last opp PDF, Word eller bildefiler
+                  </BodyShort>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {app.documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">
+                          {doc.mime_type.includes("pdf") ? "📄" : "🖼️"}
+                        </span>
+                        <div>
+                          <a
+                            href={`/api/uploads/${encodeURIComponent(doc.storage_path)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-accent hover:underline"
+                          >
+                            {doc.name}
+                          </a>
+                          <BodyShort size="small" className="text-slate-500">
+                            {DOC_TYPES.find(t => t.value === doc.type)?.label} · {(doc.size / 1024).toFixed(1)} KB
+                          </BodyShort>
+                        </div>
+                      </div>
+                      <Button
+                        variant="tertiary"
+                        size="xsmall"
+                        onClick={() => handleDeleteDocument(doc.id, doc.name)}
+                      >
+                        Slett
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Panel>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -475,17 +595,17 @@ export default function ApplicationDetailPage() {
             <Heading level="2" size="small" className="mb-4">
               Kontaktperson
             </Heading>
-            {app.contactName || app.contactEmail || app.contactPhone ? (
+            {app.contact_name || app.contact_email || app.contact_phone ? (
               <div className="space-y-2">
-                {app.contactName && <BodyShort>{app.contactName}</BodyShort>}
-                {app.contactEmail && (
-                  <a href={`mailto:${app.contactEmail}`} className="block text-accent hover:underline text-sm">
-                    {app.contactEmail}
+                {app.contact_name && <BodyShort>{app.contact_name}</BodyShort>}
+                {app.contact_email && (
+                  <a href={`mailto:${app.contact_email}`} className="block text-accent hover:underline text-sm">
+                    {app.contact_email}
                   </a>
                 )}
-                {app.contactPhone && (
-                  <a href={`tel:${app.contactPhone}`} className="block text-accent hover:underline text-sm">
-                    {app.contactPhone}
+                {app.contact_phone && (
+                  <a href={`tel:${app.contact_phone}`} className="block text-accent hover:underline text-sm">
+                    {app.contact_phone}
                   </a>
                 )}
               </div>
@@ -504,17 +624,46 @@ export default function ApplicationDetailPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Opprettet</span>
-                <span>{new Date(app.createdAt).toLocaleDateString("nb-NO")}</span>
+                <span>{new Date(app.created_at).toLocaleDateString("nb-NO")}</span>
               </div>
-              {app.sentAt && (
+              {app.sent_at && (
                 <div className="flex justify-between">
                   <span className="text-slate-500">Sendt</span>
-                  <span>{new Date(app.sentAt).toLocaleDateString("nb-NO")}</span>
+                  <span>{new Date(app.sent_at).toLocaleDateString("nb-NO")}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span className="text-slate-500">Sist oppdatert</span>
-                <span>{new Date(app.updatedAt).toLocaleDateString("nb-NO")}</span>
+                <span>{new Date(app.updated_at).toLocaleDateString("nb-NO")}</span>
+              </div>
+            </div>
+          </Panel>
+
+          {/* Quick stats */}
+          <Panel border>
+            <Heading level="2" size="small" className="mb-4">
+              Innhold
+            </Heading>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className={app.cv_text ? "text-green-600" : "text-slate-400"}>
+                  {app.cv_text ? "✓" : "○"}
+                </span>
+                <span className={app.cv_text ? "" : "text-slate-400"}>CV-tekst</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={app.cover_letter_text ? "text-green-600" : "text-slate-400"}>
+                  {app.cover_letter_text ? "✓" : "○"}
+                </span>
+                <span className={app.cover_letter_text ? "" : "text-slate-400"}>Søknadsbrev</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={(app.documents?.length || 0) > 0 ? "text-green-600" : "text-slate-400"}>
+                  {(app.documents?.length || 0) > 0 ? "✓" : "○"}
+                </span>
+                <span className={(app.documents?.length || 0) > 0 ? "" : "text-slate-400"}>
+                  Dokumenter ({app.documents?.length || 0})
+                </span>
               </div>
             </div>
           </Panel>
@@ -523,4 +672,3 @@ export default function ApplicationDetailPage() {
     </div>
   );
 }
-

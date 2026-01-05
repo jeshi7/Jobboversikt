@@ -70,6 +70,8 @@ CREATE TABLE applications (
   contact_name TEXT,
   contact_email TEXT,
   contact_phone TEXT,
+  cv_text TEXT,
+  cover_letter_text TEXT,
   sent_at TIMESTAMPTZ,
   interview_dates TIMESTAMPTZ[],
   created_at TIMESTAMPTZ DEFAULT NOW(),
