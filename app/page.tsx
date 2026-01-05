@@ -29,6 +29,8 @@ interface DashboardApp {
   intervju1?: string;
   cvText?: string;
   coverLetterText?: string;
+  folder?: string;
+  resources?: string[];
 }
 
 function mapSupabaseApp(app: SupabaseApp): DashboardApp {
@@ -51,6 +53,8 @@ function mapSupabaseApp(app: SupabaseApp): DashboardApp {
     interviewDates: app.interview_dates || undefined,
     cvText: app.cv_text || undefined,
     coverLetterText: app.cover_letter_text || undefined,
+    folder: "",
+    resources: [],
   };
 }
 
