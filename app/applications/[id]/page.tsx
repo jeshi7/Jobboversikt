@@ -462,10 +462,8 @@ export default function ApplicationDetailPage() {
 
               {editingCv ? (
                 <div className="space-y-4">
-                  <BodyShort size="small" className="text-slate-500">
-                    CV-tekst (kopier/lim inn eller skriv direkte):
-                  </BodyShort>
                   <Textarea
+                    label="CV-tekst (kopier/lim inn eller skriv direkte)"
                     value={editForm.cv_text || ""}
                     onChange={(e) => setEditForm(prev => ({ ...prev, cv_text: e.target.value }))}
                     className="font-mono text-sm"
@@ -578,10 +576,8 @@ export default function ApplicationDetailPage() {
 
               {editingCoverLetter ? (
                 <div className="space-y-4">
-                  <BodyShort size="small" className="text-slate-500">
-                    Søknadsbrev-tekst (kopier/lim inn eller skriv direkte):
-                  </BodyShort>
                   <Textarea
+                    label="Søknadsbrev-tekst (kopier/lim inn eller skriv direkte)"
                     value={editForm.cover_letter_text || ""}
                     onChange={(e) => setEditForm(prev => ({ ...prev, cover_letter_text: e.target.value }))}
                     rows={20}

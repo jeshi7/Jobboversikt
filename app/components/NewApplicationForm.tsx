@@ -273,11 +273,9 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
 
               {/* Angle */}
               <div>
-                <label className="block text-sm font-medium mb-1">Din vinkel</label>
-                <BodyShort size="small" className="text-slate-500 mb-2 text-xs">
-                  Hvorfor passer du til denne stillingen? Hva er din unike vinkel?
-                </BodyShort>
                 <Textarea
+                  label="Din vinkel"
+                  description="Hvorfor passer du til denne stillingen? Hva er din unike vinkel?"
                   value={formData.angle}
                   onChange={(e) => handleChange("angle", e.target.value)}
                   className="w-full"
@@ -316,8 +314,8 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium mb-1">Notater</label>
                 <Textarea
+                  label="Notater"
                   value={formData.notes}
                   onChange={(e) => handleChange("notes", e.target.value)}
                   className="w-full"
@@ -427,6 +425,8 @@ export function NewApplicationForm({ onClose, onSuccess }: NewApplicationFormPro
                   </div>
                   
                   <Textarea
+                    label="CV-tekst"
+                    hideLabel
                     value={formData.cvText}
                     onChange={(e) => handleChange("cvText", e.target.value)}
                     className="w-full font-mono text-sm"
@@ -586,6 +586,8 @@ FERDIGHETER
                   </div>
                   
                   <Textarea
+                    label="Søknadsbrev"
+                    hideLabel
                     value={formData.coverLetterText}
                     onChange={(e) => handleChange("coverLetterText", e.target.value)}
                     className="w-full"
