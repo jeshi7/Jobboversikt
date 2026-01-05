@@ -580,7 +580,7 @@ export function loadApplications(options?: LoadApplicationsOptions): Application
     );
   }
 
-  return enriched.sort((a, b) => a.company.localeCompare(b.company, "nb"));
+  return enriched.sort((a: Application, b: Application) => a.company.localeCompare(b.company, "nb"));
 }
 
 export function summariseApplications(apps: Application[]) {
