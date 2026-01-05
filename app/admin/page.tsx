@@ -183,15 +183,26 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <Heading level="1" size="medium">
-          Administrasjon
-        </Heading>
-        <BodyShort size="small" className="mt-1 text-slate-600">
-          {user?.role === "admin" 
-            ? "Administrer organisasjoner, klienter og innstillinger"
-            : "Oversikt over klienter og organisasjon"}
-        </BodyShort>
+      <header className="flex items-start justify-between">
+        <div>
+          <Heading level="1" size="medium">
+            Administrasjon
+          </Heading>
+          <BodyShort size="small" className="mt-1 text-slate-600">
+            {user?.role === "admin" 
+              ? "Administrer organisasjoner, klienter og innstillinger"
+              : "Oversikt over klienter og organisasjon"}
+          </BodyShort>
+        </div>
+        {user?.role === "admin" && (
+          <Button 
+            variant="secondary" 
+            size="small"
+            onClick={() => router.push("/admin/migrate")}
+          >
+            📥 Migrer data
+          </Button>
+        )}
       </header>
 
       <section>

@@ -17,7 +17,18 @@ export function createSession(userId: string): string {
   return sessionId;
 }
 
-export function getSession(sessionId: string): { userId: string } | null {
+export function getSession(sessionIdOrRequest: string | { headers: { get: (name: string) => string | null } }): { userId: string } | null {
+  // Handle both string sessionId and request object
+  let sessionId: string | null;
+  
+  if (typeof sessionIdOrRequest === "string") {
+    sessionId = sessionIdOrRequest;
+  } else {
+    sessionId = sessionIdOrRequest.headers.get("x-session-id");
+  }
+  
+  if (!sessionId) return null;
+  
   const session = sessions.get(sessionId);
   if (!session) return null;
   

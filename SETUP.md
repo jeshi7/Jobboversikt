@@ -55,6 +55,23 @@ Denne guiden forklarer hvordan du setter opp Jobboversikt for produksjon.
 3. Opprett din organisasjon og admin-bruker
 4. Du er klar!
 
+## 7. Migrer eksisterende data (valgfritt)
+
+Hvis du har eksisterende jobbsøknadsdata i `Jobb_Søknad_Pakke/`-mappen, kan du importere dem:
+
+1. Kjør appen lokalt (`npm run dev`)
+2. Logg inn som admin
+3. Gå til `/admin/migrate`
+4. Klikk "Start migrering"
+
+**Merk:** Migrering kan bare kjøres lokalt fordi den trenger tilgang til filsystemet.
+
+### Hva migreres?
+- Alle søknader fra `02_Søknader/`
+- CV-profiler og søknadsbrev fra hver bedriftsmappe
+- Status fra `Søknadsoversikt.md`
+- Kompetansebank fra `01_Ressurser/Kompetansebank.md`
+
 ## Lokal utvikling
 
 For lokal utvikling, opprett en `.env.local` fil:
