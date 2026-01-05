@@ -127,7 +127,7 @@ export default function ClientPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          organizationId: client.organizationId,
+          organizationId: client.organization_id,
           clientId,
           companyName,
           jobListingText
