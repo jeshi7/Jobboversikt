@@ -29,8 +29,8 @@ interface DashboardApp {
   intervju1?: string;
   cvText?: string;
   coverLetterText?: string;
-  folder?: string;
-  resources?: string[];
+  folder: string;
+  resources: string[];
 }
 
 function mapSupabaseApp(app: SupabaseApp): DashboardApp {
