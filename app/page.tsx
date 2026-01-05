@@ -76,7 +76,10 @@ function buildContactReminders(
       const status = row.status.toLowerCase();
       const isSent = status.includes("✉️") || status.includes("sendt");
       const inDialog = status.includes("dialog");
-      return isSent || inDialog;
+      // Check if application is rejected (in Avslag folder or has avslått status)
+      const app = apps.find((a) => a.company === row.company);
+      const isRejected = app?.status === "avslått" || app?.folder?.includes("Avslag");
+      return (isSent || inDialog) && !isRejected;
     })
     .flatMap((row) => {
       const contacts = [
@@ -203,7 +206,10 @@ function buildIntervjuReminders(
       const isSent = status.includes("✉️") || status.includes("sendt");
       const inDialog = status.includes("dialog");
       const hasIntervju = status.includes("intervju");
-      return isSent || inDialog || hasIntervju;
+      // Check if application is rejected (in Avslag folder or has avslått status)
+      const app = apps.find((a) => a.company === row.company);
+      const isRejected = app?.status === "avslått" || app?.folder?.includes("Avslag");
+      return (isSent || inDialog || hasIntervju) && !isRejected;
     })
     .flatMap((row) => {
       const intervjuer = [
