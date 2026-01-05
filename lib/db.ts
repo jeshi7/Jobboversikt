@@ -4,6 +4,9 @@ import path from "node:path";
 const ROOT = process.cwd();
 const DATA_DIR = path.join(ROOT, ".data");
 
+// Check if we're in a read-only environment (like Vercel)
+const isReadOnlyEnvironment = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';
+
 export interface Organization {
   id: string;
   name: string;
@@ -68,16 +71,27 @@ export interface CompetenceBank {
 }
 
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  if (isReadOnlyEnvironment) return;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch {
+    // Ignore errors in read-only environment
   }
 }
 
 function getFilePath(entity: string, id?: string): string {
   ensureDataDir();
   const entityDir = path.join(DATA_DIR, entity);
-  if (!fs.existsSync(entityDir)) {
-    fs.mkdirSync(entityDir, { recursive: true });
+  if (!isReadOnlyEnvironment) {
+    try {
+      if (!fs.existsSync(entityDir)) {
+        fs.mkdirSync(entityDir, { recursive: true });
+      }
+    } catch {
+      // Ignore errors in read-only environment
+    }
   }
   
   if (id) {
@@ -86,16 +100,45 @@ function getFilePath(entity: string, id?: string): string {
   return entityDir;
 }
 
+function safeReadDir(dir: string): string[] {
+  try {
+    if (!fs.existsSync(dir)) return [];
+    return fs.readdirSync(dir);
+  } catch {
+    return [];
+  }
+}
+
+function safeReadFile(filePath: string): string | null {
+  try {
+    if (!fs.existsSync(filePath)) return null;
+    return fs.readFileSync(filePath, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+function safeWriteFile(filePath: string, data: string): boolean {
+  if (isReadOnlyEnvironment) return false;
+  try {
+    fs.writeFileSync(filePath, data, "utf8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function saveOrganization(org: Organization): void {
   const filePath = getFilePath("organizations", org.id);
-  fs.writeFileSync(filePath, JSON.stringify(org, null, 2), "utf8");
+  safeWriteFile(filePath, JSON.stringify(org, null, 2));
 }
 
 export function getOrganization(id: string): Organization | null {
   const filePath = getFilePath("organizations", id);
-  if (!fs.existsSync(filePath)) return null;
+  const content = safeReadFile(filePath);
+  if (!content) return null;
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return JSON.parse(content);
   } catch {
     return null;
   }
@@ -103,16 +146,18 @@ export function getOrganization(id: string): Organization | null {
 
 export function getOrganizationBySlug(slug: string): Organization | null {
   const orgsDir = getFilePath("organizations");
-  if (!fs.existsSync(orgsDir)) return null;
+  const files = safeReadDir(orgsDir);
   
-  const files = fs.readdirSync(orgsDir);
   for (const file of files) {
     if (file.endsWith(".json")) {
-      try {
-        const org = JSON.parse(fs.readFileSync(path.join(orgsDir, file), "utf8"));
-        if (org.slug === slug) return org;
-      } catch {
-        continue;
+      const content = safeReadFile(path.join(orgsDir, file));
+      if (content) {
+        try {
+          const org = JSON.parse(content);
+          if (org.slug === slug) return org;
+        } catch {
+          continue;
+        }
       }
     }
   }
@@ -121,14 +166,15 @@ export function getOrganizationBySlug(slug: string): Organization | null {
 
 export function listOrganizations(): Organization[] {
   const orgsDir = getFilePath("organizations");
-  if (!fs.existsSync(orgsDir)) return [];
+  const files = safeReadDir(orgsDir);
   
-  const files = fs.readdirSync(orgsDir);
   return files
     .filter(f => f.endsWith(".json"))
     .map(f => {
+      const content = safeReadFile(path.join(orgsDir, f));
+      if (!content) return null;
       try {
-        return JSON.parse(fs.readFileSync(path.join(orgsDir, f), "utf8"));
+        return JSON.parse(content);
       } catch {
         return null;
       }
@@ -138,28 +184,39 @@ export function listOrganizations(): Organization[] {
 
 export function saveUser(user: User): void {
   const filePath = getFilePath("users", user.id);
-  fs.writeFileSync(filePath, JSON.stringify(user, null, 2), "utf8");
+  safeWriteFile(filePath, JSON.stringify(user, null, 2));
 }
 
 export function deleteUser(userId: string): void {
+  if (isReadOnlyEnvironment) return;
   const filePath = getFilePath("users", userId);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch {
+    // Ignore errors
   }
 }
 
 export function deleteOrganization(orgId: string): void {
+  if (isReadOnlyEnvironment) return;
   const filePath = getFilePath("organizations", orgId);
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch {
+    // Ignore errors
   }
 }
 
 export function getUser(id: string): User | null {
   const filePath = getFilePath("users", id);
-  if (!fs.existsSync(filePath)) return null;
+  const content = safeReadFile(filePath);
+  if (!content) return null;
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return JSON.parse(content);
   } catch {
     return null;
   }
@@ -167,14 +224,15 @@ export function getUser(id: string): User | null {
 
 export function getUsersByOrganization(organizationId: string): User[] {
   const usersDir = getFilePath("users");
-  if (!fs.existsSync(usersDir)) return [];
+  const files = safeReadDir(usersDir);
   
-  const files = fs.readdirSync(usersDir);
   return files
     .filter(f => f.endsWith(".json"))
     .map(f => {
+      const content = safeReadFile(path.join(usersDir, f));
+      if (!content) return null;
       try {
-        const user = JSON.parse(fs.readFileSync(path.join(usersDir, f), "utf8"));
+        const user = JSON.parse(content);
         return user.organizationId === organizationId ? user : null;
       } catch {
         return null;
@@ -185,14 +243,15 @@ export function getUsersByOrganization(organizationId: string): User[] {
 
 export function saveClient(client: Client): void {
   const filePath = getFilePath("clients", client.id);
-  fs.writeFileSync(filePath, JSON.stringify(client, null, 2), "utf8");
+  safeWriteFile(filePath, JSON.stringify(client, null, 2));
 }
 
 export function getClient(id: string): Client | null {
   const filePath = getFilePath("clients", id);
-  if (!fs.existsSync(filePath)) return null;
+  const content = safeReadFile(filePath);
+  if (!content) return null;
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return JSON.parse(content);
   } catch {
     return null;
   }
@@ -200,14 +259,15 @@ export function getClient(id: string): Client | null {
 
 export function getClientsByOrganization(organizationId: string): Client[] {
   const clientsDir = getFilePath("clients");
-  if (!fs.existsSync(clientsDir)) return [];
+  const files = safeReadDir(clientsDir);
   
-  const files = fs.readdirSync(clientsDir);
   return files
     .filter(f => f.endsWith(".json"))
     .map(f => {
+      const content = safeReadFile(path.join(clientsDir, f));
+      if (!content) return null;
       try {
-        const client = JSON.parse(fs.readFileSync(path.join(clientsDir, f), "utf8"));
+        const client = JSON.parse(content);
         return client.organizationId === organizationId ? client : null;
       } catch {
         return null;
@@ -218,14 +278,15 @@ export function getClientsByOrganization(organizationId: string): Client[] {
 
 export function saveCompetenceBank(bank: CompetenceBank): void {
   const filePath = getFilePath("competenceBanks", bank.id);
-  fs.writeFileSync(filePath, JSON.stringify(bank, null, 2), "utf8");
+  safeWriteFile(filePath, JSON.stringify(bank, null, 2));
 }
 
 export function getCompetenceBank(id: string): CompetenceBank | null {
   const filePath = getFilePath("competenceBanks", id);
-  if (!fs.existsSync(filePath)) return null;
+  const content = safeReadFile(filePath);
+  if (!content) return null;
   try {
-    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return JSON.parse(content);
   } catch {
     return null;
   }
@@ -233,16 +294,18 @@ export function getCompetenceBank(id: string): CompetenceBank | null {
 
 export function getCompetenceBankByClient(clientId: string): CompetenceBank | null {
   const banksDir = getFilePath("competenceBanks");
-  if (!fs.existsSync(banksDir)) return null;
+  const files = safeReadDir(banksDir);
   
-  const files = fs.readdirSync(banksDir);
   for (const file of files) {
     if (file.endsWith(".json")) {
-      try {
-        const bank = JSON.parse(fs.readFileSync(path.join(banksDir, file), "utf8"));
-        if (bank.clientId === clientId) return bank;
-      } catch {
-        continue;
+      const content = safeReadFile(path.join(banksDir, file));
+      if (content) {
+        try {
+          const bank = JSON.parse(content);
+          if (bank.clientId === clientId) return bank;
+        } catch {
+          continue;
+        }
       }
     }
   }
